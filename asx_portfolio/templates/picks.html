@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% set active = "picks" %}
+{% block title %}Today's Picks &middot; ASX Portfolio{% endblock %}
+
+{% block content %}
+<section class="mb-8">
+  <div class="flex items-baseline justify-between mb-2">
+    <h1 class="text-3xl font-bold text-slate-900">Today's Picks</h1>
+    <span class="text-sm text-slate-500">{{ pick_date }}</span>
+  </div>
+  <p class="text-slate-600">Top {{ picks|length }} ASX 200 names from a six-pillar fundamental screen, filtered for a projected long-term annualised return of at least {{ "%.0f"|format(min_projected_return*100) }}%.</p>
+</section>
+
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+  {% for p in picks %}
+  <article class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm hover:shadow transition">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <div class="text-lg font-bold text-slate-900">{{ p.ticker }}</div>
+        <div class="text-sm text-slate-500">{{ p.name }}</div>
+      </div>
+      <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{{ p.sector }}</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <div>
+        <div class="text-xs text-slate-500">Composite</div>
+        <div class="text-xl font-semibold">{{ "%.1f"|format(p.composite_score) }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Proj. Return</div>
+        <div class="text-xl font-semibold {% if p.projected_return >= 0.10 %}num-pos{% else %}num-neg{% endif %}">{{ "%.1f"|format(p.projected_return*100) }}%</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Price</div>
+        <div class="text-base font-medium">${{ "%.2f"|format(p.price) }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Div Yield</div>
+        <div class="text-base font-medium">{% if p.dividend_yield is number %}{{ "%.2f"|format(p.dividend_yield*100) }}%{% else %}—{% endif %}</div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2">
+      {% for label, key in [("Value","score_value"),("Growth","score_growth"),("Quality","score_quality"),("Income","score_income"),("Momentum","score_momentum"),("Risk","score_risk")] %}
+        {% set v = p[key] | default(50) %}
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>{{ label }}</span><span>{{ "%.0f"|format(v) }}</span></div>
+          <div class="pillar-bar" style="--score: {{ v }}%"></div>
+        </div>
+      {% endfor %}
+    </div>
+    <p class="mt-4 text-xs text-slate-600 italic">{{ p.rationale }}</p>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Full ASX 200 screen</h2>
+    <span class="text-xs text-slate-500">{{ full_screen|length }} tickers &middot; click any column to sort</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="sortable w-full text-sm">
+      <thead class="bg-slate-50 text-slate-700">
+        <tr>
+          <th class="px-3 py-2 text-left">Ticker</th>
+          <th class="px-3 py-2 text-left">Name</th>
+          <th class="px-3 py-2 text-left">Sector</th>
+          <th class="px-3 py-2 text-right">Score</th>
+          <th class="px-3 py-2 text-right">Proj. Return</th>
+          <th class="px-3 py-2 text-right">Div Yld</th>
+          <th class="px-3 py-2 text-right">P/E</th>
+          <th class="px-3 py-2 text-right">12m Ret</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in full_screen %}
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">{{ r.ticker }}</td>
+          <td class="px-3 py-2">{{ r.name }}</td>
+          <td class="px-3 py-2 text-slate-500">{{ r.sector }}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ r.composite_score }}">{{ "%.1f"|format(r.composite_score) }}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ r.projected_return }}">{{ "%.1f"|format(r.projected_return*100) }}%</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ r.dividend_yield or 0 }}">{% if r.dividend_yield is number %}{{ "%.2f"|format(r.dividend_yield*100) }}%{% else %}—{% endif %}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ r.pe or 0 }}">{% if r.pe is number %}{{ "%.1f"|format(r.pe) }}{% else %}—{% endif %}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ r.return_12m or 0 }}">{% if r.return_12m is number %}{{ "%.1f"|format(r.return_12m*100) }}%{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

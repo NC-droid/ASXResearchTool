@@ -1,0 +1,185 @@
+ticker,name,sector
+CBA.AX,Commonwealth Bank of Australia,Financials
+BHP.AX,BHP Group,Materials
+CSL.AX,CSL Limited,Health Care
+NAB.AX,National Australia Bank,Financials
+WBC.AX,Westpac Banking Corporation,Financials
+ANZ.AX,ANZ Group Holdings,Financials
+MQG.AX,Macquarie Group,Financials
+WES.AX,Wesfarmers,Consumer Discretionary
+GMG.AX,Goodman Group,Real Estate
+TLS.AX,Telstra Group,Communication Services
+WOW.AX,Woolworths Group,Consumer Staples
+TCL.AX,Transurban Group,Industrials
+RIO.AX,Rio Tinto,Materials
+FMG.AX,Fortescue,Materials
+WDS.AX,Woodside Energy Group,Energy
+ALL.AX,Aristocrat Leisure,Consumer Discretionary
+QBE.AX,QBE Insurance Group,Financials
+COL.AX,Coles Group,Consumer Staples
+STO.AX,Santos,Energy
+NCM.AX,Newcrest Mining,Materials
+SUN.AX,Suncorp Group,Financials
+ORG.AX,Origin Energy,Energy
+SCG.AX,Scentre Group,Real Estate
+S32.AX,South32,Materials
+REA.AX,REA Group,Communication Services
+JHX.AX,James Hardie Industries,Materials
+COH.AX,Cochlear,Health Care
+RMD.AX,ResMed,Health Care
+SHL.AX,Sonic Healthcare,Health Care
+ASX.AX,ASX Limited,Financials
+MIN.AX,Mineral Resources,Materials
+NST.AX,Northern Star Resources,Materials
+PLS.AX,Pilbara Minerals,Materials
+QAN.AX,Qantas Airways,Industrials
+SUL.AX,Super Retail Group,Consumer Discretionary
+SVW.AX,Seven Group Holdings,Industrials
+TLC.AX,Lottery Corporation,Consumer Discretionary
+TPG.AX,TPG Telecom,Communication Services
+TWE.AX,Treasury Wine Estates,Consumer Staples
+WTC.AX,WiseTech Global,Information Technology
+XRO.AX,Xero,Information Technology
+ALD.AX,Ampol,Energy
+AGL.AX,AGL Energy,Utilities
+APA.AX,APA Group,Utilities
+ALU.AX,Altium,Information Technology
+AMC.AX,Amcor,Materials
+ANN.AX,Ansell,Health Care
+ARB.AX,ARB Corporation,Consumer Discretionary
+AZJ.AX,Aurizon Holdings,Industrials
+BEN.AX,Bendigo and Adelaide Bank,Financials
+BOQ.AX,Bank of Queensland,Financials
+BRG.AX,Breville Group,Consumer Discretionary
+BSL.AX,BlueScope Steel,Materials
+BXB.AX,Brambles,Industrials
+CAR.AX,CAR Group,Communication Services
+CGF.AX,Challenger,Financials
+CHC.AX,Charter Hall Group,Real Estate
+CIA.AX,Champion Iron,Materials
+CIP.AX,Centuria Industrial REIT,Real Estate
+CMW.AX,Cromwell Property Group,Real Estate
+CNI.AX,Centuria Capital Group,Real Estate
+CNU.AX,Chorus,Communication Services
+CPU.AX,Computershare,Information Technology
+CQR.AX,Charter Hall Retail REIT,Real Estate
+CTD.AX,Corporate Travel Management,Consumer Discretionary
+DEG.AX,De Grey Mining,Materials
+DMP.AX,Domino's Pizza Enterprises,Consumer Discretionary
+DOW.AX,Downer EDI,Industrials
+DRR.AX,Deterra Royalties,Materials
+DXS.AX,Dexus,Real Estate
+EBO.AX,EBOS Group,Health Care
+EDV.AX,Endeavour Group,Consumer Staples
+ELD.AX,Elders,Consumer Staples
+EVN.AX,Evolution Mining,Materials
+FBU.AX,Fletcher Building,Materials
+FLT.AX,Flight Centre Travel Group,Consumer Discretionary
+GMD.AX,Genesis Minerals,Materials
+GNC.AX,GrainCorp,Consumer Staples
+GOR.AX,Gold Road Resources,Materials
+GPT.AX,GPT Group,Real Estate
+HUB.AX,Hub24,Financials
+HVN.AX,Harvey Norman Holdings,Consumer Discretionary
+IAG.AX,Insurance Australia Group,Financials
+IEL.AX,IDP Education,Consumer Discretionary
+IFL.AX,Insignia Financial,Financials
+ILU.AX,Iluka Resources,Materials
+IGO.AX,IGO Limited,Materials
+IPL.AX,Incitec Pivot,Materials
+JBH.AX,JB Hi-Fi,Consumer Discretionary
+JHG.AX,Janus Henderson Group,Financials
+LLC.AX,Lendlease Group,Real Estate
+LNK.AX,Link Administration Holdings,Information Technology
+LOV.AX,Lovisa Holdings,Consumer Discretionary
+LTR.AX,Liontown Resources,Materials
+LYC.AX,Lynas Rare Earths,Materials
+MFG.AX,Magellan Financial Group,Financials
+MGR.AX,Mirvac Group,Real Estate
+MND.AX,Monadelphous Group,Industrials
+MP1.AX,Megaport,Information Technology
+MPL.AX,Medibank Private,Financials
+NEM.AX,Newmont,Materials
+NHC.AX,New Hope Corporation,Energy
+NIC.AX,Nickel Industries,Materials
+NUF.AX,Nufarm,Materials
+NWL.AX,Netwealth Group,Financials
+NWS.AX,News Corporation,Communication Services
+ORA.AX,Orora,Materials
+ORI.AX,Orica,Materials
+PME.AX,Pro Medicus,Health Care
+PNI.AX,Pinnacle Investment Management,Financials
+PPT.AX,Perpetual,Financials
+PRU.AX,Perseus Mining,Materials
+QUB.AX,Qube Holdings,Industrials
+REH.AX,Reece,Industrials
+RHC.AX,Ramsay Health Care,Health Care
+RMS.AX,Ramelius Resources,Materials
+RRL.AX,Regis Resources,Materials
+RWC.AX,Reliance Worldwide Corporation,Industrials
+SBM.AX,St Barbara,Materials
+SDF.AX,Steadfast Group,Financials
+SEK.AX,SEEK,Communication Services
+SFR.AX,Sandfire Resources,Materials
+SGM.AX,Sims,Materials
+SGP.AX,Stockland,Real Estate
+SGR.AX,Star Entertainment Group,Consumer Discretionary
+SIG.AX,Sigma Healthcare,Health Care
+SLR.AX,Silver Lake Resources,Materials
+SMR.AX,Stanmore Resources,Energy
+SOL.AX,Washington H. Soul Pattinson and Company,Financials
+SPK.AX,Spark New Zealand,Communication Services
+SQ2.AX,Block Inc,Information Technology
+TAH.AX,Tabcorp Holdings,Consumer Discretionary
+TLX.AX,Telix Pharmaceuticals,Health Care
+TNE.AX,TechnologyOne,Information Technology
+VCX.AX,Vicinity Centres,Real Estate
+VEA.AX,Viva Energy Group,Energy
+VUK.AX,Virgin Money UK,Financials
+WAF.AX,West African Resources,Materials
+WHC.AX,Whitehaven Coal,Energy
+WOR.AX,Worley,Energy
+ZIP.AX,Zip Co,Information Technology
+A2M.AX,The a2 Milk Company,Consumer Staples
+AD8.AX,Audinate Group,Information Technology
+AIA.AX,Auckland International Airport,Industrials
+ALX.AX,Atlas Arteria,Industrials
+APE.AX,Eagers Automotive,Consumer Discretionary
+ARF.AX,Arena REIT,Real Estate
+AUB.AX,AUB Group,Financials
+BAP.AX,Bapcor,Consumer Discretionary
+BGA.AX,Bega Cheese,Consumer Staples
+BPT.AX,Beach Energy,Energy
+BWP.AX,BWP Trust,Real Estate
+CCP.AX,Credit Corp Group,Financials
+CDA.AX,Codan,Information Technology
+CKF.AX,Collins Foods,Consumer Discretionary
+CLW.AX,Charter Hall Long WALE REIT,Real Estate
+CMM.AX,Capricorn Metals,Materials
+CWY.AX,Cleanaway Waste Management,Industrials
+DDR.AX,Dicker Data,Information Technology
+DTL.AX,Data#3,Information Technology
+EML.AX,EML Payments,Information Technology
+HLS.AX,Healius,Health Care
+HMC.AX,Home Consortium,Real Estate
+INA.AX,Ingenia Communities Group,Real Estate
+ING.AX,Inghams Group,Consumer Staples
+IPH.AX,IPH Limited,Industrials
+IRE.AX,Iress,Information Technology
+KAR.AX,Karoon Energy,Energy
+LFS.AX,Latitude Group Holdings,Financials
+LIC.AX,Lifestyle Communities,Real Estate
+MAF.AX,MA Financial Group,Financials
+MAH.AX,Macmahon Holdings,Industrials
+MGH.AX,Maas Group Holdings,Industrials
+NAN.AX,Nanosonics,Health Care
+NEC.AX,Nine Entertainment,Communication Services
+NHF.AX,nib Holdings,Financials
+PXA.AX,PEXA Group,Information Technology
+QOR.AX,Qoria,Information Technology
+SLC.AX,Superloop,Communication Services
+SVR.AX,Solvar,Financials
+SXL.AX,Southern Cross Media Group,Communication Services
+TYR.AX,Tyro Payments,Information Technology
+VNT.AX,Ventia Services Group,Industrials
+WGX.AX,Westgold Resources,Materials

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio &middot; ASX Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .num-pos { color: #16a34a; }
+    .num-neg { color: #dc2626; }
+    .pillar-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%); position: relative; }
+    .pillar-bar::after { content: ""; position: absolute; top: -2px; width: 2px; height: 10px; background: #1f2937; left: var(--score, 50%); }
+    .sortable th { cursor: pointer; user-select: none; }
+    .sortable th:hover { background: #f3f4f6; }
+    .sortable th.sorted-asc::after { content: " \2191"; }
+    .sortable th.sorted-desc::after { content: " \2193"; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-md bg-indigo-600 text-white grid place-items-center font-bold">A</div>
+        <div>
+          <div class="font-semibold text-slate-900">ASX Portfolio</div>
+          <div class="text-xs text-slate-500">Daily fundamental screener &middot; private research</div>
+        </div>
+      </div>
+      <nav class="flex gap-1 text-sm">
+        <a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-100 ">Today's Picks</a>
+        <a href="portfolio.html" class="px-3 py-2 rounded-md hover:bg-slate-100 bg-indigo-50 text-indigo-700 font-medium">Portfolio</a>
+        <a href="archive.html" class="px-3 py-2 rounded-md hover:bg-slate-100 ">Archive</a>
+        <a href="backtest.html" class="px-3 py-2 rounded-md hover:bg-slate-100 ">Backtest</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    
+<section class="mb-6">
+  <h1 class="text-3xl font-bold text-slate-900 mb-1">Paper Portfolio</h1>
+  <p class="text-slate-600">$10,000 hypothetical capital, equal-weighted across the daily picks, rebalanced every 30 days.</p>
+</section>
+
+
+<section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Current Value</div>
+    <div class="text-2xl font-bold mt-1">$10,000.00</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Total Return</div>
+    <div class="text-2xl font-bold mt-1 num-pos">0.00%</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Days Held</div>
+    <div class="text-2xl font-bold mt-1">1</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Annualised</div>
+    <div class="text-2xl font-bold mt-1 num-pos">0.00%</div>
+  </div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 mb-8">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">Equity curve</h2>
+    <p class="text-xs text-slate-500">Total portfolio value over time (mark-to-market each day).</p>
+  </div>
+  <div id="equity-chart" style="height: 360px;"></div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 mb-8 overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">Holdings</h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="sortable w-full text-sm">
+      <thead class="bg-slate-50 text-slate-700">
+        <tr>
+          <th class="px-3 py-2 text-left">Ticker</th>
+          <th class="px-3 py-2 text-left">Name</th>
+          <th class="px-3 py-2 text-left">Sector</th>
+          <th class="px-3 py-2 text-right">Shares</th>
+          <th class="px-3 py-2 text-right">Avg Cost</th>
+          <th class="px-3 py-2 text-right">Price</th>
+          <th class="px-3 py-2 text-right">Market Value</th>
+          <th class="px-3 py-2 text-right">Weight</th>
+          <th class="px-3 py-2 text-right">P&amp;L</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono font-semibold">CQR.AX</td>
+          <td class="px-3 py-2">Charter Hall Retail REIT</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="518.1347291073824">518.1347</td>
+          <td class="px-3 py-2 text-right" data-sort="3.859999895095825">$3.86</td>
+          <td class="px-3 py-2 text-right" data-sort="3.86">$3.86</td>
+          <td class="px-3 py-2 text-right" data-sort="2000.0000543544961">$2,000.00</td>
+          <td class="px-3 py-2 text-right" data-sort="0.20000000631156695">20.0%</td>
+          <td class="px-3 py-2 text-right num-pos" data-sort="5.435449611468357e-05">$0.00 <span class="text-xs">(0.00%)</span></td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono font-semibold">WAF.AX</td>
+          <td class="px-3 py-2">West African Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="621.1180069036246">621.1180</td>
+          <td class="px-3 py-2 text-right" data-sort="3.2200000286102295">$3.22</td>
+          <td class="px-3 py-2 text-right" data-sort="3.22">$3.22</td>
+          <td class="px-3 py-2 text-right" data-sort="1999.9999822296713">$2,000.00</td>
+          <td class="px-3 py-2 text-right" data-sort="0.19999999909908442">20.0%</td>
+          <td class="px-3 py-2 text-right num-neg" data-sort="-1.7770328668120783e-05">$-0.00 <span class="text-xs">(-0.00%)</span></td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono font-semibold">SOL.AX</td>
+          <td class="px-3 py-2">Washington H. Soul Pattinson and Company</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="47.337278106508876">47.3373</td>
+          <td class="px-3 py-2 text-right" data-sort="42.25">$42.25</td>
+          <td class="px-3 py-2 text-right" data-sort="42.25">$42.25</td>
+          <td class="px-3 py-2 text-right" data-sort="2000.0">$2,000.00</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2000000008761173">20.0%</td>
+          <td class="px-3 py-2 text-right num-pos" data-sort="0.0">$0.00 <span class="text-xs">(0.00%)</span></td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono font-semibold">FMG.AX</td>
+          <td class="px-3 py-2">Fortescue</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="101.112231070361">101.1122</td>
+          <td class="px-3 py-2 text-right" data-sort="19.780000686645508">$19.78</td>
+          <td class="px-3 py-2 text-right" data-sort="19.78">$19.78</td>
+          <td class="px-3 py-2 text-right" data-sort="1999.9999305717408">$2,000.00</td>
+          <td class="px-3 py-2 text-right" data-sort="0.19999999393329135">20.0%</td>
+          <td class="px-3 py-2 text-right num-neg" data-sort="-6.942825916667061e-05">$-0.00 <span class="text-xs">(-0.00%)</span></td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono font-semibold">ARF.AX</td>
+          <td class="px-3 py-2">Arena REIT</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="574.712640528226">574.7126</td>
+          <td class="px-3 py-2 text-right" data-sort="3.4800000190734863">$3.48</td>
+          <td class="px-3 py-2 text-right" data-sort="3.48">$3.48</td>
+          <td class="px-3 py-2 text-right" data-sort="1999.9999890382264">$2,000.00</td>
+          <td class="px-3 py-2 text-right" data-sort="0.19999999977993993">20.0%</td>
+          <td class="px-3 py-2 text-right num-neg" data-sort="-1.096177356885164e-05">$-0.00 <span class="text-xs">(-0.00%)</span></td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">Rebalance history</h2>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-slate-700">
+      <tr>
+        <th class="px-3 py-2 text-left">Date</th>
+        <th class="px-3 py-2 text-left">Picks</th>
+        <th class="px-3 py-2 text-right">Cost basis</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr class="border-t border-slate-100">
+        <td class="px-3 py-2">2026-04-25</td>
+        <td class="px-3 py-2 font-mono text-xs">CQR.AX, WAF.AX, SOL.AX, FMG.AX, ARF.AX</td>
+        <td class="px-3 py-2 text-right">$10,000.00</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</section>
+
+<script>
+  const valueHistory = [{"date": "2026-04-25", "total_value": 10000.0, "cash": 0.0, "invested_value": 10000.0, "total_return_pct": 0.0}];
+  const dates = valueHistory.map(v => v.date);
+  const values = valueHistory.map(v => v.total_value);
+  Plotly.newPlot('equity-chart', [{
+    x: dates, y: values,
+    type: 'scatter', mode: 'lines',
+    line: { color: '#4f46e5', width: 2 },
+    fill: 'tozeroy', fillcolor: 'rgba(79,70,229,0.08)',
+    hovertemplate: '<b>%{x}</b><br>$%{y:,.2f}<extra></extra>'
+  }], {
+    margin: { l: 60, r: 20, t: 10, b: 40 },
+    yaxis: { tickprefix: '$', gridcolor: '#e5e7eb' },
+    xaxis: { gridcolor: '#e5e7eb' },
+    plot_bgcolor: '#ffffff', paper_bgcolor: '#ffffff'
+  }, {responsive: true, displaylogo: false});
+</script>
+
+
+
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-6 py-8 text-xs text-slate-400 border-t border-slate-200 mt-12">
+    <p>Generated 2026-04-25 16:23 &middot; Data from Yahoo Finance.</p>
+    <p class="mt-1">This is a personal research tool. <strong>Not financial advice.</strong> Past performance does not predict future returns.</p>
+  </footer>
+
+  <script>
+    // Sortable tables — click headers to sort
+    document.querySelectorAll('table.sortable').forEach(table => {
+      const tbody = table.tBodies[0];
+      table.querySelectorAll('th').forEach((th, i) => {
+        th.addEventListener('click', () => {
+          const rows = Array.from(tbody.rows);
+          const asc = !th.classList.contains('sorted-asc');
+          table.querySelectorAll('th').forEach(h => h.classList.remove('sorted-asc','sorted-desc'));
+          th.classList.add(asc ? 'sorted-asc' : 'sorted-desc');
+          rows.sort((a, b) => {
+            const av = a.cells[i].dataset.sort ?? a.cells[i].innerText.trim();
+            const bv = b.cells[i].dataset.sort ?? b.cells[i].innerText.trim();
+            const an = parseFloat(av), bn = parseFloat(bv);
+            const isNum = !isNaN(an) && !isNaN(bn);
+            if (isNum) return asc ? an - bn : bn - an;
+            return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+          });
+          rows.forEach(r => tbody.appendChild(r));
+        });
+      });
+    });
+  </script>
+</body>
+</html>

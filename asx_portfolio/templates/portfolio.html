@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% set active = "portfolio" %}
+{% block title %}Portfolio &middot; ASX Portfolio{% endblock %}
+
+{% block content %}
+<section class="mb-6">
+  <h1 class="text-3xl font-bold text-slate-900 mb-1">Paper Portfolio</h1>
+  <p class="text-slate-600">$10,000 hypothetical capital, equal-weighted across the daily picks, rebalanced every {{ rebalance_days }} days.</p>
+</section>
+
+{% if state %}
+<section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Current Value</div>
+    <div class="text-2xl font-bold mt-1">${{ "{:,.2f}".format(latest.total_value) }}</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Total Return</div>
+    <div class="text-2xl font-bold mt-1 {% if latest.total_return_pct >= 0 %}num-pos{% else %}num-neg{% endif %}">{{ "%.2f"|format(latest.total_return_pct*100) }}%</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Days Held</div>
+    <div class="text-2xl font-bold mt-1">{{ days_held }}</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Annualised</div>
+    <div class="text-2xl font-bold mt-1 {% if annualised >= 0 %}num-pos{% else %}num-neg{% endif %}">{{ "%.2f"|format(annualised*100) }}%</div>
+  </div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 mb-8">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">Equity curve</h2>
+    <p class="text-xs text-slate-500">Total portfolio value over time (mark-to-market each day).</p>
+  </div>
+  <div id="equity-chart" style="height: 360px;"></div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 mb-8 overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">Holdings</h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="sortable w-full text-sm">
+      <thead class="bg-slate-50 text-slate-700">
+        <tr>
+          <th class="px-3 py-2 text-left">Ticker</th>
+          <th class="px-3 py-2 text-left">Name</th>
+          <th class="px-3 py-2 text-left">Sector</th>
+          <th class="px-3 py-2 text-right">Shares</th>
+          <th class="px-3 py-2 text-right">Avg Cost</th>
+          <th class="px-3 py-2 text-right">Price</th>
+          <th class="px-3 py-2 text-right">Market Value</th>
+          <th class="px-3 py-2 text-right">Weight</th>
+          <th class="px-3 py-2 text-right">P&amp;L</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in holdings %}
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono font-semibold">{{ h.ticker }}</td>
+          <td class="px-3 py-2">{{ h.name }}</td>
+          <td class="px-3 py-2 text-slate-500">{{ h.sector }}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ h.shares }}">{{ "%.4f"|format(h.shares) }}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ h.avg_cost }}">${{ "%.2f"|format(h.avg_cost) }}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ h.price }}">${{ "%.2f"|format(h.price) }}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ h.market_value }}">${{ "{:,.2f}".format(h.market_value) }}</td>
+          <td class="px-3 py-2 text-right" data-sort="{{ h.weight_pct }}">{{ "%.1f"|format(h.weight_pct*100) }}%</td>
+          <td class="px-3 py-2 text-right {% if h.unrealized_pnl >= 0 %}num-pos{% else %}num-neg{% endif %}" data-sort="{{ h.unrealized_pnl }}">${{ "{:,.2f}".format(h.unrealized_pnl) }} <span class="text-xs">({{ "%.2f"|format(h.unrealized_pnl_pct*100) }}%)</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">Rebalance history</h2>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-slate-700">
+      <tr>
+        <th class="px-3 py-2 text-left">Date</th>
+        <th class="px-3 py-2 text-left">Picks</th>
+        <th class="px-3 py-2 text-right">Cost basis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rebalances|reverse %}
+      <tr class="border-t border-slate-100">
+        <td class="px-3 py-2">{{ r.date }}</td>
+        <td class="px-3 py-2 font-mono text-xs">{{ r.picks|join(", ") }}</td>
+        <td class="px-3 py-2 text-right">${{ "{:,.2f}".format(r.cost_basis) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<script>
+  const valueHistory = {{ value_history_json|safe }};
+  const dates = valueHistory.map(v => v.date);
+  const values = valueHistory.map(v => v.total_value);
+  Plotly.newPlot('equity-chart', [{
+    x: dates, y: values,
+    type: 'scatter', mode: 'lines',
+    line: { color: '#4f46e5', width: 2 },
+    fill: 'tozeroy', fillcolor: 'rgba(79,70,229,0.08)',
+    hovertemplate: '<b>%{x}</b><br>$%{y:,.2f}<extra></extra>'
+  }], {
+    margin: { l: 60, r: 20, t: 10, b: 40 },
+    yaxis: { tickprefix: '$', gridcolor: '#e5e7eb' },
+    xaxis: { gridcolor: '#e5e7eb' },
+    plot_bgcolor: '#ffffff', paper_bgcolor: '#ffffff'
+  }, {responsive: true, displaylogo: false});
+</script>
+
+{% else %}
+<section class="bg-white border border-slate-200 rounded-lg p-8 text-center">
+  <p class="text-slate-600">No portfolio yet. Run <code class="bg-slate-100 px-2 py-0.5 rounded">python main.py portfolio init</code> to create one.</p>
+</section>
+{% endif %}
+{% endblock %}

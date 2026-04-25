@@ -1,0 +1,73 @@
+{
+  "initial_capital": 10000.0,
+  "cash": 0.0,
+  "created_at": "2026-04-25",
+  "last_rebalance": "2026-04-25",
+  "rebalance_interval_days": 30,
+  "transaction_cost": 0.0,
+  "positions": [
+    {
+      "ticker": "CQR.AX",
+      "shares": 518.1347291073824,
+      "avg_cost": 3.859999895095825,
+      "entry_date": "2026-04-25",
+      "name": "Charter Hall Retail REIT",
+      "sector": "Real Estate"
+    },
+    {
+      "ticker": "WAF.AX",
+      "shares": 621.1180069036246,
+      "avg_cost": 3.2200000286102295,
+      "entry_date": "2026-04-25",
+      "name": "West African Resources",
+      "sector": "Materials"
+    },
+    {
+      "ticker": "SOL.AX",
+      "shares": 47.337278106508876,
+      "avg_cost": 42.25,
+      "entry_date": "2026-04-25",
+      "name": "Washington H. Soul Pattinson and Company",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "FMG.AX",
+      "shares": 101.112231070361,
+      "avg_cost": 19.780000686645508,
+      "entry_date": "2026-04-25",
+      "name": "Fortescue",
+      "sector": "Materials"
+    },
+    {
+      "ticker": "ARF.AX",
+      "shares": 574.712640528226,
+      "avg_cost": 3.4800000190734863,
+      "entry_date": "2026-04-25",
+      "name": "Arena REIT",
+      "sector": "Real Estate"
+    }
+  ],
+  "value_history": [
+    {
+      "date": "2026-04-25",
+      "total_value": 10000.0,
+      "cash": 0.0,
+      "invested_value": 10000.0,
+      "total_return_pct": 0.0
+    }
+  ],
+  "rebalance_history": [
+    {
+      "date": "2026-04-25",
+      "picks": [
+        "CQR.AX",
+        "WAF.AX",
+        "SOL.AX",
+        "FMG.AX",
+        "ARF.AX"
+      ],
+      "cost_basis": 10000.0,
+      "cash_after": 0.0
+    }
+  ]
+}

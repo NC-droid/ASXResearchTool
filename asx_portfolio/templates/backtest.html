@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% set active = "backtest" %}
+{% block title %}Backtest &middot; ASX Portfolio{% endblock %}
+
+{% block content %}
+<section class="mb-6">
+  <h1 class="text-3xl font-bold text-slate-900 mb-1">Backtest</h1>
+  <p class="text-slate-600">Historical simulation of the price-based pillars (momentum + risk) of the screen versus the S&amp;P/ASX 200 benchmark.</p>
+  <p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-3 mt-3">
+    <strong>Caveat:</strong> Yahoo Finance only exposes current snapshot fundamentals, so this backtest tests only the price-based half of the model. The fundamental pillars (value, growth, quality, income) are scored from today's snapshots in the live screen but cannot be tested historically without a paid point-in-time data feed.
+  </p>
+</section>
+
+{% if backtest %}
+<section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Strategy CAGR</div>
+    <div class="text-2xl font-bold mt-1 num-pos">{{ "%.2f"|format(metrics.strategy_cagr*100) }}%</div>
+    <div class="text-xs text-slate-400 mt-1">vs benchmark {{ "%.2f"|format(metrics.benchmark_cagr*100) }}%</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Total Return</div>
+    <div class="text-2xl font-bold mt-1">{{ "%.0f"|format(metrics.total_return_strategy*100) }}%</div>
+    <div class="text-xs text-slate-400 mt-1">over {{ "%.1f"|format(metrics.years) }} years</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Sharpe (rf=3%)</div>
+    <div class="text-2xl font-bold mt-1">{{ "%.2f"|format(metrics.strategy_sharpe) }}</div>
+    <div class="text-xs text-slate-400 mt-1">vs benchmark {{ "%.2f"|format(metrics.benchmark_sharpe) }}</div>
+  </div>
+  <div class="bg-white border border-slate-200 rounded-lg p-4">
+    <div class="text-xs text-slate-500 uppercase tracking-wide">Max drawdown</div>
+    <div class="text-2xl font-bold mt-1 num-neg">{{ "%.1f"|format(metrics.strategy_max_dd*100) }}%</div>
+    <div class="text-xs text-slate-400 mt-1">vs benchmark {{ "%.1f"|format(metrics.benchmark_max_dd*100) }}%</div>
+  </div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 mb-8">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">$10,000 growth</h2>
+    <p class="text-xs text-slate-500">Strategy versus benchmark, rebased to $10,000 at start.</p>
+  </div>
+  <div id="equity-chart" style="height: 420px;"></div>
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200">
+    <h2 class="text-lg font-semibold">All metrics</h2>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-2 p-5">
+    {% for label, value in metric_rows %}
+    <div class="flex justify-between border-b border-slate-100 py-2">
+      <div class="text-slate-600">{{ label }}</div>
+      <div class="font-semibold">{{ value }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+  const data = {{ chart_data_json|safe }};
+  Plotly.newPlot('equity-chart', [
+    { x: data.dates, y: data.strategy, type: 'scatter', mode: 'lines', name: 'Strategy', line: { color: '#4f46e5', width: 2 } },
+    { x: data.dates, y: data.benchmark, type: 'scatter', mode: 'lines', name: 'ASX 200 Benchmark', line: { color: '#9333ea', width: 2, dash: 'dot' } }
+  ], {
+    margin: { l: 60, r: 20, t: 10, b: 40 },
+    yaxis: { tickprefix: '$', gridcolor: '#e5e7eb' },
+    xaxis: { gridcolor: '#e5e7eb' },
+    legend: { orientation: 'h', y: -0.15 },
+    plot_bgcolor: '#ffffff', paper_bgcolor: '#ffffff'
+  }, {responsive: true, displaylogo: false});
+</script>
+{% else %}
+<section class="bg-white border border-slate-200 rounded-lg p-8 text-center">
+  <p class="text-slate-600">No backtest yet. Run <code class="bg-slate-100 px-2 py-0.5 rounded">python main.py backtest</code> to generate one.</p>
+</section>
+{% endif %}
+{% endblock %}

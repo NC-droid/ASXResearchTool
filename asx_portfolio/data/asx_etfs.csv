@@ -1,0 +1,88 @@
+ticker,name,category,subcategory,mer,distribution_freq
+VAS.AX,Vanguard Australian Shares Index ETF,Aus Equity,Broad,0.0007,Quarterly
+A200.AX,Betashares Australia 200 ETF,Aus Equity,Broad,0.0004,Semi-Annual
+IOZ.AX,iShares Core S&P/ASX 200 ETF,Aus Equity,Broad,0.0009,Semi-Annual
+STW.AX,SPDR S&P/ASX 200 Fund,Aus Equity,Broad,0.0013,Quarterly
+MVW.AX,VanEck Australian Equal Weight ETF,Aus Equity,Equal Weight,0.0035,Semi-Annual
+VHY.AX,Vanguard Australian Shares High Yield ETF,Aus Equity,High Yield,0.0025,Quarterly
+IHD.AX,iShares S&P/ASX Dividend Opportunities ETF,Aus Equity,High Yield,0.0030,Quarterly
+SYI.AX,SPDR MSCI Australia Select High Dividend Yield Fund,Aus Equity,High Yield,0.0035,Quarterly
+EX20.AX,Betashares Australian Ex-20 Portfolio Diversifier ETF,Aus Equity,Mid/Small,0.0025,Semi-Annual
+VSO.AX,Vanguard MSCI Australian Small Companies Index ETF,Aus Equity,Small Caps,0.0030,Quarterly
+ISO.AX,iShares S&P/ASX Small Ordinaries ETF,Aus Equity,Small Caps,0.0055,Quarterly
+SMLL.AX,Betashares Australian Small Companies Select Fund,Aus Equity,Small Caps,0.0039,Semi-Annual
+VLC.AX,Vanguard MSCI Australian Large Companies Index ETF,Aus Equity,Large Caps,0.0020,Quarterly
+QOZ.AX,Betashares FTSE RAFI Australia 200 ETF,Aus Equity,Fundamental,0.0040,Semi-Annual
+MVE.AX,VanEck S&P/ASX MidCap ETF,Aus Equity,Mid Caps,0.0045,Semi-Annual
+GRNV.AX,VanEck MSCI Australian Sustainable Equity ETF,Aus Equity,ESG,0.0035,Semi-Annual
+FAIR.AX,Betashares Australian Sustainability Leaders ETF,Aus Equity,ESG,0.0049,Semi-Annual
+VGS.AX,Vanguard MSCI Index International Shares ETF,Intl Equity,Developed Broad,0.0018,Quarterly
+IVV.AX,iShares S&P 500 ETF,Intl Equity,US Large,0.0004,Quarterly
+IOO.AX,iShares Global 100 ETF,Intl Equity,Developed Broad,0.0040,Semi-Annual
+VTS.AX,Vanguard US Total Market Shares ETF,Intl Equity,US Total,0.0003,Quarterly
+NDQ.AX,Betashares NASDAQ 100 ETF,Intl Equity,US Tech,0.0048,Semi-Annual
+HNDQ.AX,Betashares NASDAQ 100 Currency Hedged ETF,Intl Equity,US Tech (Hedged),0.0051,Semi-Annual
+QUAL.AX,VanEck MSCI World ex-Australia Quality ETF,Intl Equity,Developed Quality,0.0040,Semi-Annual
+QHAL.AX,VanEck MSCI World ex-Australia Quality (Hedged) ETF,Intl Equity,Developed Quality (Hedged),0.0043,Semi-Annual
+VEU.AX,Vanguard All-World ex-US Shares Index ETF,Intl Equity,Ex-US Developed,0.0008,Quarterly
+WXOZ.AX,SPDR S&P World ex Australia Fund,Intl Equity,Developed Broad,0.0030,Annual
+VESG.AX,Vanguard Ethically Conscious International Shares ETF,Intl Equity,ESG,0.0018,Quarterly
+ETHI.AX,Betashares Global Sustainability Leaders ETF,Intl Equity,ESG,0.0059,Semi-Annual
+VVLU.AX,Vanguard Global Value Equity Active ETF,Intl Equity,Value,0.0029,Quarterly
+VMIN.AX,Vanguard Global Minimum Volatility Active ETF,Intl Equity,Min Vol,0.0028,Quarterly
+HVST.AX,Betashares Australian Dividend Harvester Fund,Aus Equity,High Yield,0.0090,Monthly
+RDV.AX,Russell High Dividend Australian Shares ETF,Aus Equity,High Yield,0.0034,Quarterly
+ZYAU.AX,SPDR MSCI Australia Select High Dividend Yield Fund,Aus Equity,High Yield,0.0035,Quarterly
+HACK.AX,Betashares Global Cybersecurity ETF,Intl Equity,Sector Tech,0.0067,Annual
+ROBO.AX,ETFS ROBO Global Robotics and Automation ETF,Intl Equity,Sector Tech,0.0069,Annual
+ATEC.AX,Betashares S&P/ASX Australian Technology ETF,Aus Equity,Sector Tech,0.0048,Semi-Annual
+DRUG.AX,Betashares Global Healthcare ETF (currency hedged),Intl Equity,Sector Health,0.0057,Semi-Annual
+IXJ.AX,iShares Global Healthcare ETF,Intl Equity,Sector Health,0.0047,Semi-Annual
+MNRS.AX,Betashares Global Gold Miners ETF (currency hedged),Intl Equity,Sector Materials,0.0057,Semi-Annual
+FANG.AX,Betashares FANG+ ETF,Intl Equity,US Tech Concentrated,0.0035,Semi-Annual
+ASIA.AX,Betashares Asia Technology Tigers ETF,Intl Equity,Asia Tech,0.0067,Semi-Annual
+IZZ.AX,iShares China Large-Cap ETF,Intl Equity,China,0.0074,Semi-Annual
+IAA.AX,iShares Asia 50 ETF,Intl Equity,Asia,0.0050,Semi-Annual
+VAE.AX,Vanguard FTSE Asia ex Japan Shares Index ETF,Intl Equity,Asia,0.0040,Quarterly
+VGE.AX,Vanguard FTSE Emerging Markets Shares ETF,Intl Equity,Emerging Markets,0.0048,Quarterly
+IEM.AX,iShares MSCI Emerging Markets ETF,Intl Equity,Emerging Markets,0.0069,Semi-Annual
+EMKT.AX,VanEck MSCI Multifactor Emerging Markets Equity ETF,Intl Equity,Emerging Markets,0.0069,Semi-Annual
+INDIA.AX,Betashares India Quality ETF,Intl Equity,India,0.0080,Semi-Annual
+VEQ.AX,Vanguard FTSE Europe Shares ETF,Intl Equity,Europe,0.0035,Quarterly
+HEUR.AX,iShares Currency Hedged MSCI Europe ETF,Intl Equity,Europe (Hedged),0.0040,Semi-Annual
+IJP.AX,iShares MSCI Japan ETF,Intl Equity,Japan,0.0047,Semi-Annual
+VAP.AX,Vanguard Australian Property Securities Index ETF,REITs,Aus REIT,0.0023,Quarterly
+MVA.AX,VanEck Vectors Australian Property ETF,REITs,Aus REIT,0.0035,Quarterly
+DJRE.AX,SPDR Dow Jones Global Real Estate Fund,REITs,Global REIT,0.0050,Quarterly
+REIT.AX,SPDR S&P/ASX 200 Listed Property Fund,REITs,Aus REIT,0.0040,Quarterly
+GLIN.AX,Vanguard Global Infrastructure Index ETF,REITs,Global Infra,0.0047,Quarterly
+IFRA.AX,VanEck FTSE Global Infrastructure (Hedged) ETF,REITs,Global Infra (Hedged),0.0052,Quarterly
+VAF.AX,Vanguard Australian Fixed Interest Index ETF,Bonds,Aus Bonds,0.0020,Quarterly
+IAF.AX,iShares Core Composite Bond ETF,Bonds,Aus Bonds,0.0015,Quarterly
+VGB.AX,Vanguard Australian Government Bond Index ETF,Bonds,Aus Govt,0.0020,Quarterly
+GOVT.AX,SPDR S&P/ASX Australian Government Bond Fund,Bonds,Aus Govt,0.0022,Quarterly
+BOND.AX,Betashares Australian Investment Grade Corporate Bond ETF,Bonds,Aus Corp,0.0028,Monthly
+CRED.AX,Betashares Australian Investment Grade Corporate Bond ETF,Bonds,Aus Corp,0.0025,Monthly
+HBRD.AX,Betashares Active Australian Hybrids Fund,Bonds,Aus Hybrids,0.0055,Monthly
+FLOT.AX,VanEck Australian Floating Rate ETF,Bonds,Floating Rate,0.0022,Monthly
+AGVT.AX,Betashares Australian Government Bond ETF,Bonds,Aus Govt,0.0022,Quarterly
+VIF.AX,Vanguard International Fixed Interest Index (Hedged) ETF,Bonds,Global Bonds,0.0020,Quarterly
+VBND.AX,Vanguard Global Aggregate Bond Index (Hedged) ETF,Bonds,Global Bonds,0.0020,Quarterly
+IHCB.AX,iShares Core Global Corporate Bond (AUD Hedged) ETF,Bonds,Global Corp,0.0026,Semi-Annual
+USHY.AX,iShares Broad USD High Yield Corporate Bond ETF,Bonds,US High Yield,0.0050,Semi-Annual
+GOLD.AX,Global X Physical Gold,Commodities,Gold,0.0040,N/A
+QAU.AX,Betashares Gold Bullion ETF Currency Hedged,Commodities,Gold (Hedged),0.0059,N/A
+PMGOLD.AX,Perth Mint Gold,Commodities,Gold,0.0015,N/A
+ETPMAG.AX,Global X Physical Silver,Commodities,Silver,0.0049,N/A
+OOO.AX,Betashares Crude Oil Index ETF Currency Hedged,Commodities,Oil,0.0079,N/A
+QCB.AX,Betashares Commodities Basket ETF Currency Hedged,Commodities,Broad,0.0069,N/A
+VDHG.AX,Vanguard Diversified High Growth Index ETF,Multi-Asset,90/10 Growth,0.0027,Quarterly
+VDGR.AX,Vanguard Diversified Growth Index ETF,Multi-Asset,70/30 Growth,0.0027,Quarterly
+VDBA.AX,Vanguard Diversified Balanced Index ETF,Multi-Asset,50/50 Balanced,0.0027,Quarterly
+VDCO.AX,Vanguard Diversified Conservative Income Fund,Multi-Asset,30/70 Conservative,0.0027,Quarterly
+DHHF.AX,Betashares Diversified All Growth ETF,Multi-Asset,100/0 Growth,0.0019,Quarterly
+DGGF.AX,Betashares Diversified High Growth ETF,Multi-Asset,90/10 Growth,0.0026,Quarterly
+DBBF.AX,Betashares Diversified Balanced ETF,Multi-Asset,50/50 Balanced,0.0026,Quarterly
+AAA.AX,Betashares Australian High Interest Cash ETF,Cash,Cash,0.0018,Monthly
+ISEC.AX,iShares Enhanced Cash ETF,Cash,Cash,0.0012,Monthly
+MNY.AX,BetaShares Australian Cash Plus Fund,Cash,Cash,0.0035,Monthly

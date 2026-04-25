@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set active = "archive" %}
+{% block title %}Archive &middot; ASX Portfolio{% endblock %}
+
+{% block content %}
+<section class="mb-6">
+  <h1 class="text-3xl font-bold text-slate-900 mb-1">Picks Archive</h1>
+  <p class="text-slate-600">Every day's top picks since {{ archive[-1].date if archive else "launch" }}.</p>
+</section>
+
+{% if archive %}
+<div class="grid gap-4">
+  {% for day in archive %}
+  <article class="bg-white border border-slate-200 rounded-lg p-5">
+    <div class="flex items-baseline justify-between mb-3">
+      <h3 class="text-base font-semibold text-slate-900">{{ day.date }}</h3>
+      <span class="text-xs text-slate-500">{{ day.picks|length }} picks</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-slate-500">
+          <tr>
+            <th class="px-2 py-1 text-left">Ticker</th>
+            <th class="px-2 py-1 text-left">Name</th>
+            <th class="px-2 py-1 text-left">Sector</th>
+            <th class="px-2 py-1 text-right">Score</th>
+            <th class="px-2 py-1 text-right">Proj. Return</th>
+            <th class="px-2 py-1 text-right">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in day.picks %}
+          <tr class="border-t border-slate-100">
+            <td class="px-2 py-1 font-mono font-semibold">{{ p.ticker }}</td>
+            <td class="px-2 py-1">{{ p.name }}</td>
+            <td class="px-2 py-1 text-slate-500">{{ p.sector }}</td>
+            <td class="px-2 py-1 text-right">{% if p.composite_score is number %}{{ "%.1f"|format(p.composite_score) }}{% else %}—{% endif %}</td>
+            <td class="px-2 py-1 text-right">{% if p.projected_return is number %}{{ "%.1f"|format(p.projected_return*100) }}%{% else %}—{% endif %}</td>
+            <td class="px-2 py-1 text-right">{% if p.price is number %}${{ "%.2f"|format(p.price) }}{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<section class="bg-white border border-slate-200 rounded-lg p-8 text-center text-slate-500">
+  <p>No archived picks yet. Run the daily screen to start the archive.</p>
+</section>
+{% endif %}
+{% endblock %}

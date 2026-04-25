@@ -1,0 +1,20 @@
+# ASX Portfolio Screener — configuration
+top_n: 5
+min_projected_return: 0.10
+diversify_by_sector: true
+history_period: "5y"
+fetch_workers: 8
+fetch_announcements: true
+use_alpha_vantage: false
+weights:
+  value: 0.22
+  growth: 0.22
+  quality: 0.22
+  income: 0.10
+  momentum: 0.14
+  risk: 0.10
+reports_dir: "reports"
+site_dir: "site"
+portfolio_initial_capital: 10000.0
+portfolio_rebalance_days: 30
+portfolio_transaction_cost: 0.0

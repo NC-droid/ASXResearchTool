@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASX ETF Screener</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .num-pos { color: #16a34a; }
+    .num-neg { color: #dc2626; }
+    .pillar-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg,#ef4444,#f59e0b 50%,#22c55e); position: relative; }
+    .pillar-bar::after { content: ""; position: absolute; top: -2px; width: 2px; height: 10px; background: #1f2937; left: var(--score, 50%); }
+    input[type=range] { accent-color: #4f46e5; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 9999px; background: #eef2ff; color: #3730a3; font-size: 12px; font-weight: 500; }
+    .stale { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .sortable th { cursor: pointer; user-select: none; }
+    .sortable th:hover { background: #f3f4f6; }
+    .sortable th.sorted-asc::after { content: " \2191"; }
+    .sortable th.sorted-desc::after { content: " \2193"; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-md bg-indigo-600 text-white grid place-items-center font-bold">A</div>
+        <div>
+          <div class="font-semibold text-slate-900">ASX ETF Screener</div>
+          <div class="text-xs text-slate-500">Interactive · risk-adjusted · powered by Yahoo Finance</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 text-sm">
+        <span id="status" class="text-slate-500">Idle</span>
+        <button id="refreshBtn" class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium">Refresh data</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Inputs panel -->
+    <aside class="lg:col-span-4 space-y-5">
+      <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="font-semibold text-slate-900 mb-4">What are you looking for?</h2>
+
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-2">Risk tolerance</label>
+          <div class="flex gap-1 bg-slate-100 rounded-md p-1" role="tablist" id="risk-group">
+            <button data-value="low"    class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">Low</button>
+            <button data-value="medium" class="flex-1 py-1.5 text-sm rounded-md bg-white shadow-sm font-medium">Medium</button>
+            <button data-value="high"   class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">High</button>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-2">Investment horizon</label>
+          <div class="flex gap-1 bg-slate-100 rounded-md p-1" role="tablist" id="horizon-group">
+            <button data-value="short"  class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">1–3 yrs</button>
+            <button data-value="medium" class="flex-1 py-1.5 text-sm rounded-md bg-white shadow-sm font-medium">3–7 yrs</button>
+            <button data-value="long"   class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">7+ yrs</button>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-sm font-medium text-slate-700">Max management fee (MER)</label>
+            <span id="merLabel" class="text-sm text-slate-500 tabular-nums">no cap</span>
+          </div>
+          <input id="merSlider" type="range" min="0" max="100" step="1" value="100" class="w-full" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1"><span>0.05%</span><span>1.00%</span><span>any</span></div>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-sm font-medium text-slate-700">Minimum annual yield</label>
+            <span id="yieldLabel" class="text-sm text-slate-500 tabular-nums">0%</span>
+          </div>
+          <input id="yieldSlider" type="range" min="0" max="80" step="1" value="0" class="w-full" />
+          <div class="text-xs text-slate-500 mt-1" id="yieldMonthlyHint">Equivalent to ~0.00% per month if distributions are evenly spread.</div>
+        </div>
+
+        <div class="mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-sm font-medium text-slate-700">Asset focus</label>
+            <span class="text-xs text-slate-500"><a href="#" id="catAll" class="text-indigo-600 hover:underline">all</a> · <a href="#" id="catNone" class="text-indigo-600 hover:underline">none</a></span>
+          </div>
+          <div id="categoryList" class="space-y-1.5 text-sm"></div>
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-2">How many to recommend</label>
+          <select id="topN" class="w-full border border-slate-300 rounded-md py-1.5 px-2 text-sm">
+            <option value="3" selected>Top 3</option>
+            <option value="5">Top 5</option>
+            <option value="10">Top 10</option>
+          </select>
+        </div>
+
+        <div class="pt-4 mt-4 border-t border-slate-200">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Target quarterly dividend (AUD)</label>
+          <p class="text-xs text-slate-500 mb-2">Enter a target and we'll work out how much to invest in each pick to hit it.</p>
+          <div class="flex gap-2 items-center">
+            <span class="text-slate-500 text-sm">$</span>
+            <input id="targetDividend" type="number" min="0" step="50" value="0" placeholder="e.g. 1000"
+                   class="flex-1 border border-slate-300 rounded-md py-1.5 px-2 text-sm" />
+            <span class="text-xs text-slate-500">per quarter</span>
+          </div>
+          <div id="targetDividendHint" class="text-xs text-slate-400 mt-1"></div>
+        </div>
+      </section>
+
+      <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h3 class="font-semibold text-slate-900 mb-2">How scoring responds to your inputs</h3>
+        <p class="text-xs text-slate-500 mb-3">Pillar weights flex with risk &amp; horizon. Heavier bars = more influence on the composite.</p>
+        <div id="pillarWeights" class="space-y-2 text-xs"></div>
+      </section>
+
+      <section class="bg-white border border-slate-200 rounded-lg p-4 text-xs text-slate-500">
+        <strong class="text-slate-700">Disclaimer:</strong> Personal research tool only. Yahoo data may be delayed ~15&ndash;20 minutes. Not financial advice.
+      </section>
+    </aside>
+
+    <!-- Results panel -->
+    <section class="lg:col-span-8 space-y-6">
+      <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-baseline justify-between mb-4">
+          <h2 id="picksHeading" class="text-xl font-bold text-slate-900">Top picks</h2>
+          <span id="candidateCount" class="text-xs text-slate-500"></span>
+        </div>
+        <div id="picksGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        <div id="picksEmpty" class="hidden bg-amber-50 border border-amber-200 rounded p-4 text-sm text-amber-800">No ETFs match your filters. Try widening the categories, raising the MER cap, or lowering the minimum yield.</div>
+      </div>
+
+      <div id="dividendPlan" class="hidden bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-baseline justify-between mb-3">
+          <h2 class="text-lg font-semibold text-slate-900">Investment plan to hit your dividend target</h2>
+          <span id="planTotalsHeadline" class="text-xs text-slate-500"></span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-center">
+          <div class="bg-indigo-50 border border-indigo-200 rounded-md p-3">
+            <div class="text-xs text-indigo-700 uppercase tracking-wide">Total capital</div>
+            <div id="planTotalCapital" class="text-2xl font-bold text-indigo-900 mt-1 tabular-nums">—</div>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-md p-3">
+            <div class="text-xs text-slate-500 uppercase tracking-wide">Annual dividend</div>
+            <div id="planAnnual" class="text-2xl font-bold text-slate-900 mt-1 tabular-nums">—</div>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-md p-3">
+            <div class="text-xs text-slate-500 uppercase tracking-wide">Avg yield</div>
+            <div id="planAvgYield" class="text-2xl font-bold text-slate-900 mt-1 tabular-nums">—</div>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-700">
+              <tr>
+                <th class="px-3 py-2 text-left">Ticker</th>
+                <th class="px-3 py-2 text-left">Name</th>
+                <th class="px-3 py-2 text-right">Yield</th>
+                <th class="px-3 py-2 text-right">Invest (AUD)</th>
+                <th class="px-3 py-2 text-right">Annual dividend</th>
+                <th class="px-3 py-2 text-right">Quarterly</th>
+                <th class="px-3 py-2 text-right">Monthly avg</th>
+              </tr>
+            </thead>
+            <tbody id="planTableBody"></tbody>
+          </table>
+        </div>
+        <div id="planWarnings" class="mt-3 space-y-1"></div>
+        <p class="mt-3 text-xs text-slate-400">
+          Equal-weight allocation across the {N} picks. Distributions are paid on each ETF's actual schedule
+          (most are quarterly or semi-annual; "Monthly avg" assumes you spread the annual income evenly).
+          Yield figures are trailing 12-month — future distributions can be higher or lower.
+        </p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-baseline justify-between">
+          <h2 class="font-semibold text-slate-900">Full ranking</h2>
+          <span class="text-xs text-slate-500">Click any column to sort</span>
+        </div>
+        <div class="overflow-x-auto max-h-[600px]">
+          <table class="sortable w-full text-sm">
+            <thead class="bg-slate-50 text-slate-700 sticky top-0">
+              <tr>
+                <th class="px-3 py-2 text-left">Ticker</th>
+                <th class="px-3 py-2 text-left">Name</th>
+                <th class="px-3 py-2 text-left">Category</th>
+                <th class="px-3 py-2 text-right">Score</th>
+                <th class="px-3 py-2 text-right">1y</th>
+                <th class="px-3 py-2 text-right">3y CAGR</th>
+                <th class="px-3 py-2 text-right">5y CAGR</th>
+                <th class="px-3 py-2 text-right">Vol 1y</th>
+                <th class="px-3 py-2 text-right">Sharpe 3y</th>
+                <th class="px-3 py-2 text-right">Yield</th>
+                <th class="px-3 py-2 text-right">MER</th>
+              </tr>
+            </thead>
+            <tbody id="fullTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  // ---------- Helpers ----------
+  const fmtPct = (v, dp=2) => v == null ? "—" : (v*100).toFixed(dp) + "%";
+  const fmtNum = (v, dp=2) => v == null ? "—" : Number(v).toFixed(dp);
+  const debounce = (fn, ms=400) => { let h; return (...a) => { clearTimeout(h); h = setTimeout(() => fn(...a), ms); }; };
+
+  // ---------- State ----------
+  const state = {
+    risk_tolerance: "medium",
+    horizon: "medium",
+    categories: [],
+    max_mer: null,
+    min_dividend_yield_annual: 0.0,
+    top_n: 3,
+    target_quarterly_dividend_aud: 0,
+  };
+  const fmtAUD = v => v == null ? "—" : "$" + Number(v).toLocaleString("en-AU", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const fmtAUD0 = v => v == null ? "—" : "$" + Number(v).toLocaleString("en-AU", {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+  // Slider mappings
+  // MER: 0..100 → 0.0005 .. 0.01, 100 → null (no cap)
+  function merFromSlider(v) {
+    v = parseInt(v, 10);
+    if (v >= 100) return null;
+    const min = 0.0005, max = 0.01;
+    return min + (v / 99) * (max - min);
+  }
+  function merLabel(mer) {
+    if (mer == null) return "no cap";
+    return (mer * 100).toFixed(2) + "% p.a.";
+  }
+  // Yield: 0..80 → 0% .. 8% in 0.1% steps
+  function yieldFromSlider(v) { return parseInt(v, 10) / 1000; }
+  function yieldLabel(y) { return (y * 100).toFixed(1) + "%"; }
+
+  // ---------- Toggle group helper ----------
+  function bindToggleGroup(id, key) {
+    const root = document.getElementById(id);
+    root.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        root.querySelectorAll("button").forEach(b => {
+          b.classList.remove("bg-white", "shadow-sm", "font-medium");
+          b.classList.add("hover:bg-white");
+        });
+        btn.classList.add("bg-white", "shadow-sm", "font-medium");
+        state[key] = btn.dataset.value;
+        triggerScreen();
+      });
+    });
+  }
+  bindToggleGroup("risk-group", "risk_tolerance");
+  bindToggleGroup("horizon-group", "horizon");
+
+  // ---------- Sliders ----------
+  const merSlider = document.getElementById("merSlider");
+  const merLabelEl = document.getElementById("merLabel");
+  merSlider.addEventListener("input", () => {
+    state.max_mer = merFromSlider(merSlider.value);
+    merLabelEl.textContent = merLabel(state.max_mer);
+    triggerScreen();
+  });
+
+  const yieldSlider = document.getElementById("yieldSlider");
+  const yieldLabelEl = document.getElementById("yieldLabel");
+  const yieldHint = document.getElementById("yieldMonthlyHint");
+  yieldSlider.addEventListener("input", () => {
+    const y = yieldFromSlider(yieldSlider.value);
+    state.min_dividend_yield_annual = y;
+    yieldLabelEl.textContent = yieldLabel(y);
+    yieldHint.textContent = "Equivalent to ~" + (y/12*100).toFixed(2) + "% per month if distributions are evenly spread.";
+    triggerScreen();
+  });
+
+  document.getElementById("topN").addEventListener("change", (e) => {
+    state.top_n = parseInt(e.target.value, 10);
+    triggerScreen();
+  });
+
+  // Target dividend input
+  const targetDivInput = document.getElementById("targetDividend");
+  const targetDivHint = document.getElementById("targetDividendHint");
+  function updateDividendHint(v) {
+    if (!v || v <= 0) { targetDivHint.textContent = ""; return; }
+    targetDivHint.textContent = `≈ $${(v*4).toLocaleString("en-AU")} per year · $${(v/3).toLocaleString("en-AU", {maximumFractionDigits: 0})}/month average`;
+  }
+  targetDivInput.addEventListener("input", () => {
+    const v = Math.max(parseFloat(targetDivInput.value) || 0, 0);
+    state.target_quarterly_dividend_aud = v;
+    updateDividendHint(v);
+    triggerScreen();
+  });
+
+  // ---------- Categories ----------
+  async function loadCategories() {
+    const r = await fetch("/api/categories");
+    const j = await r.json();
+    const list = document.getElementById("categoryList");
+    list.innerHTML = "";
+    j.categories.forEach(cat => {
+      const id = "cat_" + cat.replace(/\W+/g, "_");
+      const wrap = document.createElement("label");
+      wrap.className = "flex items-center justify-between cursor-pointer";
+      wrap.innerHTML = `
+        <span class="flex items-center gap-2">
+          <input type="checkbox" id="${id}" value="${cat}" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+          <span>${cat}</span>
+        </span>
+        <span class="text-xs text-slate-400">${j.count_per_category[cat] ?? ""}</span>`;
+      list.appendChild(wrap);
+      wrap.querySelector("input").addEventListener("change", syncCategoriesAndScreen);
+    });
+    syncCategoriesAndScreen();
+  }
+  function syncCategoriesAndScreen() {
+    const checks = document.querySelectorAll("#categoryList input[type=checkbox]");
+    const all = Array.from(checks).map(c => c.value);
+    const sel = Array.from(checks).filter(c => c.checked).map(c => c.value);
+    state.categories = sel.length === all.length ? [] : sel; // empty means "all"
+    triggerScreen();
+  }
+  document.getElementById("catAll").addEventListener("click", e => {
+    e.preventDefault();
+    document.querySelectorAll("#categoryList input[type=checkbox]").forEach(c => (c.checked = true));
+    syncCategoriesAndScreen();
+  });
+  document.getElementById("catNone").addEventListener("click", e => {
+    e.preventDefault();
+    document.querySelectorAll("#categoryList input[type=checkbox]").forEach(c => (c.checked = false));
+    syncCategoriesAndScreen();
+  });
+
+  // ---------- Screen ----------
+  let inFlight = null;
+  async function runScreen(forceRefresh = false) {
+    setStatus(forceRefresh ? "Refreshing data from Yahoo…" : "Scoring…", true);
+    if (inFlight) inFlight.abort();
+    const ctrl = new AbortController();
+    inFlight = ctrl;
+    try {
+      const r = await fetch("/api/screen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...state, force_refresh: forceRefresh }),
+        signal: ctrl.signal,
+      });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json();
+      renderResults(j);
+      setStatus("Updated · " + (j.elapsed_seconds ?? 0).toFixed(2) + "s", false);
+    } catch (e) {
+      if (e.name === "AbortError") return;
+      setStatus("Error: " + e.message, false, true);
+    }
+  }
+  const triggerScreen = debounce(() => runScreen(false), 350);
+
+  function setStatus(msg, busy, error = false) {
+    const el = document.getElementById("status");
+    el.textContent = msg;
+    el.classList.toggle("stale", busy);
+    el.classList.toggle("text-red-600", !!error);
+  }
+
+  document.getElementById("refreshBtn").addEventListener("click", () => runScreen(true));
+
+  // ---------- Render ----------
+  function renderResults(data) {
+    document.getElementById("candidateCount").textContent = `${data.candidate_count} ETFs match — showing top ${data.picks.length}`;
+    renderPicks(data.picks, data.rationales);
+    renderTable(data.all_filtered);
+    renderPillarWeights(data.pillar_weights);
+    renderDividendPlan(data.dividend_plan);
+    document.getElementById("picksEmpty").classList.toggle("hidden", data.picks.length > 0);
+  }
+
+  function renderDividendPlan(plan) {
+    const card = document.getElementById("dividendPlan");
+    if (!plan) { card.classList.add("hidden"); return; }
+    card.classList.remove("hidden");
+
+    document.getElementById("planTotalsHeadline").textContent =
+      `Target: ${fmtAUD0(plan.target_quarterly_aud)}/quarter · ${fmtAUD0(plan.target_annual_aud)}/year`;
+
+    if (!plan.feasible) {
+      document.getElementById("planTotalCapital").textContent = "—";
+      document.getElementById("planAnnual").textContent = fmtAUD0(plan.target_annual_aud);
+      document.getElementById("planAvgYield").textContent = "0%";
+      document.getElementById("planTableBody").innerHTML = "";
+      document.getElementById("planWarnings").innerHTML =
+        plan.warnings.map(w => `<div class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded p-2">${w}</div>`).join("");
+      return;
+    }
+
+    document.getElementById("planTotalCapital").textContent = fmtAUD0(plan.total_capital_aud);
+    document.getElementById("planAnnual").textContent = fmtAUD0(plan.target_annual_aud);
+    document.getElementById("planAvgYield").textContent = (plan.average_yield * 100).toFixed(2) + "%";
+
+    const body = document.getElementById("planTableBody");
+    body.innerHTML = "";
+    plan.allocations.forEach(a => {
+      const tr = document.createElement("tr");
+      tr.className = "border-t border-slate-100";
+      const zero = a.yield <= 0;
+      tr.innerHTML = `
+        <td class="px-3 py-2 font-mono font-medium">${a.ticker}</td>
+        <td class="px-3 py-2">${a.name ?? ""}</td>
+        <td class="px-3 py-2 text-right ${zero ? "text-amber-600" : ""}">${(a.yield*100).toFixed(2)}%${zero ? " ⚠" : ""}</td>
+        <td class="px-3 py-2 text-right font-semibold">${fmtAUD(a.investment_aud)}</td>
+        <td class="px-3 py-2 text-right">${fmtAUD(a.expected_annual_aud)}</td>
+        <td class="px-3 py-2 text-right">${fmtAUD(a.expected_quarterly_aud)}</td>
+        <td class="px-3 py-2 text-right text-slate-500">${fmtAUD(a.expected_monthly_aud)}</td>`;
+      body.appendChild(tr);
+    });
+
+    const warningsEl = document.getElementById("planWarnings");
+    warningsEl.innerHTML = (plan.warnings || []).map(w =>
+      `<div class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded p-2">${w}</div>`
+    ).join("");
+  }
+
+  function renderPicks(picks, rationales) {
+    const grid = document.getElementById("picksGrid");
+    grid.innerHTML = "";
+    picks.forEach((p, i) => {
+      const card = document.createElement("article");
+      card.className = "bg-white border border-slate-200 rounded-lg p-4 shadow-sm hover:shadow transition";
+      card.innerHTML = `
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <div class="text-xs text-slate-400">#${i+1} pick</div>
+            <div class="text-lg font-bold text-slate-900">${p.ticker}</div>
+            <div class="text-xs text-slate-500">${p.name}</div>
+          </div>
+          <span class="chip">${p.category}</span>
+        </div>
+        <div id="spark-${i}" style="height:60px"></div>
+        <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
+          <div><div class="text-xs text-slate-500">Composite</div><div class="font-semibold">${fmtNum(p.composite_score, 1)}</div></div>
+          <div><div class="text-xs text-slate-500">1y return</div><div class="font-semibold ${ (p.return_1y||0) >= 0 ? "num-pos" : "num-neg"}">${fmtPct(p.return_1y, 1)}</div></div>
+          <div><div class="text-xs text-slate-500">3y CAGR</div><div class="font-semibold">${fmtPct(p.return_3y, 1)}</div></div>
+          <div><div class="text-xs text-slate-500">Sharpe 3y</div><div class="font-semibold">${fmtNum(p.sharpe_3y, 2)}</div></div>
+          <div><div class="text-xs text-slate-500">Yield</div><div class="font-semibold">${fmtPct(p.dividend_yield, 2)}</div></div>
+          <div><div class="text-xs text-slate-500">MER</div><div class="font-semibold">${fmtPct(p.mer, 2)}</div></div>
+        </div>
+        <div class="mt-3 space-y-1.5">
+          ${ ["return","risk_adj","stability","cost","liquidity","income"].map(k => {
+              const labels = {return:"Return",risk_adj:"Risk-adj.",stability:"Stability",cost:"Cost",liquidity:"Liquidity",income:"Income"};
+              const v = p["score_"+k] ?? 50;
+              return `<div>
+                <div class="flex justify-between text-xs text-slate-600"><span>${labels[k]}</span><span>${v.toFixed(0)}</span></div>
+                <div class="pillar-bar" style="--score:${v}%"></div>
+              </div>`;
+            }).join("")}
+        </div>
+        <p class="mt-3 text-xs text-slate-600 italic">${rationales[i] || ""}</p>`;
+      grid.appendChild(card);
+
+      // Sparkline
+      if (p.history_dates && p.history_prices && p.history_prices.length > 1) {
+        Plotly.newPlot(`spark-${i}`, [{
+          x: p.history_dates, y: p.history_prices,
+          type: "scatter", mode: "lines",
+          line: { color: "#4f46e5", width: 1.5 },
+          fill: "tozeroy", fillcolor: "rgba(79,70,229,0.10)",
+          hoverinfo: "skip",
+        }], {
+          margin: {l: 0, r: 0, t: 0, b: 0},
+          xaxis: { visible: false },
+          yaxis: { visible: false, range: [Math.min(...p.history_prices)*0.95, Math.max(...p.history_prices)*1.05] },
+          showlegend: false, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+        }, { displayModeBar: false, responsive: true });
+      }
+    });
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById("fullTable");
+    tbody.innerHTML = "";
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.className = "border-t border-slate-100 hover:bg-slate-50";
+      const r1 = (r.return_1y ?? 0);
+      tr.innerHTML = `
+        <td class="px-3 py-2 font-mono font-medium">${r.ticker}</td>
+        <td class="px-3 py-2">${r.name ?? ""}</td>
+        <td class="px-3 py-2 text-slate-500">${r.category ?? ""}</td>
+        <td class="px-3 py-2 text-right" data-sort="${r.composite_score ?? 0}">${fmtNum(r.composite_score, 1)}</td>
+        <td class="px-3 py-2 text-right ${r1 >= 0 ? "num-pos" : "num-neg"}" data-sort="${r1}">${fmtPct(r.return_1y, 1)}</td>
+        <td class="px-3 py-2 text-right" data-sort="${r.return_3y ?? -1}">${fmtPct(r.return_3y, 1)}</td>
+        <td class="px-3 py-2 text-right" data-sort="${r.return_5y ?? -1}">${fmtPct(r.return_5y, 1)}</td>
+        <td class="px-3 py-2 text-right" data-sort="${r.volatility_1y ?? 0}">${fmtPct(r.volatility_1y, 1)}</td>
+        <td class="px-3 py-2 text-right" data-sort="${r.sharpe_3y ?? 0}">${fmtNum(r.sharpe_3y, 2)}</td>
+        <td class="px-3 py-2 text-right" data-sort="${r.dividend_yield ?? 0}">${fmtPct(r.dividend_yield, 2)}</td>
+        <td class="px-3 py-2 text-right" data-sort="${r.mer ?? 0}">${fmtPct(r.mer, 2)}</td>`;
+      tbody.appendChild(tr);
+    });
+    bindSortableTable();
+  }
+
+  function bindSortableTable() {
+    const table = document.querySelector("table.sortable");
+    if (!table || table.dataset.bound === "1") return;
+    const tbody = table.tBodies[0];
+    table.querySelectorAll("th").forEach((th, i) => {
+      th.addEventListener("click", () => {
+        const rows = Array.from(tbody.rows);
+        const asc = !th.classList.contains("sorted-asc");
+        table.querySelectorAll("th").forEach(h => h.classList.remove("sorted-asc","sorted-desc"));
+        th.classList.add(asc ? "sorted-asc" : "sorted-desc");
+        rows.sort((a,b) => {
+          const av = a.cells[i].dataset.sort ?? a.cells[i].innerText.trim();
+          const bv = b.cells[i].dataset.sort ?? b.cells[i].innerText.trim();
+          const an = parseFloat(av), bn = parseFloat(bv);
+          const isNum = !isNaN(an) && !isNaN(bn);
+          if (isNum) return asc ? an - bn : bn - an;
+          return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+        });
+        rows.forEach(r => tbody.appendChild(r));
+      });
+    });
+    table.dataset.bound = "1";
+  }
+
+  function renderPillarWeights(weights) {
+    if (!weights) return;
+    const container = document.getElementById("pillarWeights");
+    container.innerHTML = "";
+    const labels = {return:"Return", risk_adj:"Risk-adjusted", stability:"Stability", cost:"Cost", liquidity:"Liquidity", income:"Income"};
+    const order = ["return","risk_adj","stability","cost","liquidity","income"];
+    const maxW = Math.max(...order.map(k => weights[k] ?? 0));
+    order.forEach(k => {
+      const w = weights[k] ?? 0;
+      const row = document.createElement("div");
+      row.innerHTML = `
+        <div class="flex justify-between text-slate-600">
+          <span>${labels[k]}</span>
+          <span class="tabular-nums">${(w*100).toFixed(0)}%</span>
+        </div>
+        <div class="h-2 rounded bg-slate-100 mt-1">
+          <div class="h-2 rounded bg-indigo-500" style="width:${(w/maxW*100).toFixed(0)}%"></div>
+        </div>`;
+      container.appendChild(row);
+    });
+  }
+
+  // ---------- Init ----------
+  loadCategories();
+  </script>
+</body>
+</html>

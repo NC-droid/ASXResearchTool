@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Today's Picks &middot; ASX Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .num-pos { color: #16a34a; }
+    .num-neg { color: #dc2626; }
+    .pillar-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%); position: relative; }
+    .pillar-bar::after { content: ""; position: absolute; top: -2px; width: 2px; height: 10px; background: #1f2937; left: var(--score, 50%); }
+    .sortable th { cursor: pointer; user-select: none; }
+    .sortable th:hover { background: #f3f4f6; }
+    .sortable th.sorted-asc::after { content: " \2191"; }
+    .sortable th.sorted-desc::after { content: " \2193"; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-md bg-indigo-600 text-white grid place-items-center font-bold">A</div>
+        <div>
+          <div class="font-semibold text-slate-900">ASX Portfolio</div>
+          <div class="text-xs text-slate-500">Daily fundamental screener &middot; private research</div>
+        </div>
+      </div>
+      <nav class="flex gap-1 text-sm">
+        <a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-100 bg-indigo-50 text-indigo-700 font-medium">Today's Picks</a>
+        <a href="portfolio.html" class="px-3 py-2 rounded-md hover:bg-slate-100 ">Portfolio</a>
+        <a href="archive.html" class="px-3 py-2 rounded-md hover:bg-slate-100 ">Archive</a>
+        <a href="backtest.html" class="px-3 py-2 rounded-md hover:bg-slate-100 ">Backtest</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    
+<section class="mb-8">
+  <div class="flex items-baseline justify-between mb-2">
+    <h1 class="text-3xl font-bold text-slate-900">Today's Picks</h1>
+    <span class="text-sm text-slate-500">2026-04-25</span>
+  </div>
+  <p class="text-slate-600">Top 5 ASX 200 names from a six-pillar fundamental screen, filtered for a projected long-term annualised return of at least 10%.</p>
+</section>
+
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+  
+  <article class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm hover:shadow transition">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <div class="text-lg font-bold text-slate-900">CQR.AX</div>
+        <div class="text-sm text-slate-500">Charter Hall Retail REIT</div>
+      </div>
+      <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Real Estate</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <div>
+        <div class="text-xs text-slate-500">Composite</div>
+        <div class="text-xl font-semibold">78.2</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Proj. Return</div>
+        <div class="text-xl font-semibold num-pos">27.2%</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Price</div>
+        <div class="text-base font-medium">$3.86</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Div Yield</div>
+        <div class="text-base font-medium">8.16%</div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2">
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Value</span><span>86</span></div>
+          <div class="pillar-bar" style="--score: 85.75021590792488%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Growth</span><span>88</span></div>
+          <div class="pillar-bar" style="--score: 88.13079209652037%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Quality</span><span>65</span></div>
+          <div class="pillar-bar" style="--score: 65.4478068444552%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Income</span><span>89</span></div>
+          <div class="pillar-bar" style="--score: 89.04109589041096%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Momentum</span><span>57</span></div>
+          <div class="pillar-bar" style="--score: 56.99421965317919%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Risk</span><span>87</span></div>
+          <div class="pillar-bar" style="--score: 86.83917035022102%"></div>
+        </div>
+      
+    </div>
+    <p class="mt-4 text-xs text-slate-600 italic">Charter Hall Retail REIT (CQR.AX, Real Estate): attractively valued, strong growth profile, solid 8.2% yield, contained volatility/drawdowns. Projected long-term return ≈ 27.2% p.a.</p>
+  </article>
+  
+  <article class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm hover:shadow transition">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <div class="text-lg font-bold text-slate-900">WAF.AX</div>
+        <div class="text-sm text-slate-500">West African Resources</div>
+      </div>
+      <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Materials</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <div>
+        <div class="text-xs text-slate-500">Composite</div>
+        <div class="text-xl font-semibold">75.9</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Proj. Return</div>
+        <div class="text-xl font-semibold num-pos">18.4%</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Price</div>
+        <div class="text-base font-medium">$3.22</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Div Yield</div>
+        <div class="text-base font-medium">—</div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2">
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Value</span><span>80</span></div>
+          <div class="pillar-bar" style="--score: 80.36394166638165%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Growth</span><span>91</span></div>
+          <div class="pillar-bar" style="--score: 90.62860639972024%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Quality</span><span>87</span></div>
+          <div class="pillar-bar" style="--score: 87.06931264251816%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Income</span><span>50</span></div>
+          <div class="pillar-bar" style="--score: 50.0%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Momentum</span><span>71</span></div>
+          <div class="pillar-bar" style="--score: 71.21387283236994%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Risk</span><span>41</span></div>
+          <div class="pillar-bar" style="--score: 41.2669160149609%"></div>
+        </div>
+      
+    </div>
+    <p class="mt-4 text-xs text-slate-600 italic">West African Resources (WAF.AX, Materials): attractively valued, strong growth profile, high-quality balance sheet &amp; returns, positive medium-term momentum. Projected long-term return ≈ 18.4% p.a.</p>
+  </article>
+  
+  <article class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm hover:shadow transition">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <div class="text-lg font-bold text-slate-900">SOL.AX</div>
+        <div class="text-sm text-slate-500">Washington H. Soul Pattinson and Company</div>
+      </div>
+      <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Financials</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <div>
+        <div class="text-xs text-slate-500">Composite</div>
+        <div class="text-xl font-semibold">75.6</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Proj. Return</div>
+        <div class="text-xl font-semibold num-pos">21.3%</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Price</div>
+        <div class="text-base font-medium">$42.25</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Div Yield</div>
+        <div class="text-base font-medium">2.27%</div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2">
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Value</span><span>87</span></div>
+          <div class="pillar-bar" style="--score: 87.15700781543934%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Growth</span><span>97</span></div>
+          <div class="pillar-bar" style="--score: 97.39552369295332%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Quality</span><span>83</span></div>
+          <div class="pillar-bar" style="--score: 83.34407704848398%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Income</span><span>17</span></div>
+          <div class="pillar-bar" style="--score: 16.78082191780822%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Momentum</span><span>68</span></div>
+          <div class="pillar-bar" style="--score: 67.86127167630057%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Risk</span><span>55</span></div>
+          <div class="pillar-bar" style="--score: 55.06154369262156%"></div>
+        </div>
+      
+    </div>
+    <p class="mt-4 text-xs text-slate-600 italic">Washington H. Soul Pattinson and Company (SOL.AX, Financials): attractively valued, strong growth profile, high-quality balance sheet &amp; returns. Projected long-term return ≈ 21.3% p.a.</p>
+  </article>
+  
+  <article class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm hover:shadow transition">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <div class="text-lg font-bold text-slate-900">FMG.AX</div>
+        <div class="text-sm text-slate-500">Fortescue</div>
+      </div>
+      <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Materials</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <div>
+        <div class="text-xs text-slate-500">Composite</div>
+        <div class="text-xl font-semibold">71.8</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Proj. Return</div>
+        <div class="text-xl font-semibold num-pos">22.6%</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Price</div>
+        <div class="text-base font-medium">$19.78</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Div Yield</div>
+        <div class="text-base font-medium">6.27%</div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2">
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Value</span><span>71</span></div>
+          <div class="pillar-bar" style="--score: 70.60292181140336%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Growth</span><span>67</span></div>
+          <div class="pillar-bar" style="--score: 66.64801538730548%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Quality</span><span>75</span></div>
+          <div class="pillar-bar" style="--score: 75.20711585822043%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Income</span><span>82</span></div>
+          <div class="pillar-bar" style="--score: 81.5068493150685%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Momentum</span><span>71</span></div>
+          <div class="pillar-bar" style="--score: 70.52023121387283%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Risk</span><span>70</span></div>
+          <div class="pillar-bar" style="--score: 70.33151989119347%"></div>
+        </div>
+      
+    </div>
+    <p class="mt-4 text-xs text-slate-600 italic">Fortescue (FMG.AX, Materials): attractively valued, high-quality balance sheet &amp; returns, solid 6.3% yield, positive medium-term momentum, contained volatility/drawdowns. Projected long-term return ≈ 22.6% p.a.</p>
+  </article>
+  
+  <article class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm hover:shadow transition">
+    <div class="flex items-start justify-between mb-2">
+      <div>
+        <div class="text-lg font-bold text-slate-900">ARF.AX</div>
+        <div class="text-sm text-slate-500">Arena REIT</div>
+      </div>
+      <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Real Estate</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <div>
+        <div class="text-xs text-slate-500">Composite</div>
+        <div class="text-xl font-semibold">70.1</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Proj. Return</div>
+        <div class="text-xl font-semibold num-pos">23.0%</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Price</div>
+        <div class="text-base font-medium">$3.48</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500">Div Yield</div>
+        <div class="text-base font-medium">5.53%</div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2">
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Value</span><span>74</span></div>
+          <div class="pillar-bar" style="--score: 73.80553322844341%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Growth</span><span>82</span></div>
+          <div class="pillar-bar" style="--score: 81.80975695051582%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Quality</span><span>64</span></div>
+          <div class="pillar-bar" style="--score: 64.31511870420532%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Income</span><span>73</span></div>
+          <div class="pillar-bar" style="--score: 73.28767123287672%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Momentum</span><span>45</span></div>
+          <div class="pillar-bar" style="--score: 45.14450867052023%"></div>
+        </div>
+      
+        
+        <div>
+          <div class="flex justify-between text-xs text-slate-600 mb-0.5"><span>Risk</span><span>81</span></div>
+          <div class="pillar-bar" style="--score: 80.92825569534172%"></div>
+        </div>
+      
+    </div>
+    <p class="mt-4 text-xs text-slate-600 italic">Arena REIT (ARF.AX, Real Estate): attractively valued, strong growth profile, solid 5.5% yield, contained volatility/drawdowns. Projected long-term return ≈ 23.0% p.a.</p>
+  </article>
+  
+</section>
+
+<section class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+  <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Full ASX 200 screen</h2>
+    <span class="text-xs text-slate-500">173 tickers &middot; click any column to sort</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="sortable w-full text-sm">
+      <thead class="bg-slate-50 text-slate-700">
+        <tr>
+          <th class="px-3 py-2 text-left">Ticker</th>
+          <th class="px-3 py-2 text-left">Name</th>
+          <th class="px-3 py-2 text-left">Sector</th>
+          <th class="px-3 py-2 text-right">Score</th>
+          <th class="px-3 py-2 text-right">Proj. Return</th>
+          <th class="px-3 py-2 text-right">Div Yld</th>
+          <th class="px-3 py-2 text-right">P/E</th>
+          <th class="px-3 py-2 text-right">12m Ret</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CQR.AX</td>
+          <td class="px-3 py-2">Charter Hall Retail REIT</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="78.2195566422664">78.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2716">27.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0816">8.16%</td>
+          <td class="px-3 py-2 text-right" data-sort="6.433333">6.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1202143309409385">12.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WAF.AX</td>
+          <td class="px-3 py-2">West African Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="75.87024315392429">75.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1836645949485938">18.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="7.8536587">7.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3819743064577261">38.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SOL.AX</td>
+          <td class="px-3 py-2">Washington H. Soul Pattinson and Company</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="75.62206847823794">75.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2127">21.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0227">2.27%</td>
+          <td class="px-3 py-2 text-right" data-sort="6.580997">6.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1734863909774198">17.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">FMG.AX</td>
+          <td class="px-3 py-2">Fortescue</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="71.79744096309284">71.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2256727001311699">22.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.06269999999999999">6.27%</td>
+          <td class="px-3 py-2 text-right" data-sort="11.635294">11.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3595003689643135">36.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">RRL.AX</td>
+          <td class="px-3 py-2">Regis Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="71.23682485641609">71.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1907374149659864">19.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0272">2.72%</td>
+          <td class="px-3 py-2 text-right" data-sort="11.484375">11.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.71405278089788">71.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">DRR.AX</td>
+          <td class="px-3 py-2">Deterra Royalties</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="70.4304109749509">70.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2234792077124791">22.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0614">6.14%</td>
+          <td class="px-3 py-2 text-right" data-sort="11.882353">11.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2003275490420395">20.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ARF.AX</td>
+          <td class="px-3 py-2">Arena REIT</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="70.12651386099088">70.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2298976995805259">23.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0553">5.53%</td>
+          <td class="px-3 py-2 text-right" data-sort="9.157895">9.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.007827553942731935">0.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CMW.AX</td>
+          <td class="px-3 py-2">Cromwell Property Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="69.58575422593917">69.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2498480519480519">25.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0779">7.79%</td>
+          <td class="px-3 py-2 text-right" data-sort="9.625">9.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1041410666063818">10.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">GMD.AX</td>
+          <td class="px-3 py-2">Genesis Minerals</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="69.16297112261881">69.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.147689871665198">14.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="18.057144">18.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6853333791097005">68.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">VCX.AX</td>
+          <td class="px-3 py-2">Vicinity Centres</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="67.92082428658506">67.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2250406263275147">22.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0484">4.84%</td>
+          <td class="px-3 py-2 text-right" data-sort="8.827586">8.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1577833231993946">15.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">GPT.AX</td>
+          <td class="px-3 py-2">GPT Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="67.91563919716617">67.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2235472747544692">22.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05019999999999999">5.02%</td>
+          <td class="px-3 py-2 text-right" data-sort="9.37255">9.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1003996918033816">10.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NEM.AX</td>
+          <td class="px-3 py-2">Newmont</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="67.8149114584224">67.8</td>
+          <td class="px-3 py-2 text-right" data-sort="1.003610195748345">100.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.97">97.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="14.44661">14.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.8656316547231186">86.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CLW.AX</td>
+          <td class="px-3 py-2">Charter Hall Long WALE REIT</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="66.99283339191128">67.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.234175488066511">23.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.071">7.10%</td>
+          <td class="px-3 py-2 text-right" data-sort="11.580645">11.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.006697835695569143">0.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NIC.AX</td>
+          <td class="px-3 py-2">Nickel Industries</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="66.53867468108339">66.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.226766832613631">22.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0394">3.94%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.9134616178168378">91.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BWP.AX</td>
+          <td class="px-3 py-2">BWP Trust</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="65.27664306347097">65.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2154737896716716">21.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0484">4.84%</td>
+          <td class="px-3 py-2 text-right" data-sort="10.621622">10.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1675297739795421">16.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WGX.AX</td>
+          <td class="px-3 py-2">Westgold Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="64.95083379627243">65.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6322405266699055">63.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.49">49.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="22.481482">22.5</td>
+          <td class="px-3 py-2 text-right" data-sort="1.074220982513662">107.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BHP.AX</td>
+          <td class="px-3 py-2">BHP Group</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="64.52871415245528">64.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.179944563043251">18.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0349">3.49%</td>
+          <td class="px-3 py-2 text-right" data-sort="19.964413">20.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.5516843782121719">55.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CIA.AX</td>
+          <td class="px-3 py-2">Champion Iron</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="64.18138945667893">64.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2001535357106418">20.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.04480000000000001">4.48%</td>
+          <td class="px-3 py-2 text-right" data-sort="14.142857">14.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.177740282955313">17.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MND.AX</td>
+          <td class="px-3 py-2">Monadelphous Group</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="64.08332148036072">64.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1722390989626562">17.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0339">3.39%</td>
+          <td class="px-3 py-2 text-right" data-sort="27.264153">27.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.9282443094901294">92.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">EVN.AX</td>
+          <td class="px-3 py-2">Evolution Mining</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="64.0412878874949">64.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1771620707491083">17.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0313">3.13%</td>
+          <td class="px-3 py-2 text-right" data-sort="19.333332">19.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6571741255106125">65.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">DXS.AX</td>
+          <td class="px-3 py-2">Dexus</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="63.7842469661952">63.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2172967765868888">21.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0602">6.02%</td>
+          <td class="px-3 py-2 text-right" data-sort="13.47826">13.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1009290224882839">-10.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MAH.AX</td>
+          <td class="px-3 py-2">Macmahon Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="63.31233028847028">63.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1694164531325111">16.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0241">2.41%</td>
+          <td class="px-3 py-2 text-right" data-sort="19.750002">19.8</td>
+          <td class="px-3 py-2 text-right" data-sort="2.215019383746761">221.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">QBE.AX</td>
+          <td class="px-3 py-2">QBE Insurance Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="62.9546998786345">63.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1799556988063353">18.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0487">4.87%</td>
+          <td class="px-3 py-2 text-right" data-sort="11.29798">11.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0962365016512261">9.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CMM.AX</td>
+          <td class="px-3 py-2">Capricorn Metals</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="62.89483746162">62.9</td>
+          <td class="px-3 py-2 text-right" data-sort="1.013580786808795">101.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.87">87.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="21.203703">21.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2635507725836037">26.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">HVN.AX</td>
+          <td class="px-3 py-2">Harvey Norman Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="62.3385814620803">62.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2240022009268608">22.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.064">6.40%</td>
+          <td class="px-3 py-2 text-right" data-sort="10.066668">10.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.07986700245682632">-8.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">HUB.AX</td>
+          <td class="px-3 py-2">Hub24</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="62.31422771589938">62.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.9876701821668264">98.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.86">86.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="65.1875">65.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2150240779595738">21.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SVR.AX</td>
+          <td class="px-3 py-2">Solvar</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="62.10238041282332">62.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1660220754864976">16.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0764">7.64%</td>
+          <td class="px-3 py-2 text-right" data-sort="9.812501">9.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0798787627337667">8.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CHC.AX</td>
+          <td class="px-3 py-2">Charter Hall Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="60.93756727668885">60.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.172799999776">17.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0248">2.48%</td>
+          <td class="px-3 py-2 text-right" data-sort="17.857143">17.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2353420530262038">23.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SGP.AX</td>
+          <td class="px-3 py-2">Stockland</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="60.25699714806446">60.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2254594304885484">22.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0625">6.25%</td>
+          <td class="px-3 py-2 text-right" data-sort="11.638888">11.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1821845659570983">-18.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">PPT.AX</td>
+          <td class="px-3 py-2">Perpetual</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="59.53833416629048">59.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.239082566080951">23.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0691">6.91%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.09940328759983252">9.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CGF.AX</td>
+          <td class="px-3 py-2">Challenger</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="59.49380856973446">59.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1929705866906575">19.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0365">3.65%</td>
+          <td class="px-3 py-2 text-right" data-sort="13.709678">13.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2340085823646998">23.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MGR.AX</td>
+          <td class="px-3 py-2">Mirvac Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="59.31385305928057">59.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2021017341040462">20.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0532">5.32%</td>
+          <td class="px-3 py-2 text-right" data-sort="17.3">17.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1825113678317261">-18.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CIP.AX</td>
+          <td class="px-3 py-2">Centuria Industrial REIT</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="58.85297439279969">58.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.153278184317318">15.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0554">5.54%</td>
+          <td class="px-3 py-2 text-right" data-sort="13.681818">13.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0783470633047818">7.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SCG.AX</td>
+          <td class="px-3 py-2">Scentre Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="58.78158786013743">58.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2140704593312329">21.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.048">4.80%</td>
+          <td class="px-3 py-2 text-right" data-sort="10.8529415">10.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0945592977499663">9.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SDF.AX</td>
+          <td class="px-3 py-2">Steadfast Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="58.54315725868633">58.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2038831747750897">20.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.04650000000000001">4.65%</td>
+          <td class="px-3 py-2 text-right" data-sort="13.375001">13.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2375835237786619">-23.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SFR.AX</td>
+          <td class="px-3 py-2">Sandfire Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="57.89525212373854">57.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1323094951752934">13.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="40.61905">40.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.7355035196694601">73.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">VNT.AX</td>
+          <td class="px-3 py-2">Ventia Services Group</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="57.45194552710773">57.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1684951582867784">16.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0467">4.67%</td>
+          <td class="px-3 py-2 text-right" data-sort="16.78125">16.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3200601040392057">32.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">IPH.AX</td>
+          <td class="px-3 py-2">IPH Limited</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="57.3407433196706">57.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2163591751462358">21.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1067">10.67%</td>
+          <td class="px-3 py-2 text-right" data-sort="12.714286">12.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1311930991289193">-13.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">LFS.AX</td>
+          <td class="px-3 py-2">Latitude Group Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="57.26487326702006">57.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2902531914893617">29.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1277">12.77%</td>
+          <td class="px-3 py-2 text-right" data-sort="11.75">11.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1051559496077868">-10.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MFG.AX</td>
+          <td class="px-3 py-2">Magellan Financial Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="56.96006879465546">57.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.02770040851029047">2.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0665">6.65%</td>
+          <td class="px-3 py-2 text-right" data-sort="12.135802">12.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.4047872332088776">40.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SPK.AX</td>
+          <td class="px-3 py-2">Spark New Zealand</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="56.64733060088977">56.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2535837193077339">25.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0987">9.87%</td>
+          <td class="px-3 py-2 text-right" data-sort="14.333334">14.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.0464652069385878">-4.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CCP.AX</td>
+          <td class="px-3 py-2">Credit Corp Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="56.62398219617246">56.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1101950687755077">11.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0603">6.03%</td>
+          <td class="px-3 py-2 text-right" data-sort="7.7445254">7.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1037438265224823">-10.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">RIO.AX</td>
+          <td class="px-3 py-2">Rio Tinto</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="56.18998791614923">56.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.04137253758990145">4.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0343">3.43%</td>
+          <td class="px-3 py-2 text-right" data-sort="20.210836">20.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.5558347077068753">55.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ASX.AX</td>
+          <td class="px-3 py-2">ASX Limited</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="56.18918424456524">56.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1183262112309715">11.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0341">3.41%</td>
+          <td class="px-3 py-2 text-right" data-sort="22.163568">22.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1243281194269085">-12.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TYR.AX</td>
+          <td class="px-3 py-2">Tyro Payments</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="56.13960552438287">56.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1531125849743434">15.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="15.099999">15.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.07092200440364205">7.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NAB.AX</td>
+          <td class="px-3 py-2">National Australia Bank</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="55.80236972735251">55.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1899698581607993">19.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0424">4.24%</td>
+          <td class="px-3 py-2 text-right" data-sort="18.135748">18.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1724668262208524">17.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NEC.AX</td>
+          <td class="px-3 py-2">Nine Entertainment</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="55.3979248282001">55.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2483331574823417">24.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0909">9.09%</td>
+          <td class="px-3 py-2 text-right" data-sort="13.357142">13.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.005108873520107693">0.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CDA.AX</td>
+          <td class="px-3 py-2">Codan</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="55.05816203758342">55.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1408607177183199">14.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0109">1.09%</td>
+          <td class="px-3 py-2 text-right" data-sort="50.197186">50.2</td>
+          <td class="px-3 py-2 text-right" data-sort="1.343042580884621">134.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">PRU.AX</td>
+          <td class="px-3 py-2">Perseus Mining</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="54.79845888624515">54.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01429256501561339">-1.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.018">1.80%</td>
+          <td class="px-3 py-2 text-right" data-sort="15.444444">15.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.7568683767112463">75.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CNI.AX</td>
+          <td class="px-3 py-2">Centuria Capital Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="53.56267173333755">53.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.02356666666666667">2.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0619">6.19%</td>
+          <td class="px-3 py-2 text-right" data-sort="12.0">12.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1465423835983188">14.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">PME.AX</td>
+          <td class="px-3 py-2">Pro Medicus</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="53.55708738693867">53.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.5880959957108063">58.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.46">46.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="61.758926">61.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.3648479442650875">-36.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TLS.AX</td>
+          <td class="px-3 py-2">Telstra Group</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="53.53074512225005">53.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0972540272614622">9.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.039">3.90%</td>
+          <td class="px-3 py-2 text-right" data-sort="26.9">26.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2492316502308427">24.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">RMD.AX</td>
+          <td class="px-3 py-2">ResMed</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="53.51553788603497">53.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1354562548498708">13.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0113">1.13%</td>
+          <td class="px-3 py-2 text-right" data-sort="21.9078">21.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.15859725963174">-15.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SUL.AX</td>
+          <td class="px-3 py-2">Super Retail Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="52.98721824073429">53.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.007774818171540375">0.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0525">5.25%</td>
+          <td class="px-3 py-2 text-right" data-sort="14.1744175">14.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01038082188429401">-1.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MIN.AX</td>
+          <td class="px-3 py-2">Mineral Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="52.75220880605549">52.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1370119595436549">13.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="29.391088">29.4</td>
+          <td class="px-3 py-2 text-right" data-sort="2.265676454085776">226.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">IFL.AX</td>
+          <td class="px-3 py-2">Insignia Financial</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="52.61346910694419">52.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.06574530308445309">6.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="28.17647">28.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2841822888362451">28.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TNE.AX</td>
+          <td class="px-3 py-2">TechnologyOne</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="52.5674559555111">52.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.9895523083803686">99.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.91">91.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="69.26191">69.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0178122539978971">1.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BXB.AX</td>
+          <td class="px-3 py-2">Brambles</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="52.47836486860042">52.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1390775648605306">13.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0294">2.94%</td>
+          <td class="px-3 py-2 text-right" data-sort="23.425533">23.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1404201354774814">14.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">AZJ.AX</td>
+          <td class="px-3 py-2">Aurizon Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="52.22270137173543">52.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.06536443587219481">6.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0455">4.55%</td>
+          <td class="px-3 py-2 text-right" data-sort="23.22222">23.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.4233158727631747">42.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">JBH.AX</td>
+          <td class="px-3 py-2">JB Hi-Fi</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="52.03718270050369">52.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.112171394107233">11.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0413">4.13%</td>
+          <td class="px-3 py-2 text-right" data-sort="17.31818">17.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2182190739878562">-21.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">DDR.AX</td>
+          <td class="px-3 py-2">Dicker Data</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="51.83717269057939">51.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1288610116120423">12.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0513">5.13%</td>
+          <td class="px-3 py-2 text-right" data-sort="19.06383">19.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1215849911305138">12.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BSL.AX</td>
+          <td class="px-3 py-2">BlueScope Steel</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="51.82443425002354">51.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1618741348924221">16.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0322">3.22%</td>
+          <td class="px-3 py-2 text-right" data-sort="51.684208">51.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3752771051510371">37.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">QAN.AX</td>
+          <td class="px-3 py-2">Qantas Airways</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="51.785886531434">51.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1107868804128298">11.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0471">4.71%</td>
+          <td class="px-3 py-2 text-right" data-sort="7.9339623">7.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.02155979366598748">2.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SHL.AX</td>
+          <td class="px-3 py-2">Sonic Healthcare</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="51.54012727721759">51.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1683995577744636">16.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05309999999999999">5.31%</td>
+          <td class="px-3 py-2 text-right" data-sort="18.315315">18.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1818129899275438">-18.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NHF.AX</td>
+          <td class="px-3 py-2">nib Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="51.44351555793754">51.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05943589743589744">5.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.04">4.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="16.25">16.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01674027927009847">-1.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">QUB.AX</td>
+          <td class="px-3 py-2">Qube Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="50.95765113455762">51.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1539284290440261">15.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.022">2.20%</td>
+          <td class="px-3 py-2 text-right" data-sort="41.916668">41.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3052652041199344">30.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NWS.AX</td>
+          <td class="px-3 py-2">News Corporation</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="50.89574689028169">50.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6240123663511582">62.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.69">69.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="39.435184">39.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1191318590543186">-11.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NST.AX</td>
+          <td class="px-3 py-2">Northern Star Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="50.79836345969408">50.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1698899341040759">17.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0229">2.29%</td>
+          <td class="px-3 py-2 text-right" data-sort="18.525425">18.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0720337560162514">7.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WBC.AX</td>
+          <td class="px-3 py-2">Westpac Banking Corporation</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="50.51765277920665">50.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.0003270514932040558">-0.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0395">3.95%</td>
+          <td class="px-3 py-2 text-right" data-sort="19.603014">19.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2614769880461605">26.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">APA.AX</td>
+          <td class="px-3 py-2">APA Group</td>
+          <td class="px-3 py-2 text-slate-500">Utilities</td>
+          <td class="px-3 py-2 text-right" data-sort="50.44001513518202">50.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1827288535674671">18.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0568">5.68%</td>
+          <td class="px-3 py-2 text-right" data-sort="84.333336">84.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3037833296515058">30.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MGH.AX</td>
+          <td class="px-3 py-2">Maas Group Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="50.30005434334561">50.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1583541575824805">15.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0149">1.49%</td>
+          <td class="px-3 py-2 text-right" data-sort="21.318182">21.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2219493980786273">22.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">INA.AX</td>
+          <td class="px-3 py-2">Ingenia Communities Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="50.14274928049468">50.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.122274510993368">12.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0225">2.25%</td>
+          <td class="px-3 py-2 text-right" data-sort="12.363636">12.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.237861596610826">-23.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">RMS.AX</td>
+          <td class="px-3 py-2">Ramelius Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="50.13518616581961">50.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01889784946236559">-1.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0215">2.15%</td>
+          <td class="px-3 py-2 text-right" data-sort="14.88">14.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.5261492303089104">52.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">AUB.AX</td>
+          <td class="px-3 py-2">AUB Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="50.01926242759171">50.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1875717852704198">18.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0362">3.62%</td>
+          <td class="px-3 py-2 text-right" data-sort="15.937888">15.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1641564763283506">-16.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">DOW.AX</td>
+          <td class="px-3 py-2">Downer EDI</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="49.97563509807213">50.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.172142780062341">17.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0361">3.61%</td>
+          <td class="px-3 py-2 text-right" data-sort="31.166668">31.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3785342594394117">37.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">DTL.AX</td>
+          <td class="px-3 py-2">Data#3</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="49.89151044214245">49.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1736750296149789">17.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0337">3.37%</td>
+          <td class="px-3 py-2 text-right" data-sort="25.031252">25.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1269641985232761">12.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MPL.AX</td>
+          <td class="px-3 py-2">Medibank Private</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="49.82492364221302">49.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.02602043065787951">-2.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0357">3.57%</td>
+          <td class="px-3 py-2 text-right" data-sort="27.352942">27.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05870498220393294">5.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WDS.AX</td>
+          <td class="px-3 py-2">Woodside Energy Group</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="49.77488694441468">49.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.001058783749404511">0.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0507">5.07%</td>
+          <td class="px-3 py-2 text-right" data-sort="16.469698">16.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6976638770828913">69.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ANN.AX</td>
+          <td class="px-3 py-2">Ansell</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="49.63840588543935">49.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1743899843261589">17.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0301">3.01%</td>
+          <td class="px-3 py-2 text-right" data-sort="20.584616">20.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.08709599127564993">-8.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">KAR.AX</td>
+          <td class="px-3 py-2">Karoon Energy</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="49.51029706382304">49.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.004060711993781784">-0.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0246">2.46%</td>
+          <td class="px-3 py-2 text-right" data-sort="9.73913">9.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6269855164771567">62.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ANZ.AX</td>
+          <td class="px-3 py-2">ANZ Group Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="49.5017972887774">49.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.007150593610042992">-0.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0458">4.58%</td>
+          <td class="px-3 py-2 text-right" data-sort="18.484694">18.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3000216271560427">30.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ZIP.AX</td>
+          <td class="px-3 py-2">Zip Co</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="49.15318212483291">49.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.136">13.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="31.25">31.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.4970060264937299">49.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">LYC.AX</td>
+          <td class="px-3 py-2">Lynas Rare Earths</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="48.70809646057905">48.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1221953896816685">12.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="227.75">227.8</td>
+          <td class="px-3 py-2 text-right" data-sort="1.128504488340942">112.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WES.AX</td>
+          <td class="px-3 py-2">Wesfarmers</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="48.44428588733626">48.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.08922740439500833">8.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0287">2.87%</td>
+          <td class="px-3 py-2 text-right" data-sort="27.48148">27.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01006249745531529">-1.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SBM.AX</td>
+          <td class="px-3 py-2">St Barbara</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="48.36899583657073">48.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1665648894773035">16.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="1.381818026156468">138.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">EDV.AX</td>
+          <td class="px-3 py-2">Endeavour Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="48.34483086068732">48.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.001100002399999814">-0.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0489">4.89%</td>
+          <td class="px-3 py-2 text-right" data-sort="16.666668">16.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.08741664942629346">-8.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BEN.AX</td>
+          <td class="px-3 py-2">Bendigo and Adelaide Bank</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="48.23151258555597">48.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1059963267458505">10.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0566">5.66%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.007634932519814841">0.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TLC.AX</td>
+          <td class="px-3 py-2">Lottery Corporation</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="48.16766493969892">48.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.01069987777120161">1.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0289">2.89%</td>
+          <td class="px-3 py-2 text-right" data-sort="34.562504">34.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1277777502249526">12.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MQG.AX</td>
+          <td class="px-3 py-2">Macquarie Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="48.02254482059084">48.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.073868165011477">7.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0343">3.43%</td>
+          <td class="px-3 py-2 text-right" data-sort="23.92173">23.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2440347395104685">24.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">APE.AX</td>
+          <td class="px-3 py-2">Eagers Automotive</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="47.95270199494849">48.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.170301633834577">17.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0316">3.16%</td>
+          <td class="px-3 py-2 text-right" data-sort="26.735632">26.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2989327289014243">29.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">IAG.AX</td>
+          <td class="px-3 py-2">Insurance Australia Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="47.34161874397675">47.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.005432043321327157">-0.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0428">4.28%</td>
+          <td class="px-3 py-2 text-right" data-sort="15.73913">15.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.06641615953031632">-6.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">IGO.AX</td>
+          <td class="px-3 py-2">IGO Limited</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="47.20228821039866">47.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.03023252360322104">-3.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.9153005640683798">91.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BPT.AX</td>
+          <td class="px-3 py-2">Beach Energy</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="47.12352213056376">47.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0474">4.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0574">5.74%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1145355153646239">11.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ORI.AX</td>
+          <td class="px-3 py-2">Orica</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="47.02896716199318">47.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1546756840798031">15.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0269">2.69%</td>
+          <td class="px-3 py-2 text-right" data-sort="64.303024">64.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3585619702595897">35.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SGM.AX</td>
+          <td class="px-3 py-2">Sims</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="46.81716472678849">46.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05710293414487967">5.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0132">1.32%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.4758029521730078">47.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">FLT.AX</td>
+          <td class="px-3 py-2">Flight Centre Travel Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="46.81384558450847">46.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.06261823899371069">6.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0387">3.87%</td>
+          <td class="px-3 py-2 text-right" data-sort="21.2">21.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1285622621852566">-12.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">S32.AX</td>
+          <td class="px-3 py-2">South32</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="46.65723425065369">46.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1557888873456792">15.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0219">2.19%</td>
+          <td class="px-3 py-2 text-right" data-sort="36.000004">36.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6381509178020341">63.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">EBO.AX</td>
+          <td class="px-3 py-2">EBOS Group</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="46.6179131277628">46.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1608128897546003">16.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05230000000000001">5.23%</td>
+          <td class="px-3 py-2 text-right" data-sort="16.94175">16.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.4662776001975084">-46.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WHC.AX</td>
+          <td class="px-3 py-2">Whitehaven Coal</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="46.56024112300401">46.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.02008915171527641">-2.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0101">1.01%</td>
+          <td class="px-3 py-2 text-right" data-sort="10.037974">10.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.6583791329057487">65.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">IRE.AX</td>
+          <td class="px-3 py-2">Iress</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="46.44507946435959">46.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01530349049422815">-1.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0349">3.49%</td>
+          <td class="px-3 py-2 text-right" data-sort="16.780489">16.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1095615207604629">-11.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">PLS.AX</td>
+          <td class="px-3 py-2">Pilbara Minerals</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="46.43898278909093">46.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1378890812561427">13.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="2.979310200812563">297.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">LTR.AX</td>
+          <td class="px-3 py-2">Liontown Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="46.42906991951556">46.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1615290152847541">16.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="3.148148000976192">314.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CBA.AX</td>
+          <td class="px-3 py-2">Commonwealth Bank of Australia</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="46.2977503342579">46.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.06819471644973484">6.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0284">2.84%</td>
+          <td class="px-3 py-2 text-right" data-sort="28.098228">28.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1025688863486127">10.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BRG.AX</td>
+          <td class="px-3 py-2">Breville Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="46.16113784110883">46.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.03456139624694192">3.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0124">1.24%</td>
+          <td class="px-3 py-2 text-right" data-sort="32.978493">33.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1229801960532899">12.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">LOV.AX</td>
+          <td class="px-3 py-2">Lovisa Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="46.15623806383745">46.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1140263046320757">11.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0337">3.37%</td>
+          <td class="px-3 py-2 text-right" data-sort="30.012657">30.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.01494029865247715">1.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">RHC.AX</td>
+          <td class="px-3 py-2">Ramsay Health Care</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="46.03883975552679">46.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1040539381064321">10.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0213">2.13%</td>
+          <td class="px-3 py-2 text-right" data-sort="31.738096">31.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2250362872602474">22.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CPU.AX</td>
+          <td class="px-3 py-2">Computershare</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="45.77479201885492">45.8</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0337270094215502">3.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0366">3.66%</td>
+          <td class="px-3 py-2 text-right" data-sort="21.013987">21.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2163816401515544">-21.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NWL.AX</td>
+          <td class="px-3 py-2">Netwealth Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="45.59346786726688">45.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1421678273115833">14.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0174">1.74%</td>
+          <td class="px-3 py-2 text-right" data-sort="104.86957">104.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.0790485186978066">-7.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SLC.AX</td>
+          <td class="px-3 py-2">Superloop</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="45.3717022438702">45.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1243988268504743">12.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="113.66667">113.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.4267782159647269">42.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">XRO.AX</td>
+          <td class="px-3 py-2">Xero</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="45.32369740358155">45.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1291399824877935">12.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="54.7047">54.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.4890295890601219">-48.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SIG.AX</td>
+          <td class="px-3 py-2">Sigma Healthcare</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="45.19558631758387">45.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1432605734767025">14.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0143">1.43%</td>
+          <td class="px-3 py-2 text-right" data-sort="55.8">55.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.06235460601028198">-6.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ALX.AX</td>
+          <td class="px-3 py-2">Atlas Arteria</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="45.05954491716068">45.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.03318522160766788">3.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0924">9.24%</td>
+          <td class="px-3 py-2 text-right" data-sort="24.055553">24.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.0675588144327991">-6.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NUF.AX</td>
+          <td class="px-3 py-2">Nufarm</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="45.05357694656465">45.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.02755555687417289">2.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.398457621834189">-39.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">AMC.AX</td>
+          <td class="px-3 py-2">Amcor</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="44.95547487874261">45.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2066034725646045">20.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.071">7.10%</td>
+          <td class="px-3 py-2 text-right" data-sort="29.521505">29.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2229036312261043">-22.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BGA.AX</td>
+          <td class="px-3 py-2">Bega Cheese</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="44.61392409678619">44.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1464553662256326">14.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0239">2.39%</td>
+          <td class="px-3 py-2 text-right" data-sort="195.66667">195.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1048915687305796">10.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">COL.AX</td>
+          <td class="px-3 py-2">Coles Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="44.24639127570592">44.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.03182124931604946">-3.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0317">3.17%</td>
+          <td class="px-3 py-2 text-right" data-sort="30.342106">30.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1147699108190046">11.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ALL.AX</td>
+          <td class="px-3 py-2">Aristocrat Leisure</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="44.07044942682677">44.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.09646193407522342">9.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0194">1.94%</td>
+          <td class="px-3 py-2 text-right" data-sort="25.343916">25.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2524433847834368">-25.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ARB.AX</td>
+          <td class="px-3 py-2">ARB Corporation</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="43.86252580809925">43.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01807615403827414">-1.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0348">3.48%</td>
+          <td class="px-3 py-2 text-right" data-sort="18.433964">18.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.3459535850335393">-34.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">PXA.AX</td>
+          <td class="px-3 py-2">PEXA Group</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="43.02947614357888">43.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0854636224572635">8.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.09857900835828604">9.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CAR.AX</td>
+          <td class="px-3 py-2">CAR Group</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="42.94952220379109">42.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1504554721263798">15.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.033">3.30%</td>
+          <td class="px-3 py-2 text-right" data-sort="33.064106">33.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1974275206617456">-19.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ORA.AX</td>
+          <td class="px-3 py-2">Orora</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="42.65352297055397">42.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.02528772176054187">2.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0702">7.02%</td>
+          <td class="px-3 py-2 text-right" data-sort="14.249999">14.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1682364186400795">-16.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SEK.AX</td>
+          <td class="px-3 py-2">SEEK</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="42.50633061770971">42.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1770579137590499">17.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0334">3.34%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2890307938019081">-28.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ILU.AX</td>
+          <td class="px-3 py-2">Iluka Resources</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="42.33882280215101">42.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.61">61.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.66">66.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.9104394783641085">91.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TCL.AX</td>
+          <td class="px-3 py-2">Transurban Group</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="42.019857751393">42.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1062956836085089">10.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0489">4.89%</td>
+          <td class="px-3 py-2 text-right" data-sort="92.666664">92.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.03609122108679919">3.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">EML.AX</td>
+          <td class="px-3 py-2">EML Payments</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="42.00708860843365">42.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.02319230527969812">-2.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.5760869797607897">-57.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WOR.AX</td>
+          <td class="px-3 py-2">Worley</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="41.91567934997384">41.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01012222222222223">-1.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0421">4.21%</td>
+          <td class="px-3 py-2 text-right" data-sort="18.0">18.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.01321901611615095">1.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SXL.AX</td>
+          <td class="px-3 py-2">Southern Cross Media Group</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="41.59315987713212">41.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2252877192982456">22.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0702">7.02%</td>
+          <td class="px-3 py-2 text-right" data-sort="14.25">14.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1193224787497582">-11.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">VEA.AX</td>
+          <td class="px-3 py-2">Viva Energy Group</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="41.03682529867316">41.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.001435411929780181">0.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0328">3.28%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.5037455720805459">50.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">AIA.AX</td>
+          <td class="px-3 py-2">Auckland International Airport</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="41.01598612826176">41.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04194115810645814">-4.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0172">1.72%</td>
+          <td class="px-3 py-2 text-right" data-sort="33.649998">33.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.0887917541715193">-8.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ELD.AX</td>
+          <td class="px-3 py-2">Elders</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="40.99206367529601">41.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01263265223656806">-1.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.049">4.90%</td>
+          <td class="px-3 py-2 text-right" data-sort="27.222221">27.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2713993629998495">27.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ORG.AX</td>
+          <td class="px-3 py-2">Origin Energy</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="40.97412863674931">41.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.009898984340745525">-1.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.047">4.70%</td>
+          <td class="px-3 py-2 text-right" data-sort="21.64407">21.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.281718775904179">28.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">STO.AX</td>
+          <td class="px-3 py-2">Santos</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="40.94376573784996">40.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01273530181299549">-1.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.04480000000000001">4.48%</td>
+          <td class="px-3 py-2 text-right" data-sort="22.257143">22.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.3584246318940814">35.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">GNC.AX</td>
+          <td class="px-3 py-2">GrainCorp</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="40.62116482855271">40.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05686250101074226">5.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0438">4.38%</td>
+          <td class="px-3 py-2 text-right" data-sort="35.555553">35.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.01856874176553847">1.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">LLC.AX</td>
+          <td class="px-3 py-2">Lendlease Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="40.35493871173724">40.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05809999999999999">5.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0681">6.81%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2996413596332995">-30.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WTC.AX</td>
+          <td class="px-3 py-2">WiseTech Global</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="40.04823574753422">40.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.4716507656825089">47.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.48">48.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="65.352936">65.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.4851040701854755">-48.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">FBU.AX</td>
+          <td class="px-3 py-2">Fletcher Building</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="40.01207119240409">40.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.00789999867742006">0.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1986062564360558">-19.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">GMG.AX</td>
+          <td class="px-3 py-2">Goodman Group</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="39.87130170585583">39.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.05528682174285593">-5.5%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0103">1.03%</td>
+          <td class="px-3 py-2 text-right" data-sort="34.690475">34.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.01548706050541337">1.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">COH.AX</td>
+          <td class="px-3 py-2">Cochlear</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="39.77074922350543">39.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.008681352990519656">-0.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0442">4.42%</td>
+          <td class="px-3 py-2 text-right" data-sort="18.437498">18.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.6300426383470261">-63.0%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">PNI.AX</td>
+          <td class="px-3 py-2">Pinnacle Investment Management</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="39.22574496662931">39.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1476328742268397">14.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0351">3.51%</td>
+          <td class="px-3 py-2 text-right" data-sort="28.517857">28.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.064848856939138">-6.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BAP.AX</td>
+          <td class="px-3 py-2">Bapcor</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="39.13000547172221">39.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1164964285883986">11.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1423">14.23%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.8843904878318173">-88.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NAN.AX</td>
+          <td class="px-3 py-2">Nanosonics</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="39.05039637997311">39.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.00179279276722669">0.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="52.857143">52.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1868132104218363">-18.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">RWC.AX</td>
+          <td class="px-3 py-2">Reliance Worldwide Corporation</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="39.03734587368863">39.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.02869180076323547">-2.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0218">2.18%</td>
+          <td class="px-3 py-2 text-right" data-sort="16.944443">16.9</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.248018650950917">-24.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">DMP.AX</td>
+          <td class="px-3 py-2">Domino&#39;s Pizza Enterprises</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="39.00868815659585">39.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.03637269329945882">-3.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.026">2.60%</td>
+          <td class="px-3 py-2 text-right" data-sort="28.365082">28.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2891810773552969">-28.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TAH.AX</td>
+          <td class="px-3 py-2">Tabcorp Holdings</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="38.99873111694443">39.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04849549590130667">-4.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.027">2.70%</td>
+          <td class="px-3 py-2 text-right" data-sort="111.00001">111.0</td>
+          <td class="px-3 py-2 text-right" data-sort="1.049347759581122">104.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">BOQ.AX</td>
+          <td class="px-3 py-2">Bank of Queensland</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="38.57449536526285">38.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.008872454249435197">-0.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0599">5.99%</td>
+          <td class="px-3 py-2 text-right" data-sort="44.53333">44.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.05074733198811021">-5.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ING.AX</td>
+          <td class="px-3 py-2">Inghams Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="38.37710050138642">38.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.001721212121212123">-0.2%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0404">4.04%</td>
+          <td class="px-3 py-2 text-right" data-sort="13.2">13.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.3942720653359073">-39.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">AGL.AX</td>
+          <td class="px-3 py-2">AGL Energy</td>
+          <td class="px-3 py-2 text-slate-500">Utilities</td>
+          <td class="px-3 py-2 text-right" data-sort="38.34934632193436">38.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.01979559410382926">2.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05139999999999999">5.14%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04608721152118722">-4.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TWE.AX</td>
+          <td class="px-3 py-2">Treasury Wine Estates</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="38.24079906187782">38.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.04622444795799358">4.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.08810000000000001">8.81%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.4776591127141725">-47.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SUN.AX</td>
+          <td class="px-3 py-2">Suncorp Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="38.22440986207452">38.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.03575982324747806">-3.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0199">1.99%</td>
+          <td class="px-3 py-2 text-right" data-sort="20.542168">20.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1035164508072365">-10.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CNU.AX</td>
+          <td class="px-3 py-2">Chorus</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="38.21364378174749">38.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0385826140567201">3.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0535">5.35%</td>
+          <td class="px-3 py-2 text-right" data-sort="162.2">162.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.152494275442298">15.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CKF.AX</td>
+          <td class="px-3 py-2">Collins Foods</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="38.1884533219642">38.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1127424243452709">11.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0315">3.15%</td>
+          <td class="px-3 py-2 text-right" data-sort="117.85714">117.9</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0267745275704756">2.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">REH.AX</td>
+          <td class="px-3 py-2">Reece</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="38.05685190764187">38.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.05132987563395033">-5.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0126">1.26%</td>
+          <td class="px-3 py-2 text-right" data-sort="31.113636">31.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1151605642456696">-11.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">A2M.AX</td>
+          <td class="px-3 py-2">The a2 Milk Company</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="37.66283782772643">37.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04040810810810811">-4.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0227">2.27%</td>
+          <td class="px-3 py-2 text-right" data-sort="29.6">29.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.0953215322910389">-9.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">QOR.AX</td>
+          <td class="px-3 py-2">Qoria</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="37.53890445509558">37.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.15">15.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2777778329672614">-27.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MP1.AX</td>
+          <td class="px-3 py-2">Megaport</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="37.46696738445684">37.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1267514058114751">12.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1683816003476406">-16.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">NHC.AX</td>
+          <td class="px-3 py-2">New Hope Corporation</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="37.41153186723766">37.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.0256144453252325">-2.6%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0375">3.75%</td>
+          <td class="px-3 py-2 text-right" data-sort="29.611109">29.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.5271396472015617">52.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TPG.AX</td>
+          <td class="px-3 py-2">TPG Telecom</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="37.33128584648624">37.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05295622111852025">5.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0415">4.15%</td>
+          <td class="px-3 py-2 text-right" data-sort="144.66667">144.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.09067621517717628">-9.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">HLS.AX</td>
+          <td class="px-3 py-2">Healius</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="37.20974433915583">37.2</td>
+          <td class="px-3 py-2 text-right" data-sort="0.03060377433492349">3.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.482697442902504">-48.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">WOW.AX</td>
+          <td class="px-3 py-2">Woolworths Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Staples</td>
+          <td class="px-3 py-2 text-right" data-sort="37.17103360583391">37.2</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04973391391027116">-5.0%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0238">2.38%</td>
+          <td class="px-3 py-2 text-right" data-sort="77.32653">77.3</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2277160535906015">22.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SGR.AX</td>
+          <td class="px-3 py-2">Star Entertainment Group</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="37.14301061631274">37.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.041">-4.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.09523814930126684">9.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">SMR.AX</td>
+          <td class="px-3 py-2">Stanmore Resources</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="37.14260321890529">37.1</td>
+          <td class="px-3 py-2 text-right" data-sort="0.007276018538488735">0.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0565">5.65%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2378323179660122">23.8%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">HMC.AX</td>
+          <td class="px-3 py-2">Home Consortium</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="36.5912606040265">36.6</td>
+          <td class="px-3 py-2 text-right" data-sort="0.02815625142482816">2.8%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.05">5.00%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.4673507734166693">-46.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">ALD.AX</td>
+          <td class="px-3 py-2">Ampol</td>
+          <td class="px-3 py-2 text-slate-500">Energy</td>
+          <td class="px-3 py-2 text-right" data-sort="36.39164233496098">36.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.02378304116010053">-2.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0351">3.51%</td>
+          <td class="px-3 py-2 text-right" data-sort="97.71429">97.7</td>
+          <td class="px-3 py-2 text-right" data-sort="0.561326380966197">56.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CWY.AX</td>
+          <td class="px-3 py-2">Cleanaway Waste Management</td>
+          <td class="px-3 py-2 text-slate-500">Industrials</td>
+          <td class="px-3 py-2 text-right" data-sort="35.74881043847826">35.7</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04131623931623932">-4.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.028">2.80%</td>
+          <td class="px-3 py-2 text-right" data-sort="46.8">46.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.08377576202725823">-8.4%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">JHX.AX</td>
+          <td class="px-3 py-2">James Hardie Industries</td>
+          <td class="px-3 py-2 text-slate-500">Materials</td>
+          <td class="px-3 py-2 text-right" data-sort="35.58899239740721">35.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.07449481832482079">-7.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="90.823524">90.8</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.1615531461980841">-16.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">REA.AX</td>
+          <td class="px-3 py-2">REA Group</td>
+          <td class="px-3 py-2 text-slate-500">Communication Services</td>
+          <td class="px-3 py-2 text-right" data-sort="35.34546897481967">35.3</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.05280325891824172">-5.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0145">1.45%</td>
+          <td class="px-3 py-2 text-right" data-sort="39.380184">39.4</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.2867563242443584">-28.7%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CTD.AX</td>
+          <td class="px-3 py-2">Corporate Travel Management</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="34.48795338072495">34.5</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.05260989448542836">-5.3%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0137">1.37%</td>
+          <td class="px-3 py-2 text-right" data-sort="36.522728">36.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.2907630474713039">29.1%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">AD8.AX</td>
+          <td class="px-3 py-2">Audinate Group</td>
+          <td class="px-3 py-2 text-slate-500">Information Technology</td>
+          <td class="px-3 py-2 text-right" data-sort="34.43865497495339">34.4</td>
+          <td class="px-3 py-2 text-right" data-sort="0.121">12.1%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.5728314503989083">-57.3%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">CSL.AX</td>
+          <td class="px-3 py-2">CSL Limited</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="33.56876206393986">33.6</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.01404615275462719">-1.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0328">3.28%</td>
+          <td class="px-3 py-2 text-right" data-sort="15.081206">15.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.4547231358335045">-45.5%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">TLX.AX</td>
+          <td class="px-3 py-2">Telix Pharmaceuticals</td>
+          <td class="px-3 py-2 text-slate-500">Health Care</td>
+          <td class="px-3 py-2 text-right" data-sort="32.02218246679243">32.0</td>
+          <td class="px-3 py-2 text-right" data-sort="0.1239234900605442">12.4%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.4415292560682711">-44.2%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">LIC.AX</td>
+          <td class="px-3 py-2">Lifestyle Communities</td>
+          <td class="px-3 py-2 text-slate-500">Real Estate</td>
+          <td class="px-3 py-2 text-right" data-sort="28.99887369210029">29.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04723160042895146">-4.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="0">—</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.3556485583822917">-35.6%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">MAF.AX</td>
+          <td class="px-3 py-2">MA Financial Group</td>
+          <td class="px-3 py-2 text-slate-500">Financials</td>
+          <td class="px-3 py-2 text-right" data-sort="27.12316462613997">27.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.04653318777292577">-4.7%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0291">2.91%</td>
+          <td class="px-3 py-2 text-right" data-sort="114.5">114.5</td>
+          <td class="px-3 py-2 text-right" data-sort="0.09871228728581016">9.9%</td>
+        </tr>
+        
+        <tr class="border-t border-slate-100 hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono">IEL.AX</td>
+          <td class="px-3 py-2">IDP Education</td>
+          <td class="px-3 py-2 text-slate-500">Consumer Discretionary</td>
+          <td class="px-3 py-2 text-right" data-sort="19.10712487603038">19.1</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.05862649572649573">-5.9%</td>
+          <td class="px-3 py-2 text-right" data-sort="0.0171">1.71%</td>
+          <td class="px-3 py-2 text-right" data-sort="117.0">117.0</td>
+          <td class="px-3 py-2 text-right" data-sort="-0.580342531776738">-58.0%</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</section>
+
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-6 py-8 text-xs text-slate-400 border-t border-slate-200 mt-12">
+    <p>Generated 2026-04-25 16:23 &middot; Data from Yahoo Finance.</p>
+    <p class="mt-1">This is a personal research tool. <strong>Not financial advice.</strong> Past performance does not predict future returns.</p>
+  </footer>
+
+  <script>
+    // Sortable tables — click headers to sort
+    document.querySelectorAll('table.sortable').forEach(table => {
+      const tbody = table.tBodies[0];
+      table.querySelectorAll('th').forEach((th, i) => {
+        th.addEventListener('click', () => {
+          const rows = Array.from(tbody.rows);
+          const asc = !th.classList.contains('sorted-asc');
+          table.querySelectorAll('th').forEach(h => h.classList.remove('sorted-asc','sorted-desc'));
+          th.classList.add(asc ? 'sorted-asc' : 'sorted-desc');
+          rows.sort((a, b) => {
+            const av = a.cells[i].dataset.sort ?? a.cells[i].innerText.trim();
+            const bv = b.cells[i].dataset.sort ?? b.cells[i].innerText.trim();
+            const an = parseFloat(av), bn = parseFloat(bv);
+            const isNum = !isNaN(an) && !isNaN(bn);
+            if (isNum) return asc ? an - bn : bn - an;
+            return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+          });
+          rows.forEach(r => tbody.appendChild(r));
+        });
+      });
+    });
+  </script>
+</body>
+</html>

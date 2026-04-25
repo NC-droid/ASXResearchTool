@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ASX Portfolio{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .num-pos { color: #16a34a; }
+    .num-neg { color: #dc2626; }
+    .pillar-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%); position: relative; }
+    .pillar-bar::after { content: ""; position: absolute; top: -2px; width: 2px; height: 10px; background: #1f2937; left: var(--score, 50%); }
+    .sortable th { cursor: pointer; user-select: none; }
+    .sortable th:hover { background: #f3f4f6; }
+    .sortable th.sorted-asc::after { content: " \2191"; }
+    .sortable th.sorted-desc::after { content: " \2193"; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-md bg-indigo-600 text-white grid place-items-center font-bold">A</div>
+        <div>
+          <div class="font-semibold text-slate-900">ASX Portfolio</div>
+          <div class="text-xs text-slate-500">Daily fundamental screener &middot; private research</div>
+        </div>
+      </div>
+      <nav class="flex gap-1 text-sm">
+        <a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='picks' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Today's Picks</a>
+        <a href="portfolio.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='portfolio' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Portfolio</a>
+        <a href="archive.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='archive' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Archive</a>
+        <a href="backtest.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='backtest' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Backtest</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="max-w-6xl mx-auto px-6 py-8 text-xs text-slate-400 border-t border-slate-200 mt-12">
+    <p>Generated {{ generated_at }} &middot; Data from Yahoo Finance.</p>
+    <p class="mt-1">This is a personal research tool. <strong>Not financial advice.</strong> Past performance does not predict future returns.</p>
+  </footer>
+
+  <script>
+    // Sortable tables — click headers to sort
+    document.querySelectorAll('table.sortable').forEach(table => {
+      const tbody = table.tBodies[0];
+      table.querySelectorAll('th').forEach((th, i) => {
+        th.addEventListener('click', () => {
+          const rows = Array.from(tbody.rows);
+          const asc = !th.classList.contains('sorted-asc');
+          table.querySelectorAll('th').forEach(h => h.classList.remove('sorted-asc','sorted-desc'));
+          th.classList.add(asc ? 'sorted-asc' : 'sorted-desc');
+          rows.sort((a, b) => {
+            const av = a.cells[i].dataset.sort ?? a.cells[i].innerText.trim();
+            const bv = b.cells[i].dataset.sort ?? b.cells[i].innerText.trim();
+            const an = parseFloat(av), bn = parseFloat(bv);
+            const isNum = !isNaN(an) && !isNaN(bn);
+            if (isNum) return asc ? an - bn : bn - an;
+            return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+          });
+          rows.forEach(r => tbody.appendChild(r));
+        });
+      });
+    });
+  </script>
+</body>
+</html>
