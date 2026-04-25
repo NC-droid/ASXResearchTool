@@ -48,24 +48,21 @@ jobs:
       
 
   deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+  runs-on: ubuntu-latest
+  needs: build
 
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: python-app
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_AACCD39A10854B9392A6C528384619D8 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5E174E2993A14A328872E74BF83FC60E }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DB1D564249FD45AFAEA4A2B7F969B39E }}
+  steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: python-app
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'ETFpicker'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: .
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
