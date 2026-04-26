@@ -123,6 +123,59 @@ def _sharpe(annualised_return: float, vol: float, rf: float = 0.03) -> float:
     return (annualised_return - rf) / vol
 
 
+def _normalise_yield(y: float) -> float:
+    """Yahoo sometimes returns yield as a percentage (e.g. 4.5 for 4.5%) and
+    sometimes as a decimal (0.045). Anything > 1 is treated as a percent."""
+    if math.isnan(y):
+        return y
+    return y / 100.0 if y > 1 else y
+
+
+def _resolve_yield(ticker_obj, info: dict, price: float) -> float:
+    """Get the trailing dividend yield for an ETF using a chain of fallbacks.
+
+    Yahoo Finance's primary ``yield`` field is unreliable for ASX-listed ETFs —
+    it's frequently None even when the fund clearly pays distributions
+    (e.g. VEU.AX). This helper tries the primary field, two alternates, and
+    finally falls back to summing the last 12 months of actual distributions
+    from the ticker's dividend history. As a last resort we return NaN so
+    the caller can decide how to display "unknown".
+
+    Returns the yield as a decimal (0.04 means 4.00% p.a.), or NaN if
+    nothing usable is available.
+    """
+    # 1) Primary fund yield
+    y = _safe(info, "yield", float("nan"))
+    if not math.isnan(y) and y > 0:
+        return _normalise_yield(y)
+
+    # 2) Trailing annual yield (alternate field name)
+    y = _safe(info, "trailingAnnualDividendYield", float("nan"))
+    if not math.isnan(y) and y > 0:
+        return _normalise_yield(y)
+
+    # 3) Trailing annual rate (dollars per share) divided by price
+    rate = _safe(info, "trailingAnnualDividendRate", float("nan"))
+    if not math.isnan(rate) and rate > 0 and not math.isnan(price) and price > 0:
+        return rate / price
+
+    # 4) Last resort: compute from actual dividend history (most reliable)
+    try:
+        divs = ticker_obj.dividends
+    except Exception:  # noqa: BLE001
+        divs = None
+    if divs is not None and not divs.empty:
+        try:
+            cutoff = pd.Timestamp.now(tz=divs.index.tz) - pd.Timedelta(days=365)
+            recent_total = float(divs[divs.index >= cutoff].sum())
+            if recent_total > 0 and not math.isnan(price) and price > 0:
+                return recent_total / price
+        except Exception as exc:  # noqa: BLE001
+            log.debug("Dividend history fallback failed: %s", exc)
+
+    return float("nan")
+
+
 def fetch_one(row: pd.Series, period: str = DEFAULT_HISTORY_PERIOD) -> ETFData:
     try:
         import yfinance as yf
