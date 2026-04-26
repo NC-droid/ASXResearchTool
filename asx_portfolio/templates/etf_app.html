@@ -4,85 +4,307 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ETF Screener — ASX Research Tool</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-    .num-pos { color: #16a34a; }
-    .num-neg { color: #dc2626; }
-    .pillar-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg,#ef4444,#f59e0b 50%,#22c55e); position: relative; }
-    .pillar-bar::after { content: ""; position: absolute; top: -2px; width: 2px; height: 10px; background: #1f2937; left: var(--score, 50%); }
-    input[type=range] { accent-color: #4f46e5; }
-    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 9999px; background: #eef2ff; color: #3730a3; font-size: 12px; font-weight: 500; }
-    .stale { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-    .sortable th { cursor: pointer; user-select: none; }
-    .sortable th:hover { background: #f3f4f6; }
-    .sortable th.sorted-asc::after { content: " \2191"; }
-    .sortable th.sorted-desc::after { content: " \2193"; }
-  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <style id="design-system">
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    /* ── Reset + tokens ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:#0c0f1a;--bg2:#111624;--card:#161d2e;--card2:#1c2540;
-      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
-      --gold:#f0b429;--gold2:#fcd34d;--gold-dim:rgba(240,180,41,0.1);--gold-glow:rgba(240,180,41,0.22);
-      --teal:#2dd4bf;--teal-dim:rgba(45,212,191,0.1);
-      --violet:#a78bfa;--violet-dim:rgba(167,139,250,0.1);
-      --red:#f87171;--green:#4ade80;
-      --text:#dde2ef;--muted:#7d8899;--dim:#3a4255;
+      --bg:        #0c0f1a;
+      --bg2:       #111624;
+      --card:      #161d2e;
+      --card2:     #1c2540;
+      --card3:     #212b42;
+      --border:    rgba(255,255,255,0.08);
+      --border2:   rgba(255,255,255,0.15);
+      --gold:      #f0b429;
+      --gold2:     #fcd34d;
+      --gold-dim:  rgba(240,180,41,0.12);
+      --gold-glow: rgba(240,180,41,0.25);
+      --teal:      #2dd4bf;
+      --red:       #f87171;
+      --green:     #4ade80;
+      --amber:     #fbbf24;
+      --text:      #dde2ef;
+      --muted:     #7d8899;
+      --dim:       #3a4255;
+      --r:         10px;
+      --r-sm:      7px;
     }
-    body{font-family:'Plus Jakarta Sans',sans-serif!important;background:var(--bg)!important;color:var(--text)!important;}
-    body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
-    .asx-nav{background:rgba(12,15,26,0.92)!important;backdrop-filter:blur(20px)!important;border-bottom:1px solid var(--border)!important;position:sticky!important;top:0!important;z-index:200!important;}
-    .asx-nav-inner{max-width:1280px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;}
-    .asx-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
-    .asx-logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),#e8830a);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:15px;color:#0c0f1a;font-weight:700;box-shadow:0 2px 10px var(--gold-glow);}
-    .asx-logo-text{font-size:13px;font-weight:600;color:var(--text);}
-    .asx-logo-sub{font-size:10px;color:var(--muted);}
-    .asx-nav-links{display:flex;gap:4px;}
-    .asx-nav-link{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:all 0.18s;border:1px solid transparent;}
-    .asx-nav-link:hover{color:var(--text);background:rgba(255,255,255,0.05);border-color:var(--border2);}
-    .asx-nav-link.active{color:var(--gold);background:var(--gold-dim);border-color:var(--gold-glow);}
-    .asx-disclaimer{background:rgba(240,180,41,0.06);border-bottom:1px solid rgba(240,180,41,0.15);padding:8px 32px;font-size:11.5px;color:rgba(240,180,41,0.7);display:flex;align-items:center;gap:8px;}
-    .asx-disclaimer strong{color:rgba(240,180,41,0.9);font-weight:600;}
-    .save-strip{background:linear-gradient(90deg,rgba(240,180,41,0.06),rgba(240,180,41,0.02));border:1px solid rgba(240,180,41,0.18);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;}
-    .save-strip-text{font-size:12px;color:var(--muted);}
-    .save-strip-text strong{color:var(--text);}
-    .save-strip-btn{flex-shrink:0;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
-    .save-strip-btn:hover{background:var(--gold);color:#0c0f1a;}
-    .save-strip-btn:disabled{opacity:0.4;cursor:not-allowed;}
-    .save-confirm{font-size:11px;color:var(--teal);font-weight:600;display:none;}
-    /* Tailwind dark overrides */
-    .bg-white,.bg-slate-50{background:var(--card)!important;}
-    .border-slate-200,.border-slate-100{border-color:var(--border)!important;}
-    .text-slate-900,.text-slate-800{color:var(--text)!important;}
-    .text-slate-700,.text-slate-600{color:#9ca8bc!important;}
-    .text-slate-500,.text-slate-400{color:var(--muted)!important;}
-    .bg-indigo-600{background:var(--gold)!important;color:#0c0f1a!important;}
-    .bg-indigo-50{background:var(--gold-dim)!important;}
-    .bg-indigo-500{background:var(--gold)!important;}
-    .text-indigo-700,.text-indigo-900,.text-indigo-800{color:var(--gold)!important;}
-    .border-indigo-200{border-color:var(--gold-glow)!important;}
-    .chip{background:var(--gold-dim)!important;color:var(--gold)!important;}
-    input[type=range]{accent-color:var(--gold)!important;}
-    input[type=text],input[type=number]{background:var(--card2)!important;border-color:var(--border2)!important;color:var(--text)!important;}
-    .num-pos{color:var(--green)!important;}
-    .num-neg{color:var(--red)!important;}
-    table{color:var(--text)!important;}
-    thead{background:var(--card2)!important;}
-    th{color:var(--muted)!important;}
-    .bg-amber-50{background:rgba(240,180,41,0.07)!important;}
-    .text-amber-800{color:var(--gold)!important;}
-    .border-amber-200{border-color:rgba(240,180,41,0.25)!important;}
-    ::-webkit-scrollbar{width:5px;height:5px;}
-    ::-webkit-scrollbar-track{background:transparent;}
-    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999;
+    }
+
+    /* ── Nav ── */
+    .asx-nav {
+      background: rgba(12,15,26,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 200;
+    }
+    .asx-nav-inner {
+      max-width: 1400px; margin: 0 auto;
+      padding: 0 28px; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .asx-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .asx-logo-mark {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--gold), #e8830a);
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif; font-size: 15px; color: #0c0f1a; font-weight: 700;
+      box-shadow: 0 2px 12px var(--gold-glow);
+    }
+    .asx-logo-text { font-size: 13px; font-weight: 600; color: var(--text); }
+    .asx-logo-sub  { font-size: 10px; color: var(--muted); }
+    .nav-links { display: flex; gap: 3px; }
+    .nav-link {
+      padding: 6px 13px; border-radius: 7px; font-size: 13px; font-weight: 500;
+      color: var(--muted); text-decoration: none; transition: all 0.18s;
+      border: 1px solid transparent;
+    }
+    .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); border-color: var(--border2); }
+    .nav-link.active { color: var(--gold); background: var(--gold-dim); border-color: var(--gold-glow); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    #status { font-size: 12px; color: var(--muted); }
+    #status.stale { animation: pulse 1.5s infinite; color: var(--gold); }
+    #status.error { color: var(--red); }
+    .btn-refresh {
+      padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      background: var(--card2); border: 1px solid var(--border2); color: var(--text);
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-refresh:hover { background: var(--card3); border-color: var(--gold-glow); color: var(--gold); }
+
+    /* ── Disclaimer banner ── */
+    .disclaimer-bar {
+      background: rgba(240,180,41,0.07);
+      border-bottom: 1px solid rgba(240,180,41,0.15);
+      padding: 7px 28px;
+      font-size: 11.5px; color: rgba(240,180,41,0.75);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .disclaimer-bar strong { color: rgba(240,180,41,0.95); }
+
+    /* ── Layout ── */
+    .page-wrap { max-width: 1400px; margin: 0 auto; padding: 20px 28px 60px; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+    @media (max-width: 960px) { .page-wrap { grid-template-columns: 1fr; } }
+
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 14px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px;
+    }
+    .card-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+
+    /* Toggle groups */
+    .toggle-group {
+      display: flex; gap: 3px; background: var(--bg2);
+      border-radius: 8px; padding: 3px; border: 1px solid var(--border);
+    }
+    .toggle-btn {
+      flex: 1; padding: 7px 8px; border-radius: 6px; border: none;
+      background: transparent; color: var(--muted); font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all 0.18s; font-family: inherit;
+    }
+    .toggle-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .toggle-btn[data-active="1"] { background: var(--card3); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.4); font-weight: 600; }
+
+    /* Form rows */
+    .form-row { margin-bottom: 14px; }
+    .form-row:last-child { margin-bottom: 0; }
+    .form-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 7px;
+    }
+    .form-label-val { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--text); font-weight: 500; text-transform: none; letter-spacing: 0; }
+    input[type=range] {
+      width: 100%; accent-color: var(--gold);
+      background: transparent; cursor: pointer;
+    }
+    .range-hints { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin-top: 3px; }
+
+    /* Category chips */
+    .chips-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chip {
+      padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.18s; border: 1px solid var(--border2);
+      color: var(--muted); background: transparent;
+    }
+    .chip:hover { color: var(--text); border-color: var(--border2); background: var(--card2); }
+    .chip[data-active="1"] { color: var(--gold); background: var(--gold-dim); border-color: var(--gold-glow); }
+    .chip-all { color: var(--gold); }
+    .chip-none { color: var(--red); }
+
+    /* Select */
+    select {
+      width: 100%; background: var(--card2); border: 1px solid var(--border2);
+      border-radius: var(--r-sm); padding: 8px 10px; color: var(--text);
+      font-family: inherit; font-size: 13px; cursor: pointer; outline: none;
+    }
+    select:focus { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-dim); }
+    option { background: var(--card2); }
+
+    /* Text / number inputs */
+    input[type=number], input[type=text] {
+      width: 100%; background: var(--card2); border: 1px solid var(--border2);
+      border-radius: var(--r-sm); padding: 8px 10px; color: var(--text);
+      font-family: inherit; font-size: 13px; outline: none;
+    }
+    input[type=number]:focus, input[type=text]:focus { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-dim); }
+    input[type=number]::placeholder { color: var(--dim); }
+
+    /* Pillar weights */
+    .pillar-row { margin-bottom: 8px; }
+    .pillar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .pillar-track { height: 5px; background: var(--card3); border-radius: 99px; overflow: hidden; }
+    .pillar-fill { height: 100%; background: var(--gold); border-radius: 99px; transition: width 0.4s; }
+
+    /* Save strip */
+    .save-strip {
+      background: linear-gradient(90deg, var(--gold-dim), rgba(240,180,41,0.04));
+      border: 1px solid var(--gold-glow); border-radius: var(--r);
+      padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .save-strip-text { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .save-strip-text strong { color: var(--text); display: block; margin-bottom: 1px; }
+    .btn-save {
+      flex-shrink: 0; background: var(--gold); color: #0c0f1a;
+      border: none; border-radius: var(--r-sm); padding: 8px 16px;
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.18s;
+      white-space: nowrap; font-family: inherit;
+    }
+    .btn-save:hover { background: var(--gold2); transform: translateY(-1px); }
+    .btn-save:disabled { background: var(--dim); color: var(--muted); cursor: not-allowed; transform: none; }
+    .save-confirm { font-size: 11px; color: var(--teal); font-weight: 700; display: none; white-space: nowrap; }
+
+    /* ── Main results panel ── */
+    .results { display: flex; flex-direction: column; gap: 18px; }
+
+    .results-header { display: flex; align-items: center; justify-content: space-between; }
+    .results-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); }
+    #candidateCount { font-size: 12px; color: var(--muted); }
+
+    /* Picks grid */
+    .picks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+    .pick-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 16px; transition: all 0.2s;
+    }
+    .pick-card:hover { border-color: var(--gold-glow); box-shadow: 0 6px 24px rgba(0,0,0,0.4); transform: translateY(-2px); }
+    .pick-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+    .pick-rank { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+    .pick-ticker { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); line-height: 1; }
+    .pick-name { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .pick-cat {
+      font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 99px;
+      background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-glow);
+      white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pick-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .stat-item { background: var(--card2); border-radius: 6px; padding: 7px 9px; }
+    .stat-label { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+    .stat-value { font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--text); font-weight: 600; }
+    .stat-value.pos { color: var(--green); }
+    .stat-value.neg { color: var(--red); }
+
+    /* Pillar bars on pick card */
+    .pick-pillars { display: flex; flex-direction: column; gap: 5px; margin-top: 12px; }
+    .pp-row { display: grid; grid-template-columns: 70px 1fr 28px; align-items: center; gap: 6px; }
+    .pp-label { font-size: 10px; color: var(--muted); }
+    .pp-bar-track { height: 4px; background: var(--card3); border-radius: 99px; overflow: hidden; }
+    .pp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--red), var(--amber) 50%, var(--green)); border-radius: 99px; }
+    .pp-val { font-size: 10px; color: var(--dim); font-family: 'Geist Mono', monospace; text-align: right; }
+
+    .pick-sparkline { height: 56px; margin: 10px 0 4px; }
+
+    .empty-state {
+      background: rgba(240,180,41,0.06); border: 1px solid rgba(240,180,41,0.2);
+      border-radius: var(--r); padding: 18px; font-size: 13px; color: var(--gold); display: none;
+    }
+    .empty-state.visible { display: block; }
+
+    /* Dividend plan */
+    .divplan-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; display: none; }
+    .divplan-card.visible { display: block; }
+    .divplan-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .kpi-box { background: var(--card2); border-radius: 8px; padding: 12px; text-align: center; }
+    .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .kpi-value { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--gold); }
+
+    /* Full ranking table */
+    .table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .table-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .table-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .table-search {
+      background: var(--card2); border: 1px solid var(--border2); border-radius: 6px;
+      padding: 6px 10px; color: var(--text); font-family: inherit; font-size: 12px; outline: none; width: 180px;
+    }
+    .table-search:focus { border-color: var(--gold); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead tr { background: var(--card2); }
+    thead th {
+      padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+      cursor: pointer; user-select: none; white-space: nowrap;
+    }
+    thead th:hover { color: var(--text); }
+    thead th.sorted-asc::after { content: " ↑"; color: var(--gold); }
+    thead th.sorted-desc::after { content: " ↓"; color: var(--gold); }
+    tbody tr { border-top: 1px solid var(--border); transition: background 0.12s; }
+    tbody tr:hover { background: rgba(255,255,255,0.025); }
+    tbody td { padding: 9px 12px; color: var(--text); white-space: nowrap; }
+    td.mono { font-family: 'Geist Mono', monospace; }
+    .num-pos { color: var(--green); }
+    .num-neg { color: var(--red); }
+    .chip-cat {
+      display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px;
+      background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-glow); font-weight: 600;
+    }
+
+    /* Warning box */
+    .warn-box { background: rgba(240,180,41,0.08); border: 1px solid rgba(240,180,41,0.25); border-radius: 7px; padding: 10px 12px; font-size: 12px; color: var(--gold); margin-bottom: 8px; }
+
+    /* Animations */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .pick-card { animation: fadeIn 0.3s ease both; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    @media (max-width: 640px) {
+      .page-wrap { padding: 14px 14px 40px; }
+      .picks-grid { grid-template-columns: 1fr; }
+      .divplan-kpis { grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
-    <header class="asx-nav">
+<body>
+
+  <!-- Nav -->
+  <header class="asx-nav">
     <div class="asx-nav-inner">
       <a href="/" class="asx-logo">
         <div class="asx-logo-mark">A</div>
@@ -91,203 +313,209 @@
           <div class="asx-logo-sub">Personal use only</div>
         </div>
       </a>
-      <nav class="asx-nav-links">
-        <a href="/" class="asx-nav-link">Home</a>
-        <a href="/etfs" class="asx-nav-link active">ETF Screener</a>
-        <a href="/stocks" class="asx-nav-link">ASX 200</a>
-        <a href="/combined" class="asx-nav-link">Combined</a>
+      <nav class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/etfs" class="nav-link active">ETF Screener</a>
+        <a href="/stocks" class="nav-link">ASX 200</a>
+        <a href="/combined" class="nav-link">Combined</a>
       </nav>
+      <div class="nav-right">
+        <span id="status">Idle</span>
+        <button class="btn-refresh" id="refreshBtn">↻ Refresh</button>
+      </div>
     </div>
   </header>
-  <div class="asx-disclaimer">
+
+  <!-- Disclaimer -->
+  <div class="disclaimer-bar">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <strong>Personal research tool only.</strong>&nbsp; This is not financial advice. Please do your own research and consult a licensed financial adviser before making any investment decisions.
+    <strong>Personal research tool only.</strong>&nbsp; Not financial advice. Don't make investment decisions based on this — always speak with a licensed financial adviser.
   </div>
 
-  <main class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <!-- Inputs panel -->
-    <aside class="lg:col-span-4 space-y-5">
-      <section class="bg-white border border-slate-200 rounded-lg p-5">
-        <h2 class="font-semibold text-slate-900 mb-4">What are you looking for?</h2>
+  <div class="page-wrap">
 
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-slate-700 mb-2">Risk tolerance</label>
-          <div class="flex gap-1 bg-slate-100 rounded-md p-1" role="tablist" id="risk-group">
-            <button data-value="low"    class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">Low</button>
-            <button data-value="medium" class="flex-1 py-1.5 text-sm rounded-md bg-white shadow-sm font-medium">Medium</button>
-            <button data-value="high"   class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">High</button>
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+
+      <div class="card">
+        <div class="card-title">What are you looking for?</div>
+
+        <div class="form-row">
+          <div class="form-label">Risk tolerance</div>
+          <div class="toggle-group" id="risk-group">
+            <button class="toggle-btn" data-value="low">Low</button>
+            <button class="toggle-btn" data-value="medium" data-active="1">Medium</button>
+            <button class="toggle-btn" data-value="high">High</button>
           </div>
         </div>
 
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-slate-700 mb-2">Investment horizon</label>
-          <div class="flex gap-1 bg-slate-100 rounded-md p-1" role="tablist" id="horizon-group">
-            <button data-value="short"  class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">1–3 yrs</button>
-            <button data-value="medium" class="flex-1 py-1.5 text-sm rounded-md bg-white shadow-sm font-medium">3–7 yrs</button>
-            <button data-value="long"   class="flex-1 py-1.5 text-sm rounded-md hover:bg-white">7+ yrs</button>
+        <div class="form-row">
+          <div class="form-label">Investment horizon</div>
+          <div class="toggle-group" id="horizon-group">
+            <button class="toggle-btn" data-value="short">1–3 yrs</button>
+            <button class="toggle-btn" data-value="medium" data-active="1">3–7 yrs</button>
+            <button class="toggle-btn" data-value="long">7+ yrs</button>
           </div>
         </div>
 
-        <div class="mb-5">
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-sm font-medium text-slate-700">Max management fee (MER)</label>
-            <span id="merLabel" class="text-sm text-slate-500 tabular-nums">no cap</span>
+        <div class="form-row">
+          <div class="form-label">
+            Max management fee (MER)
+            <span class="form-label-val" id="merLabel">no cap</span>
           </div>
-          <input id="merSlider" type="range" min="0" max="100" step="1" value="100" class="w-full" />
-          <div class="flex justify-between text-xs text-slate-400 mt-1"><span>0.05%</span><span>1.00%</span><span>any</span></div>
+          <input id="merSlider" type="range" min="0" max="100" step="1" value="100" />
+          <div class="range-hints"><span>0.05%</span><span>1.00%</span><span>any</span></div>
         </div>
 
-        <div class="mb-5">
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-sm font-medium text-slate-700">Minimum annual yield</label>
-            <span id="yieldLabel" class="text-sm text-slate-500 tabular-nums">0%</span>
+        <div class="form-row">
+          <div class="form-label">
+            Minimum annual yield
+            <span class="form-label-val" id="yieldLabel">0%</span>
           </div>
-          <input id="yieldSlider" type="range" min="0" max="80" step="1" value="0" class="w-full" />
-          <div class="text-xs text-slate-500 mt-1" id="yieldMonthlyHint">Equivalent to ~0.00% per month if distributions are evenly spread.</div>
+          <input id="yieldSlider" type="range" min="0" max="80" step="1" value="0" />
+          <div style="font-size:10px;color:var(--dim);margin-top:3px" id="yieldMonthlyHint">Set a yield floor to filter for income-paying ETFs.</div>
         </div>
 
-        <div class="mb-3">
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-sm font-medium text-slate-700">Asset focus</label>
-            <span class="text-xs text-slate-500"><a href="#" id="catAll" class="text-indigo-600 hover:underline">all</a> · <a href="#" id="catNone" class="text-indigo-600 hover:underline">none</a></span>
-          </div>
-          <div id="categoryList" class="space-y-1.5 text-sm"></div>
-        </div>
-
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-slate-700 mb-2">How many to recommend</label>
-          <select id="topN" class="w-full border border-slate-300 rounded-md py-1.5 px-2 text-sm">
-            <option value="3" selected>Top 3</option>
+        <div class="form-row">
+          <div class="form-label">Number of picks</div>
+          <select id="topN">
+            <option value="3">Top 3</option>
             <option value="5">Top 5</option>
             <option value="10">Top 10</option>
           </select>
         </div>
 
-        <div class="pt-4 mt-4 border-t border-slate-200">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Target quarterly dividend (AUD)</label>
-          <p class="text-xs text-slate-500 mb-2">Enter a target and we'll work out how much to invest in each pick to hit it.</p>
-          <div class="flex gap-2 items-center">
-            <span class="text-slate-500 text-sm">$</span>
-            <input id="targetDividend" type="number" min="0" step="50" value="0" placeholder="e.g. 1000"
-                   class="flex-1 border border-slate-300 rounded-md py-1.5 px-2 text-sm" />
-            <span class="text-xs text-slate-500">per quarter</span>
+        <div class="form-row">
+          <div class="form-label">Target quarterly dividend (AUD)</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="color:var(--muted);font-size:13px">$</span>
+            <input type="number" id="targetDividend" placeholder="e.g. 500" min="0" step="50" style="flex:1" />
+            <span style="color:var(--muted);font-size:12px">/ qtr</span>
           </div>
-          <div id="targetDividendHint" class="text-xs text-slate-400 mt-1"></div>
+          <div style="font-size:10px;color:var(--dim);margin-top:4px">We'll size each holding to hit your quarterly target.</div>
         </div>
-      </section>
+      </div>
 
-      <section class="bg-white border border-slate-200 rounded-lg p-5">
-        <h3 class="font-semibold text-slate-900 mb-2">How scoring responds to your inputs</h3>
-        <p class="text-xs text-slate-500 mb-3">Pillar weights flex with risk &amp; horizon. Heavier bars = more influence on the composite.</p>
-        <div id="pillarWeights" class="space-y-2 text-xs"></div>
-      </section>
+      <!-- Asset categories -->
+      <div class="card">
+        <div class="card-title">Asset focus</div>
+        <div class="chips-wrap" id="categoryChips">
+          <button class="chip chip-all" onclick="selectAllCats()">all</button>
+          <button class="chip chip-none" onclick="clearCats()">none</button>
+        </div>
+      </div>
 
-      <section class="bg-white border border-slate-200 rounded-lg p-4 text-xs text-slate-500">
-        <strong class="text-slate-700">Disclaimer:</strong> Personal research tool only. Yahoo data may be delayed ~15&ndash;20 minutes. Not financial advice.
-      </section>
-      <!-- Save ETF picks to Combined -->
+      <!-- Pillar weights -->
+      <div class="card">
+        <div class="card-title">Active pillar weights</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Heavier bars = more influence on the composite score.</div>
+        <div id="pillarWeights"></div>
+      </div>
+
+      <!-- Save to combined -->
       <div class="save-strip">
         <div class="save-strip-text">
-          <strong>Take it further</strong><br>
-          Save these picks and mix with ASX stocks in the Combined Simulator.
+          <strong>Take it to the Simulator</strong>
+          Save your ETF picks and blend with ASX stocks in the Combined Portfolio Simulator.
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          <span class="save-confirm" id="etfSaveConfirm">✓ Saved!</span>
-          <button class="save-strip-btn" id="etfSaveBtn" disabled onclick="saveEtfPicks()">Save to Combined →</button>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="save-confirm" id="etfSaveConfirm">✓ Picks saved!</span>
+          <button class="btn-save" id="etfSaveBtn" disabled onclick="saveEtfPicks()">Save to Combined →</button>
         </div>
       </div>
+
+      <!-- Disclaimer -->
+      <div class="card" style="border-color:var(--dim)">
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">
+          <strong style="color:var(--text)">Heads up:</strong> Yahoo Finance data may be delayed 15–20 min. Projected returns and scores are a model output, not a financial forecast. Past performance doesn't predict future results.
+        </div>
+      </div>
+
     </aside>
 
-    <!-- Results panel -->
-    <section class="lg:col-span-8 space-y-6">
-      <div class="bg-white border border-slate-200 rounded-lg p-5">
-        <div class="flex items-baseline justify-between mb-4">
-          <h2 id="picksHeading" class="text-xl font-bold text-slate-900">Top picks</h2>
-          <span id="candidateCount" class="text-xs text-slate-500"></span>
-        </div>
-        <div id="picksGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-        <div id="picksEmpty" class="hidden bg-amber-50 border border-amber-200 rounded p-4 text-sm text-amber-800">No ETFs match your filters. Try widening the categories, raising the MER cap, or lowering the minimum yield.</div>
+    <!-- ── Results ── -->
+    <section class="results">
+
+      <div class="results-header">
+        <h2 class="results-title">Top ETF Picks</h2>
+        <span id="candidateCount"></span>
       </div>
 
-      <div id="dividendPlan" class="hidden bg-white border border-slate-200 rounded-lg p-5">
-        <div class="flex items-baseline justify-between mb-3">
-          <h2 class="text-lg font-semibold text-slate-900">Investment plan to hit your dividend target</h2>
-          <span id="planTotalsHeadline" class="text-xs text-slate-500"></span>
+      <div class="empty-state" id="picksEmpty">
+        No ETFs match your current filters. Try widening the categories, raising the MER cap, or lowering the minimum yield.
+      </div>
+      <div class="picks-grid" id="picksGrid"></div>
+
+      <!-- Dividend plan -->
+      <div class="divplan-card" id="dividendPlan">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:16px;font-weight:700;color:var(--text)">Investment plan to hit your dividend target</div>
+          <span id="planTotalsHeadline" style="font-size:11px;color:var(--muted)"></span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 text-center">
-          <div class="bg-indigo-50 border border-indigo-200 rounded-md p-3">
-            <div class="text-xs text-indigo-700 uppercase tracking-wide">Total capital</div>
-            <div id="planTotalCapital" class="text-2xl font-bold text-indigo-900 mt-1 tabular-nums">—</div>
+        <div class="divplan-kpis">
+          <div class="kpi-box">
+            <div class="kpi-label">Total capital</div>
+            <div class="kpi-value" id="planTotalCapital">—</div>
           </div>
-          <div class="bg-slate-50 border border-slate-200 rounded-md p-3">
-            <div class="text-xs text-slate-500 uppercase tracking-wide">Annual dividend</div>
-            <div id="planAnnual" class="text-2xl font-bold text-slate-900 mt-1 tabular-nums">—</div>
+          <div class="kpi-box">
+            <div class="kpi-label">Annual dividend</div>
+            <div class="kpi-value" id="planAnnual">—</div>
           </div>
-          <div class="bg-slate-50 border border-slate-200 rounded-md p-3">
-            <div class="text-xs text-slate-500 uppercase tracking-wide">Avg yield</div>
-            <div id="planAvgYield" class="text-2xl font-bold text-slate-900 mt-1 tabular-nums">—</div>
+          <div class="kpi-box">
+            <div class="kpi-label">Avg yield</div>
+            <div class="kpi-value" id="planAvgYield">—</div>
           </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-50 text-slate-700">
-              <tr>
-                <th class="px-3 py-2 text-left">Ticker</th>
-                <th class="px-3 py-2 text-left">Name</th>
-                <th class="px-3 py-2 text-right">Yield</th>
-                <th class="px-3 py-2 text-right">Invest (AUD)</th>
-                <th class="px-3 py-2 text-right">Annual dividend</th>
-                <th class="px-3 py-2 text-right">Quarterly</th>
-                <th class="px-3 py-2 text-right">Monthly avg</th>
-              </tr>
-            </thead>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Ticker</th><th>Name</th><th>Yield</th><th>Invest (AUD)</th><th>Annual income</th><th>Quarterly</th><th>Monthly avg</th>
+            </tr></thead>
             <tbody id="planTableBody"></tbody>
           </table>
         </div>
-        <div id="planWarnings" class="mt-3 space-y-1"></div>
-        <p class="mt-3 text-xs text-slate-400">
-          Equal-weight allocation across the {N} picks. Distributions are paid on each ETF's actual schedule
-          (most are quarterly or semi-annual; "Monthly avg" assumes you spread the annual income evenly).
-          Yield figures are trailing 12-month — future distributions can be higher or lower.
-        </p>
+        <div id="planWarnings" style="margin-top:10px"></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted)">Equal-weight allocation across picks. Yield figures are trailing 12-month — future distributions may differ.</div>
       </div>
 
-      <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-baseline justify-between">
-          <h2 class="font-semibold text-slate-900">Full ranking</h2>
-          <span class="text-xs text-slate-500">Click any column to sort</span>
+      <!-- Full ranking table -->
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Full ranking</span>
+          <input type="text" class="table-search" id="tableSearch" placeholder="Filter by ticker or name…" />
         </div>
-        <div class="overflow-x-auto max-h-[600px]">
-          <table class="sortable w-full text-sm">
-            <thead class="bg-slate-50 text-slate-700 sticky top-0">
-              <tr>
-                <th class="px-3 py-2 text-left">Ticker</th>
-                <th class="px-3 py-2 text-left">Name</th>
-                <th class="px-3 py-2 text-left">Category</th>
-                <th class="px-3 py-2 text-right">Score</th>
-                <th class="px-3 py-2 text-right">1y</th>
-                <th class="px-3 py-2 text-right">3y CAGR</th>
-                <th class="px-3 py-2 text-right">5y CAGR</th>
-                <th class="px-3 py-2 text-right">Vol 1y</th>
-                <th class="px-3 py-2 text-right">Sharpe 3y</th>
-                <th class="px-3 py-2 text-right">Yield</th>
-                <th class="px-3 py-2 text-right">MER</th>
-              </tr>
-            </thead>
-            <tbody id="fullTable"></tbody>
+        <div class="table-wrap">
+          <table id="rankingTable">
+            <thead><tr>
+              <th>Ticker</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th style="text-align:right">Score</th>
+              <th style="text-align:right">1Y</th>
+              <th style="text-align:right">3Y CAGR</th>
+              <th style="text-align:right">5Y CAGR</th>
+              <th style="text-align:right">Vol 1Y</th>
+              <th style="text-align:right">Sharpe 3Y</th>
+              <th style="text-align:right">Yield</th>
+              <th style="text-align:right">MER</th>
+            </tr></thead>
+            <tbody id="tableBody"></tbody>
           </table>
         </div>
       </div>
+
     </section>
-  </main>
+  </div>
 
   <script>
-  // ---------- Helpers ----------
+  // ── Helpers ──────────────────────────────────────────────────────────────
   const fmtPct = (v, dp=2) => v == null ? "—" : (v*100).toFixed(dp) + "%";
   const fmtNum = (v, dp=2) => v == null ? "—" : Number(v).toFixed(dp);
   const debounce = (fn, ms=400) => { let h; return (...a) => { clearTimeout(h); h = setTimeout(() => fn(...a), ms); }; };
+  const fmtAUD  = v => v == null ? "—" : "$" + Number(v).toLocaleString("en-AU", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const fmtAUD0 = v => v == null ? "—" : "$" + Number(v).toLocaleString("en-AU", {minimumFractionDigits: 0, maximumFractionDigits: 0});
 
-  // ---------- State ----------
+  // ── State ─────────────────────────────────────────────────────────────────
   const state = {
     risk_tolerance: "medium",
     horizon: "medium",
@@ -297,35 +525,24 @@
     top_n: 3,
     target_quarterly_dividend_aud: 0,
   };
-  const fmtAUD = v => v == null ? "—" : "$" + Number(v).toLocaleString("en-AU", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  const fmtAUD0 = v => v == null ? "—" : "$" + Number(v).toLocaleString("en-AU", {minimumFractionDigits: 0, maximumFractionDigits: 0});
 
-  // Slider mappings
-  // MER: 0..100 → 0.0005 .. 0.01, 100 → null (no cap)
+  // ── Slider mappings ───────────────────────────────────────────────────────
   function merFromSlider(v) {
     v = parseInt(v, 10);
     if (v >= 100) return null;
-    const min = 0.0005, max = 0.01;
-    return min + (v / 99) * (max - min);
+    return 0.0005 + (v / 99) * (0.01 - 0.0005);
   }
-  function merLabel(mer) {
-    if (mer == null) return "no cap";
-    return (mer * 100).toFixed(2) + "% p.a.";
-  }
-  // Yield: 0..80 → 0% .. 8% in 0.1% steps
+  function merLabel(mer) { return mer == null ? "no cap" : (mer * 100).toFixed(2) + "% p.a."; }
   function yieldFromSlider(v) { return parseInt(v, 10) / 1000; }
   function yieldLabel(y) { return (y * 100).toFixed(1) + "%"; }
 
-  // ---------- Toggle group helper ----------
+  // ── Toggle groups (data-active instead of Tailwind classes) ──────────────
   function bindToggleGroup(id, key) {
     const root = document.getElementById(id);
-    root.querySelectorAll("button").forEach(btn => {
+    root.querySelectorAll(".toggle-btn").forEach(btn => {
       btn.addEventListener("click", () => {
-        root.querySelectorAll("button").forEach(b => {
-          b.classList.remove("bg-white", "shadow-sm", "font-medium");
-          b.classList.add("hover:bg-white");
-        });
-        btn.classList.add("bg-white", "shadow-sm", "font-medium");
+        root.querySelectorAll(".toggle-btn").forEach(b => b.removeAttribute("data-active"));
+        btn.setAttribute("data-active", "1");
         state[key] = btn.dataset.value;
         triggerScreen();
       });
@@ -334,88 +551,82 @@
   bindToggleGroup("risk-group", "risk_tolerance");
   bindToggleGroup("horizon-group", "horizon");
 
-  // ---------- Sliders ----------
-  const merSlider = document.getElementById("merSlider");
-  const merLabelEl = document.getElementById("merLabel");
-  merSlider.addEventListener("input", () => {
-    state.max_mer = merFromSlider(merSlider.value);
-    merLabelEl.textContent = merLabel(state.max_mer);
+  // ── Sliders ───────────────────────────────────────────────────────────────
+  document.getElementById("merSlider").addEventListener("input", e => {
+    state.max_mer = merFromSlider(e.target.value);
+    document.getElementById("merLabel").textContent = merLabel(state.max_mer);
     triggerScreen();
   });
-
-  const yieldSlider = document.getElementById("yieldSlider");
-  const yieldLabelEl = document.getElementById("yieldLabel");
-  const yieldHint = document.getElementById("yieldMonthlyHint");
-  yieldSlider.addEventListener("input", () => {
-    const y = yieldFromSlider(yieldSlider.value);
+  document.getElementById("yieldSlider").addEventListener("input", e => {
+    const y = yieldFromSlider(e.target.value);
     state.min_dividend_yield_annual = y;
-    yieldLabelEl.textContent = yieldLabel(y);
-    yieldHint.textContent = "Equivalent to ~" + (y/12*100).toFixed(2) + "% per month if distributions are evenly spread.";
+    document.getElementById("yieldLabel").textContent = yieldLabel(y);
+    document.getElementById("yieldMonthlyHint").textContent = y > 0
+      ? `Equivalent to ~${(y/12*100).toFixed(2)}% per month if distributions are evenly spread.`
+      : "Set a yield floor to filter for income-paying ETFs.";
     triggerScreen();
   });
-
-  document.getElementById("topN").addEventListener("change", (e) => {
+  document.getElementById("topN").addEventListener("change", e => {
     state.top_n = parseInt(e.target.value, 10);
     triggerScreen();
   });
-
-  // Target dividend input
-  const targetDivInput = document.getElementById("targetDividend");
-  const targetDivHint = document.getElementById("targetDividendHint");
-  function updateDividendHint(v) {
-    if (!v || v <= 0) { targetDivHint.textContent = ""; return; }
-    targetDivHint.textContent = `≈ $${(v*4).toLocaleString("en-AU")} per year · $${(v/3).toLocaleString("en-AU", {maximumFractionDigits: 0})}/month average`;
-  }
-  targetDivInput.addEventListener("input", () => {
-    const v = Math.max(parseFloat(targetDivInput.value) || 0, 0);
-    state.target_quarterly_dividend_aud = v;
-    updateDividendHint(v);
+  document.getElementById("targetDividend").addEventListener("input", e => {
+    state.target_quarterly_dividend_aud = parseFloat(e.target.value) || 0;
     triggerScreen();
   });
 
-  // ---------- Categories ----------
+  // ── Category chips ────────────────────────────────────────────────────────
+  let allCategories = [];
   async function loadCategories() {
-    const r = await fetch("/api/categories");
-    const j = await r.json();
-    const list = document.getElementById("categoryList");
-    list.innerHTML = "";
-    j.categories.forEach(cat => {
-      const id = "cat_" + cat.replace(/\W+/g, "_");
-      const wrap = document.createElement("label");
-      wrap.className = "flex items-center justify-between cursor-pointer";
-      wrap.innerHTML = `
-        <span class="flex items-center gap-2">
-          <input type="checkbox" id="${id}" value="${cat}" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
-          <span>${cat}</span>
-        </span>
-        <span class="text-xs text-slate-400">${j.count_per_category[cat] ?? ""}</span>`;
-      list.appendChild(wrap);
-      wrap.querySelector("input").addEventListener("change", syncCategoriesAndScreen);
-    });
-    syncCategoriesAndScreen();
+    try {
+      const r = await fetch("/api/categories");
+      const j = await r.json();
+      allCategories = j.categories || [];
+      renderCategoryChips();
+    } catch(e) { console.error("categories:", e); }
   }
-  function syncCategoriesAndScreen() {
-    const checks = document.querySelectorAll("#categoryList input[type=checkbox]");
-    const all = Array.from(checks).map(c => c.value);
-    const sel = Array.from(checks).filter(c => c.checked).map(c => c.value);
-    state.categories = sel.length === all.length ? [] : sel; // empty means "all"
+  function renderCategoryChips() {
+    const wrap = document.getElementById("categoryChips");
+    // Keep the all/none buttons, clear the rest
+    const existing = wrap.querySelectorAll(".chip-cat");
+    existing.forEach(c => c.remove());
+    allCategories.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.className = "chip chip-cat";
+      btn.textContent = cat;
+      btn.dataset.cat = cat;
+      btn.addEventListener("click", () => {
+        const active = btn.getAttribute("data-active") === "1";
+        if (active) {
+          btn.removeAttribute("data-active");
+          state.categories = state.categories.filter(c => c !== cat);
+        } else {
+          btn.setAttribute("data-active", "1");
+          if (!state.categories.includes(cat)) state.categories.push(cat);
+        }
+        triggerScreen();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+  function selectAllCats() {
+    state.categories = [];
+    document.querySelectorAll(".chip-cat").forEach(c => c.removeAttribute("data-active"));
     triggerScreen();
   }
-  document.getElementById("catAll").addEventListener("click", e => {
-    e.preventDefault();
-    document.querySelectorAll("#categoryList input[type=checkbox]").forEach(c => (c.checked = true));
-    syncCategoriesAndScreen();
-  });
-  document.getElementById("catNone").addEventListener("click", e => {
-    e.preventDefault();
-    document.querySelectorAll("#categoryList input[type=checkbox]").forEach(c => (c.checked = false));
-    syncCategoriesAndScreen();
-  });
+  function clearCats() {
+    state.categories = [...allCategories];
+    document.querySelectorAll(".chip-cat").forEach(c => {
+      c.setAttribute("data-active", "1");
+      if (!state.categories.includes(c.dataset.cat)) state.categories.push(c.dataset.cat);
+    });
+    triggerScreen();
+  }
 
-  // ---------- Screen ----------
+  // ── Screen API ────────────────────────────────────────────────────────────
   let inFlight = null;
   async function runScreen(forceRefresh = false) {
-    setStatus(forceRefresh ? "Refreshing data from Yahoo…" : "Scoring…", true);
+    setStatus(forceRefresh ? "Refreshing data…" : "Scoring…", true);
     if (inFlight) inFlight.abort();
     const ctrl = new AbortController();
     inFlight = ctrl;
@@ -429,76 +640,42 @@
       if (!r.ok) throw new Error("HTTP " + r.status);
       const j = await r.json();
       renderResults(j);
-      setStatus("Updated · " + (j.elapsed_seconds ?? 0).toFixed(2) + "s", false);
-    } catch (e) {
+      setStatus(`Updated · ${(j.elapsed_seconds ?? 0).toFixed(2)}s`, false);
+    } catch(e) {
       if (e.name === "AbortError") return;
       setStatus("Error: " + e.message, false, true);
     }
   }
   const triggerScreen = debounce(() => runScreen(false), 350);
-
-  function setStatus(msg, busy, error = false) {
+  function setStatus(msg, busy, err=false) {
     const el = document.getElementById("status");
     el.textContent = msg;
-    el.classList.toggle("stale", busy);
-    el.classList.toggle("text-red-600", !!error);
+    el.className = busy ? "stale" : err ? "error" : "";
   }
-
   document.getElementById("refreshBtn").addEventListener("click", () => runScreen(true));
 
-  // ---------- Render ----------
+  // Table search
+  document.getElementById("tableSearch").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll("#tableBody tr").forEach(tr => {
+      tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  let _etfCurrentPicks = [];
+
   function renderResults(data) {
+    _etfCurrentPicks = data.picks || [];
     document.getElementById("candidateCount").textContent = `${data.candidate_count} ETFs match — showing top ${data.picks.length}`;
+    const empty = document.getElementById("picksEmpty");
+    empty.className = data.picks.length === 0 ? "empty-state visible" : "empty-state";
     renderPicks(data.picks, data.rationales);
     renderTable(data.all_filtered);
     renderPillarWeights(data.pillar_weights);
     renderDividendPlan(data.dividend_plan);
-    document.getElementById("picksEmpty").classList.toggle("hidden", data.picks.length > 0);
-  }
-
-  function renderDividendPlan(plan) {
-    const card = document.getElementById("dividendPlan");
-    if (!plan) { card.classList.add("hidden"); return; }
-    card.classList.remove("hidden");
-
-    document.getElementById("planTotalsHeadline").textContent =
-      `Target: ${fmtAUD0(plan.target_quarterly_aud)}/quarter · ${fmtAUD0(plan.target_annual_aud)}/year`;
-
-    if (!plan.feasible) {
-      document.getElementById("planTotalCapital").textContent = "—";
-      document.getElementById("planAnnual").textContent = fmtAUD0(plan.target_annual_aud);
-      document.getElementById("planAvgYield").textContent = "0%";
-      document.getElementById("planTableBody").innerHTML = "";
-      document.getElementById("planWarnings").innerHTML =
-        plan.warnings.map(w => `<div class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded p-2">${w}</div>`).join("");
-      return;
-    }
-
-    document.getElementById("planTotalCapital").textContent = fmtAUD0(plan.total_capital_aud);
-    document.getElementById("planAnnual").textContent = fmtAUD0(plan.target_annual_aud);
-    document.getElementById("planAvgYield").textContent = (plan.average_yield * 100).toFixed(2) + "%";
-
-    const body = document.getElementById("planTableBody");
-    body.innerHTML = "";
-    plan.allocations.forEach(a => {
-      const tr = document.createElement("tr");
-      tr.className = "border-t border-slate-100";
-      const zero = a.yield <= 0;
-      tr.innerHTML = `
-        <td class="px-3 py-2 font-mono font-medium">${a.ticker}</td>
-        <td class="px-3 py-2">${a.name ?? ""}</td>
-        <td class="px-3 py-2 text-right ${zero ? "text-amber-600" : ""}">${(a.yield*100).toFixed(2)}%${zero ? " ⚠" : ""}</td>
-        <td class="px-3 py-2 text-right font-semibold">${fmtAUD(a.investment_aud)}</td>
-        <td class="px-3 py-2 text-right">${fmtAUD(a.expected_annual_aud)}</td>
-        <td class="px-3 py-2 text-right">${fmtAUD(a.expected_quarterly_aud)}</td>
-        <td class="px-3 py-2 text-right text-slate-500">${fmtAUD(a.expected_monthly_aud)}</td>`;
-      body.appendChild(tr);
-    });
-
-    const warningsEl = document.getElementById("planWarnings");
-    warningsEl.innerHTML = (plan.warnings || []).map(w =>
-      `<div class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded p-2">${w}</div>`
-    ).join("");
+    const btn = document.getElementById("etfSaveBtn");
+    if (btn) btn.disabled = _etfCurrentPicks.length === 0;
   }
 
   function renderPicks(picks, rationales) {
@@ -506,82 +683,113 @@
     grid.innerHTML = "";
     picks.forEach((p, i) => {
       const card = document.createElement("article");
-      card.className = "bg-white border border-slate-200 rounded-lg p-4 shadow-sm hover:shadow transition";
+      card.className = "pick-card";
+      card.style.animationDelay = (i * 0.08) + "s";
+
+      const ret1y = p.return_1y;
+      const pillars = [
+        ["Return",    p.score_return],
+        ["Risk-adj",  p.score_risk_adj],
+        ["Stability", p.score_stability],
+        ["Cost",      p.score_cost],
+        ["Liquidity", p.score_liquidity],
+        ["Income",    p.score_income],
+      ];
+      const pillarHtml = pillars.map(([label, score]) => {
+        const s = score != null ? Math.max(0, Math.min(100, score)) : 50;
+        return `<div class="pp-row">
+          <div class="pp-label">${label}</div>
+          <div class="pp-bar-track"><div class="pp-bar-fill" style="width:${s}%"></div></div>
+          <div class="pp-val">${Math.round(s)}</div>
+        </div>`;
+      }).join("");
+
+      const sparkId = `spark-${i}`;
       card.innerHTML = `
-        <div class="flex items-start justify-between mb-2">
+        <div class="pick-card-top">
           <div>
-            <div class="text-xs text-slate-400">#${i+1} pick</div>
-            <div class="text-lg font-bold text-slate-900">${p.ticker}</div>
-            <div class="text-xs text-slate-500">${p.name}</div>
+            <div class="pick-rank">#${i+1} pick</div>
+            <div class="pick-ticker">${p.ticker}</div>
+            <div class="pick-name">${p.name || "—"}</div>
           </div>
-          <span class="chip">${p.category}</span>
+          <div class="pick-cat">${p.category || "—"}</div>
         </div>
-        <div id="spark-${i}" style="height:60px"></div>
-        <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
-          <div><div class="text-xs text-slate-500">Composite</div><div class="font-semibold">${fmtNum(p.composite_score, 1)}</div></div>
-          <div><div class="text-xs text-slate-500">1y return</div><div class="font-semibold ${ (p.return_1y||0) >= 0 ? "num-pos" : "num-neg"}">${fmtPct(p.return_1y, 1)}</div></div>
-          <div><div class="text-xs text-slate-500">3y CAGR</div><div class="font-semibold">${fmtPct(p.return_3y, 1)}</div></div>
-          <div><div class="text-xs text-slate-500">Sharpe 3y</div><div class="font-semibold">${fmtNum(p.sharpe_3y, 2)}</div></div>
-          <div><div class="text-xs text-slate-500">Yield</div><div class="font-semibold">${fmtPct(p.dividend_yield, 2)}</div></div>
-          <div><div class="text-xs text-slate-500">MER</div><div class="font-semibold">${fmtPct(p.mer, 2)}</div></div>
+        <div id="${sparkId}" class="pick-sparkline"></div>
+        <div class="pick-stats">
+          <div class="stat-item">
+            <div class="stat-label">Composite</div>
+            <div class="stat-value">${fmtNum(p.composite_score, 1)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">1Y Return</div>
+            <div class="stat-value ${ret1y != null ? (ret1y >= 0 ? 'pos' : 'neg') : ''}">${fmtPct(ret1y, 1)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">3Y CAGR</div>
+            <div class="stat-value ${p.return_3y != null ? (p.return_3y >= 0 ? 'pos' : 'neg') : ''}">${fmtPct(p.return_3y, 1)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Sharpe 3Y</div>
+            <div class="stat-value">${fmtNum(p.sharpe_3y, 2)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Yield</div>
+            <div class="stat-value pos">${fmtPct(p.dividend_yield, 2)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">MER</div>
+            <div class="stat-value">${fmtPct(p.mer, 2)}</div>
+          </div>
         </div>
-        <div class="mt-3 space-y-1.5">
-          ${ ["return","risk_adj","stability","cost","liquidity","income"].map(k => {
-              const labels = {return:"Return",risk_adj:"Risk-adj.",stability:"Stability",cost:"Cost",liquidity:"Liquidity",income:"Income"};
-              const v = p["score_"+k] ?? 50;
-              return `<div>
-                <div class="flex justify-between text-xs text-slate-600"><span>${labels[k]}</span><span>${v.toFixed(0)}</span></div>
-                <div class="pillar-bar" style="--score:${v}%"></div>
-              </div>`;
-            }).join("")}
-        </div>
-        <p class="mt-3 text-xs text-slate-600 italic">${rationales[i] || ""}</p>`;
+        <div class="pick-pillars">${pillarHtml}</div>
+        ${rationales && rationales[i] ? `<div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:9px">${rationales[i]}</div>` : ""}
+      `;
       grid.appendChild(card);
 
       // Sparkline
-      if (p.history_dates && p.history_prices && p.history_prices.length > 1) {
-        Plotly.newPlot(`spark-${i}`, [{
+      if (p.history_dates && p.history_prices && p.history_prices.length > 2) {
+        const isUp = p.history_prices[p.history_prices.length-1] >= p.history_prices[0];
+        const lineColor = isUp ? "#4ade80" : "#f87171";
+        Plotly.newPlot(sparkId, [{
           x: p.history_dates, y: p.history_prices,
           type: "scatter", mode: "lines",
-          line: { color: "#4f46e5", width: 1.5 },
-          fill: "tozeroy", fillcolor: "rgba(79,70,229,0.10)",
-          hoverinfo: "skip",
+          line: { color: lineColor, width: 1.5 },
+          fill: "tozeroy", fillcolor: isUp ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)",
         }], {
-          margin: {l: 0, r: 0, t: 0, b: 0},
-          xaxis: { visible: false },
-          yaxis: { visible: false, range: [Math.min(...p.history_prices)*0.95, Math.max(...p.history_prices)*1.05] },
-          showlegend: false, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-        }, { displayModeBar: false, responsive: true });
+          margin: {t:0,b:0,l:0,r:0},
+          xaxis: {visible:false}, yaxis: {visible:false},
+          showlegend: false,
+          paper_bgcolor: "transparent", plot_bgcolor: "transparent",
+        }, {displayModeBar: false, responsive: true});
       }
     });
   }
 
   function renderTable(rows) {
-    const tbody = document.getElementById("fullTable");
+    const tbody = document.getElementById("tableBody");
     tbody.innerHTML = "";
-    rows.forEach(r => {
+    (rows || []).forEach(r => {
       const tr = document.createElement("tr");
-      tr.className = "border-t border-slate-100 hover:bg-slate-50";
-      const r1 = (r.return_1y ?? 0);
+      const ret1y = r.return_1y;
       tr.innerHTML = `
-        <td class="px-3 py-2 font-mono font-medium">${r.ticker}</td>
-        <td class="px-3 py-2">${r.name ?? ""}</td>
-        <td class="px-3 py-2 text-slate-500">${r.category ?? ""}</td>
-        <td class="px-3 py-2 text-right" data-sort="${r.composite_score ?? 0}">${fmtNum(r.composite_score, 1)}</td>
-        <td class="px-3 py-2 text-right ${r1 >= 0 ? "num-pos" : "num-neg"}" data-sort="${r1}">${fmtPct(r.return_1y, 1)}</td>
-        <td class="px-3 py-2 text-right" data-sort="${r.return_3y ?? -1}">${fmtPct(r.return_3y, 1)}</td>
-        <td class="px-3 py-2 text-right" data-sort="${r.return_5y ?? -1}">${fmtPct(r.return_5y, 1)}</td>
-        <td class="px-3 py-2 text-right" data-sort="${r.volatility_1y ?? 0}">${fmtPct(r.volatility_1y, 1)}</td>
-        <td class="px-3 py-2 text-right" data-sort="${r.sharpe_3y ?? 0}">${fmtNum(r.sharpe_3y, 2)}</td>
-        <td class="px-3 py-2 text-right" data-sort="${r.dividend_yield ?? 0}">${fmtPct(r.dividend_yield, 2)}</td>
-        <td class="px-3 py-2 text-right" data-sort="${r.mer ?? 0}">${fmtPct(r.mer, 2)}</td>`;
+        <td class="mono" style="font-weight:700">${r.ticker}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${r.name||"—"}</td>
+        <td><span class="chip-cat">${r.category||"—"}</span></td>
+        <td class="mono" style="text-align:right" data-sort="${r.composite_score??0}">${r.composite_score!=null?(+r.composite_score).toFixed(1):"—"}</td>
+        <td class="mono" style="text-align:right" data-sort="${r.return_1y??-99}"><span class="${ret1y!=null?(ret1y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_1y,1)}</span></td>
+        <td class="mono" style="text-align:right" data-sort="${r.return_3y??-99}"><span class="${r.return_3y!=null?(r.return_3y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_3y,1)}</span></td>
+        <td class="mono" style="text-align:right" data-sort="${r.return_5y??-99}"><span class="${r.return_5y!=null?(r.return_5y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_5y,1)}</span></td>
+        <td class="mono" style="text-align:right" data-sort="${r.volatility_1y??0}">${fmtPct(r.volatility_1y,1)}</td>
+        <td class="mono" style="text-align:right" data-sort="${r.sharpe_3y??0}">${fmtNum(r.sharpe_3y,2)}</td>
+        <td class="mono" style="text-align:right" data-sort="${r.dividend_yield??0}"><span class="num-pos">${fmtPct(r.dividend_yield,2)}</span></td>
+        <td class="mono" style="text-align:right" data-sort="${r.mer??0}">${fmtPct(r.mer,2)}</td>`;
       tbody.appendChild(tr);
     });
     bindSortableTable();
   }
 
   function bindSortableTable() {
-    const table = document.querySelector("table.sortable");
+    const table = document.getElementById("rankingTable");
     if (!table || table.dataset.bound === "1") return;
     const tbody = table.tBodies[0];
     table.querySelectorAll("th").forEach((th, i) => {
@@ -594,14 +802,49 @@
           const av = a.cells[i].dataset.sort ?? a.cells[i].innerText.trim();
           const bv = b.cells[i].dataset.sort ?? b.cells[i].innerText.trim();
           const an = parseFloat(av), bn = parseFloat(bv);
-          const isNum = !isNaN(an) && !isNaN(bn);
-          if (isNum) return asc ? an - bn : bn - an;
-          return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+          return !isNaN(an) && !isNaN(bn) ? (asc ? an-bn : bn-an) : (asc ? av.localeCompare(bv) : bv.localeCompare(av));
         });
         rows.forEach(r => tbody.appendChild(r));
       });
     });
     table.dataset.bound = "1";
+  }
+
+  function renderDividendPlan(plan) {
+    const card = document.getElementById("dividendPlan");
+    if (!plan) { card.className = "divplan-card"; return; }
+    card.className = "divplan-card visible";
+    document.getElementById("planTotalsHeadline").textContent =
+      `Target: ${fmtAUD0(plan.target_quarterly_aud)}/qtr · ${fmtAUD0(plan.target_annual_aud)}/yr`;
+    if (!plan.feasible) {
+      document.getElementById("planTotalCapital").textContent = "—";
+      document.getElementById("planAnnual").textContent = fmtAUD0(plan.target_annual_aud);
+      document.getElementById("planAvgYield").textContent = "0%";
+      document.getElementById("planTableBody").innerHTML = "";
+      document.getElementById("planWarnings").innerHTML =
+        (plan.warnings||[]).map(w => `<div class="warn-box">${w}</div>`).join("");
+      return;
+    }
+    document.getElementById("planTotalCapital").textContent = fmtAUD0(plan.total_capital_aud);
+    document.getElementById("planAnnual").textContent = fmtAUD0(plan.target_annual_aud);
+    document.getElementById("planAvgYield").textContent = ((plan.average_yield||0)*100).toFixed(2)+"%";
+    const body = document.getElementById("planTableBody");
+    body.innerHTML = "";
+    (plan.allocations||[]).forEach(a => {
+      const tr = document.createElement("tr");
+      const zero = a.yield <= 0;
+      tr.innerHTML = `
+        <td class="mono" style="font-weight:700">${a.ticker}</td>
+        <td style="color:var(--muted)">${a.name??""}</td>
+        <td class="mono" style="text-align:right;${zero?'color:var(--amber)':''}">${(a.yield*100).toFixed(2)}%${zero?" ⚠":""}</td>
+        <td class="mono" style="text-align:right;font-weight:700">${fmtAUD(a.investment_aud)}</td>
+        <td class="mono" style="text-align:right">${fmtAUD(a.expected_annual_aud)}</td>
+        <td class="mono" style="text-align:right">${fmtAUD(a.expected_quarterly_aud)}</td>
+        <td class="mono" style="text-align:right;color:var(--muted)">${fmtAUD(a.expected_monthly_aud)}</td>`;
+      body.appendChild(tr);
+    });
+    document.getElementById("planWarnings").innerHTML =
+      (plan.warnings||[]).map(w => `<div class="warn-box">${w}</div>`).join("");
   }
 
   function renderPillarWeights(weights) {
@@ -613,56 +856,37 @@
     const maxW = Math.max(...order.map(k => weights[k] ?? 0));
     order.forEach(k => {
       const w = weights[k] ?? 0;
-      const row = document.createElement("div");
-      row.innerHTML = `
-        <div class="flex justify-between text-slate-600">
-          <span>${labels[k]}</span>
-          <span class="tabular-nums">${(w*100).toFixed(0)}%</span>
-        </div>
-        <div class="h-2 rounded bg-slate-100 mt-1">
-          <div class="h-2 rounded bg-indigo-500" style="width:${(w/maxW*100).toFixed(0)}%"></div>
-        </div>`;
-      container.appendChild(row);
+      const div = document.createElement("div");
+      div.className = "pillar-row";
+      div.innerHTML = `
+        <div class="pillar-label"><span>${labels[k]}</span><span style="font-family:'Geist Mono',monospace">${(w*100).toFixed(0)}%</span></div>
+        <div class="pillar-track"><div class="pillar-fill" style="width:${maxW>0?(w/maxW*100).toFixed(0):0}%"></div></div>`;
+      container.appendChild(div);
     });
   }
 
-  // ---------- Init ----------
-  loadCategories();
-  </script>
-
-  <script>
-  // ── ETF save-to-combined ──────────────────────────────────────────────────
-  let _etfCurrentPicks = [];
+  // ── Save ETF picks to Combined ────────────────────────────────────────────
   function saveEtfPicks() {
     if (!_etfCurrentPicks.length) return;
     const payload = _etfCurrentPicks.map(p => ({
       ticker: p.ticker,
       name: p.name || p.ticker,
-      source: 'ETF',
+      source: "ETF",
       annualReturn: p.return_1y != null ? +(p.return_1y*100).toFixed(2) : (p.return_3y != null ? +(p.return_3y*100).toFixed(2) : 8.0),
       volatility: p.volatility_1y != null ? +(p.volatility_1y*100).toFixed(2) : 14.0,
       dividendYield: p.dividend_yield != null ? +(p.dividend_yield*100).toFixed(2) : 0,
-      category: p.category || '',
+      category: p.category || "",
       allocation: 0,
     }));
-    localStorage.setItem('asx_etf_picks', JSON.stringify(payload));
-    const c = document.getElementById('etfSaveConfirm');
-    c.style.display = 'inline';
-    setTimeout(() => { c.style.display = 'none'; }, 2500);
+    localStorage.setItem("asx_etf_picks", JSON.stringify(payload));
+    const c = document.getElementById("etfSaveConfirm");
+    c.style.display = "inline";
+    setTimeout(() => { c.style.display = "none"; }, 2500);
   }
-  // Patch renderResults to capture picks
-  const _etfPatchInterval = setInterval(() => {
-    if (typeof renderResults !== 'undefined') {
-      clearInterval(_etfPatchInterval);
-      const _origRender = renderResults;
-      window.renderResults = function(data) {
-        _origRender(data);
-        _etfCurrentPicks = data.picks || [];
-        const btn = document.getElementById('etfSaveBtn');
-        if (btn) btn.disabled = _etfCurrentPicks.length === 0;
-      };
-    }
-  }, 50);
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadCategories();
+  runScreen(false);
   </script>
 </body>
 </html>
