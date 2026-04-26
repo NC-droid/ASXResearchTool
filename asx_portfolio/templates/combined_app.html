@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Combined Portfolio Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .num-pos { color: #16a34a; }
+    .num-neg { color: #dc2626; }
+    input[type=range] { accent-color: #7c3aed; }
+    .source-etf  { background:#dbeafe;color:#1d4ed8; }
+    .source-asx  { background:#d1fae5;color:#065f46; }
+    .stale { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .alloc-bar-fill { transition: width 0.3s ease; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- Nav -->
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-md bg-violet-600 text-white grid place-items-center font-bold">A</div>
+        <div>
+          <div class="font-semibold text-slate-900">Combined Portfolio Simulator</div>
+          <div class="text-xs text-slate-500">Mix ETFs + ASX stocks · Monte Carlo · 500 simulations</div>
+        </div>
+      </div>
+      <nav class="flex gap-1 text-sm">
+        <a href="/" class="px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100">ETF Screener</a>
+        <a href="/stocks" class="px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100">ASX 200 Stocks</a>
+        <a href="/combined" class="px-3 py-1.5 rounded-md bg-violet-50 text-violet-700 font-medium">Combined Portfolio</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- ── Left: portfolio builder ── -->
+    <div class="lg:col-span-5 space-y-5">
+
+      <!-- Load from screeners -->
+      <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="font-semibold text-slate-900 mb-3">Load saved picks</h2>
+        <div class="space-y-2">
+          <button id="loadEtfBtn" class="w-full py-2 px-4 rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm hover:bg-indigo-100 flex items-center justify-between">
+            <span>Load ETF picks from screener</span>
+            <span id="etfBadge" class="text-xs bg-indigo-600 text-white rounded-full px-2 py-0.5 hidden"></span>
+          </button>
+          <button id="loadAsxBtn" class="w-full py-2 px-4 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm hover:bg-emerald-100 flex items-center justify-between">
+            <span>Load ASX stock picks from screener</span>
+            <span id="asxBadge" class="text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5 hidden"></span>
+          </button>
+          <p class="text-xs text-slate-400 mt-1">Or add holdings manually below using the + buttons.</p>
+        </div>
+      </section>
+
+      <!-- Holdings builder -->
+      <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold text-slate-900">Portfolio Holdings</h2>
+          <div class="flex gap-2">
+            <button id="addEtfRowBtn" class="text-xs px-2 py-1 rounded border border-indigo-200 text-indigo-700 hover:bg-indigo-50">+ ETF</button>
+            <button id="addStockRowBtn" class="text-xs px-2 py-1 rounded border border-emerald-200 text-emerald-700 hover:bg-emerald-50">+ Stock</button>
+            <button id="equaliseBtn" class="text-xs px-2 py-1 rounded border border-slate-200 text-slate-600 hover:bg-slate-50">⟳ Equal-weight</button>
+          </div>
+        </div>
+
+        <div id="holdingsList" class="space-y-2 min-h-[80px]">
+          <p id="emptyHoldings" class="text-sm text-slate-400 py-6 text-center">No holdings yet. Load from screeners or add manually.</p>
+        </div>
+
+        <!-- Allocation bar -->
+        <div class="mt-4">
+          <div class="flex h-3 rounded-full overflow-hidden bg-slate-100" id="allocBar"></div>
+          <div class="flex justify-between mt-1 text-xs">
+            <span id="allocTotal" class="text-slate-500">0% allocated</span>
+            <span id="allocWarning" class="text-red-500 hidden">Must total 100%</span>
+          </div>
+          <div id="allocLegend" class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-slate-500"></div>
+        </div>
+      </section>
+
+      <!-- Simulation settings -->
+      <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="font-semibold text-slate-900 mb-4">Simulation parameters</h2>
+
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-sm font-medium text-slate-700">Initial investment</label>
+            <span id="amountLabel" class="text-sm text-slate-500 tabular-nums">$10,000</span>
+          </div>
+          <input id="amountSlider" type="range" min="0" max="40" step="1" value="10" class="w-full" />
+          <div class="flex justify-between text-xs text-slate-400 mt-1"><span>$1K</span><span>$50K</span><span>$250K</span></div>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-sm font-medium text-slate-700">Time horizon</label>
+            <span id="yearsLabel" class="text-sm text-slate-500 tabular-nums">10 years</span>
+          </div>
+          <input id="yearsSlider" type="range" min="1" max="30" step="1" value="10" class="w-full" />
+        </div>
+
+        <button id="simulateBtn"
+          class="w-full py-3 rounded-lg bg-violet-600 text-white font-semibold hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          disabled>
+          ▶ Run Monte Carlo Simulation
+        </button>
+        <p id="simStatus" class="text-xs text-slate-400 mt-2 text-center"></p>
+      </section>
+    </div>
+
+    <!-- ── Right: results ── -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- Placeholder -->
+      <div id="resultsPlaceholder" class="bg-white border border-slate-200 rounded-lg p-12 text-center text-slate-400">
+        <div class="text-4xl mb-3">📊</div>
+        <div class="font-medium mb-1">Build your portfolio on the left</div>
+        <div class="text-sm">Load picks from the ETF and ASX 200 screeners, set allocations, then run the simulation.</div>
+      </div>
+
+      <!-- Results (hidden until sim runs) -->
+      <div id="resultsSection" class="hidden space-y-6">
+
+        <!-- KPI cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="text-xs text-slate-400 mb-1">Median outcome</div>
+            <div id="kpiMedian" class="text-2xl font-bold text-slate-900">—</div>
+            <div id="kpiHorizon" class="text-xs text-slate-400"></div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="text-xs text-slate-400 mb-1">Bear case (10th %ile)</div>
+            <div id="kpiBear" class="text-2xl font-bold text-red-600">—</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="text-xs text-slate-400 mb-1">Bull case (90th %ile)</div>
+            <div id="kpiBull" class="text-2xl font-bold text-emerald-600">—</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="text-xs text-slate-400 mb-1">Probability of profit</div>
+            <div id="kpiProb" class="text-2xl font-bold text-slate-900">—</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="text-xs text-slate-400 mb-1">Blended return / yr</div>
+            <div id="kpiReturn" class="text-2xl font-bold text-violet-600">—</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-4">
+            <div class="text-xs text-slate-400 mb-1">Portfolio volatility</div>
+            <div id="kpiVol" class="text-2xl font-bold text-slate-900">—</div>
+          </div>
+        </div>
+
+        <!-- Monte Carlo chart -->
+        <section class="bg-white border border-slate-200 rounded-lg p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-semibold text-slate-900">Monte Carlo — 500 paths</h2>
+            <span class="text-xs text-slate-400">Dashed = 10th/90th percentile</span>
+          </div>
+          <div id="mcChart" class="w-full" style="height:280px"></div>
+        </section>
+
+        <!-- Holdings breakdown table -->
+        <section class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div class="px-5 py-3 border-b border-slate-100">
+            <h2 class="font-semibold text-slate-900">Portfolio breakdown</h2>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-left text-slate-500 text-xs uppercase tracking-wide">
+              <tr>
+                <th class="px-4 py-2">Ticker</th>
+                <th class="px-4 py-2">Name</th>
+                <th class="px-4 py-2">Source</th>
+                <th class="px-4 py-2 text-right">Allocation</th>
+                <th class="px-4 py-2 text-right">1Y Return</th>
+                <th class="px-4 py-2 text-right">Volatility</th>
+                <th class="px-4 py-2 text-right">Contribution</th>
+              </tr>
+            </thead>
+            <tbody id="breakdownBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </section>
+
+        <!-- Disclaimer -->
+        <p class="text-xs text-slate-400 text-center pb-4">
+          For illustrative purposes only. Not financial advice. Past performance and model returns do not predict future outcomes.
+          Returns and volatility are historical estimates; simulated future paths may differ materially from reality.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add holding modal -->
+  <div id="addModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+      <h3 id="modalTitle" class="font-semibold text-slate-900 mb-4">Add holding</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-500 mb-1 block">Ticker (e.g. VAS.AX or BHP.AX)</label>
+          <input id="modalTicker" type="text" placeholder="VAS.AX"
+            class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500 mb-1 block">Display name</label>
+          <input id="modalName" type="text" placeholder="Vanguard Australian Shares"
+            class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-slate-500 mb-1 block">Annual return (%)</label>
+            <input id="modalReturn" type="number" step="0.1" placeholder="9.8"
+              class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-500 mb-1 block">Volatility (%)</label>
+            <input id="modalVol" type="number" step="0.1" placeholder="14.0"
+              class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button id="modalCancel" class="flex-1 py-2 rounded-md border border-slate-200 text-slate-700 text-sm hover:bg-slate-50">Cancel</button>
+        <button id="modalConfirm" class="flex-1 py-2 rounded-md bg-violet-600 text-white text-sm font-medium hover:bg-violet-700">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ─── State ───────────────────────────────────────────────────────────────
+  let holdings = [];   // [{ticker, name, source, annualReturn, volatility, allocation}]
+  let initialAmount = 10_000;
+  let years = 10;
+  let modalSource = "ETF";
+
+  const COLORS = ["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#84cc16","#ec4899","#14b8a6","#3b82f6","#a78bfa","#fb923c","#a3e635"];
+
+  // ─── Formatters ──────────────────────────────────────────────────────────
+  function fmtAUD(v) {
+    if (v == null || isNaN(v)) return "—";
+    if (v >= 1e6) return "$" + (v/1e6).toFixed(2) + "M";
+    if (v >= 1e3) return "$" + (v/1e3).toFixed(1) + "K";
+    return "$" + v.toFixed(2);
+  }
+  function fmtPct(v, decimals=1) {
+    if (v == null || isNaN(v)) return "—";
+    const cls = v >= 0 ? "num-pos" : "num-neg";
+    return `<span class="${cls}">${v.toFixed(decimals)}%</span>`;
+  }
+
+  // ─── Amount slider ────────────────────────────────────────────────────────
+  const AMOUNT_VALS = [1000,2000,3000,5000,7500,10000,15000,20000,25000,30000,40000,50000,60000,75000,100000,125000,150000,175000,200000,225000,250000,275000,300000,350000,400000,450000,500000,600000,750000,1000000,1250000,1500000,2000000,2500000,5000000,10000000,25000000,50000000,100000000,200000000,500000000];
+  document.getElementById("amountSlider").addEventListener("input", e => {
+    const idx = Math.round(+e.target.value / 40 * (AMOUNT_VALS.length - 1));
+    initialAmount = AMOUNT_VALS[idx] || 10000;
+    document.getElementById("amountLabel").textContent = fmtAUD(initialAmount).replace("$","$").replace(".00","");
+  });
+  document.getElementById("yearsSlider").addEventListener("input", e => {
+    years = +e.target.value;
+    document.getElementById("yearsLabel").textContent = years + " year" + (years === 1 ? "" : "s");
+  });
+
+  // ─── Holdings management ─────────────────────────────────────────────────
+  function addHolding(h) {
+    // Deduplicate by ticker
+    if (holdings.find(x => x.ticker === h.ticker)) {
+      holdings = holdings.map(x => x.ticker === h.ticker ? { ...x, ...h } : x);
+    } else {
+      holdings.push({ allocation: 0, ...h });
+    }
+    renderHoldings();
+  }
+
+  function removeHolding(ticker) {
+    holdings = holdings.filter(h => h.ticker !== ticker);
+    renderHoldings();
+  }
+
+  function updateAllocation(ticker, val) {
+    holdings = holdings.map(h => h.ticker === ticker ? { ...h, allocation: Math.max(0, Math.min(100, +val)) } : h);
+    renderHoldings();
+  }
+
+  function equalise() {
+    if (!holdings.length) return;
+    const each = Math.floor(100 / holdings.length);
+    const rem = 100 - each * holdings.length;
+    holdings = holdings.map((h, i) => ({ ...h, allocation: each + (i === 0 ? rem : 0) }));
+    renderHoldings();
+  }
+
+  function renderHoldings() {
+    const list = document.getElementById("holdingsList");
+    const empty = document.getElementById("emptyHoldings");
+    list.innerHTML = "";
+
+    if (!holdings.length) {
+      list.appendChild(empty);
+      empty.classList.remove("hidden");
+      updateAllocBar();
+      updateSimBtn();
+      return;
+    }
+
+    holdings.forEach((h, i) => {
+      const div = document.createElement("div");
+      div.className = "flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2";
+      div.innerHTML = `
+        <div class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${COLORS[i % COLORS.length]}"></div>
+        <span class="font-mono text-xs font-bold text-slate-700 w-16 shrink-0">${h.ticker}</span>
+        <span class="text-xs text-slate-400 truncate flex-1 max-w-[120px]">${h.name||""}</span>
+        <span class="text-xs px-1.5 py-0.5 rounded font-medium ${h.source === 'ETF' ? 'source-etf' : 'source-asx'}">${h.source}</span>
+        <input type="number" min="0" max="100" step="1" value="${h.allocation}"
+          class="w-16 text-right text-sm border border-slate-200 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-violet-400"
+          onchange="updateAllocation('${h.ticker}', this.value)" />
+        <span class="text-xs text-slate-400">%</span>
+        <button onclick="removeHolding('${h.ticker}')" class="text-slate-300 hover:text-red-400 ml-1">✕</button>
+      `;
+      list.appendChild(div);
+    });
+
+    updateAllocBar();
+    updateSimBtn();
+  }
+
+  function updateAllocBar() {
+    const total = holdings.reduce((s, h) => s + (+h.allocation || 0), 0);
+    const bar = document.getElementById("allocBar");
+    const totalEl = document.getElementById("allocTotal");
+    const warning = document.getElementById("allocWarning");
+    const legend = document.getElementById("allocLegend");
+
+    bar.innerHTML = "";
+    legend.innerHTML = "";
+
+    holdings.forEach((h, i) => {
+      if (+h.allocation > 0) {
+        const seg = document.createElement("div");
+        seg.className = "alloc-bar-fill h-full";
+        seg.style.width = `${(+h.allocation / Math.max(total, 100)) * 100}%`;
+        seg.style.background = COLORS[i % COLORS.length];
+        seg.title = `${h.ticker}: ${h.allocation}%`;
+        bar.appendChild(seg);
+
+        const chip = document.createElement("span");
+        chip.className = "flex items-center gap-1";
+        chip.innerHTML = `<span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i % COLORS.length]};display:inline-block"></span>${h.ticker} ${h.allocation}%`;
+        legend.appendChild(chip);
+      }
+    });
+
+    totalEl.textContent = `${total}% allocated`;
+    totalEl.className = `text-xs ${total === 100 ? "text-emerald-600 font-medium" : "text-slate-500"}`;
+    warning.classList.toggle("hidden", total === 100);
+  }
+
+  function updateSimBtn() {
+    const total = holdings.reduce((s, h) => s + (+h.allocation || 0), 0);
+    document.getElementById("simulateBtn").disabled = (total !== 100 || holdings.length === 0);
+  }
+
+  document.getElementById("equaliseBtn").addEventListener("click", equalise);
+
+  // ─── Load from localStorage ──────────────────────────────────────────────
+  document.getElementById("loadEtfBtn").addEventListener("click", () => {
+    const raw = localStorage.getItem("asx_etf_picks");
+    if (!raw) { alert("No ETF picks saved. Go to the ETF Screener, run a screen, then click 'Save picks to Combined'."); return; }
+    try {
+      const picks = JSON.parse(raw);
+      picks.forEach(p => addHolding({ ...p, source: "ETF" }));
+      const badge = document.getElementById("etfBadge");
+      badge.textContent = picks.length;
+      badge.classList.remove("hidden");
+    } catch { alert("Could not parse saved ETF picks."); }
+  });
+
+  document.getElementById("loadAsxBtn").addEventListener("click", () => {
+    const raw = localStorage.getItem("asx_stock_picks");
+    if (!raw) { alert("No ASX picks saved. Go to the ASX 200 Screener, run a screen, then click 'Save picks to Combined'."); return; }
+    try {
+      const picks = JSON.parse(raw);
+      picks.forEach(p => addHolding({ ...p, source: "ASX" }));
+      const badge = document.getElementById("asxBadge");
+      badge.textContent = picks.length;
+      badge.classList.remove("hidden");
+    } catch { alert("Could not parse saved ASX picks."); }
+  });
+
+  // ─── Manual add ──────────────────────────────────────────────────────────
+  document.getElementById("addEtfRowBtn").addEventListener("click", () => openModal("ETF"));
+  document.getElementById("addStockRowBtn").addEventListener("click", () => openModal("ASX"));
+
+  function openModal(source) {
+    modalSource = source;
+    document.getElementById("modalTitle").textContent = `Add ${source} holding`;
+    document.getElementById("modalTicker").value = "";
+    document.getElementById("modalName").value = "";
+    document.getElementById("modalReturn").value = "";
+    document.getElementById("modalVol").value = "";
+    document.getElementById("addModal").classList.remove("hidden");
+  }
+
+  document.getElementById("modalCancel").addEventListener("click", () => {
+    document.getElementById("addModal").classList.add("hidden");
+  });
+
+  document.getElementById("modalConfirm").addEventListener("click", () => {
+    const ticker = document.getElementById("modalTicker").value.trim().toUpperCase();
+    const name = document.getElementById("modalName").value.trim();
+    const ret = parseFloat(document.getElementById("modalReturn").value);
+    const vol = parseFloat(document.getElementById("modalVol").value);
+    if (!ticker) { alert("Please enter a ticker."); return; }
+    if (isNaN(ret) || isNaN(vol)) { alert("Please enter valid return and volatility values."); return; }
+    addHolding({ ticker, name: name || ticker, source: modalSource, annualReturn: ret, volatility: vol });
+    document.getElementById("addModal").classList.add("hidden");
+  });
+
+  // ─── Simulate ────────────────────────────────────────────────────────────
+  document.getElementById("simulateBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("simulateBtn");
+    const status = document.getElementById("simStatus");
+    btn.disabled = true;
+    status.textContent = "Running 500 simulations…";
+
+    const payload = {
+      holdings: holdings.map(h => ({
+        ticker: h.ticker,
+        name: h.name,
+        allocation: +h.allocation,
+        annualReturn: +h.annualReturn,
+        volatility: +h.volatility,
+        source: h.source,
+      })),
+      initial_amount: initialAmount,
+      years: years,
+      sim_count: 500,
+    };
+
+    try {
+      const r = await fetch("/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) {
+        const err = await r.json();
+        throw new Error(err.detail || "HTTP " + r.status);
+      }
+      const data = await r.json();
+      renderResults(data);
+      status.textContent = "Simulation complete.";
+    } catch (e) {
+      status.textContent = "Error: " + e.message;
+    } finally {
+      btn.disabled = false;
+      updateSimBtn();
+    }
+  });
+
+  // ─── Render results ──────────────────────────────────────────────────────
+  function renderResults(data) {
+    document.getElementById("resultsPlaceholder").classList.add("hidden");
+    document.getElementById("resultsSection").classList.remove("hidden");
+
+    // KPIs
+    document.getElementById("kpiMedian").textContent = fmtAUD(data.p50[data.p50.length - 1]);
+    document.getElementById("kpiBear").textContent   = fmtAUD(data.p10[data.p10.length - 1]);
+    document.getElementById("kpiBull").textContent   = fmtAUD(data.p90[data.p90.length - 1]);
+    document.getElementById("kpiProb").textContent   = (data.prob_profit * 100).toFixed(1) + "%";
+    document.getElementById("kpiReturn").textContent = data.weighted_return_pct.toFixed(2) + "%/yr";
+    document.getElementById("kpiVol").textContent    = data.weighted_vol_pct.toFixed(2) + "%";
+    document.getElementById("kpiHorizon").textContent = `${years}-year horizon · initial ${fmtAUD(initialAmount)}`;
+
+    // Chart
+    const monthPts = data.p50.map((_, i) => +(i * data.step / 12).toFixed(2));
+    Plotly.react("mcChart", [
+      {
+        x: monthPts, y: data.p90,
+        type: "scatter", mode: "lines", name: "90th %ile",
+        line: { color: "rgba(99,102,241,0.3)", width: 1.5, dash: "dot" },
+        fill: "tonexty", fillcolor: "rgba(99,102,241,0.05)",
+      },
+      {
+        x: monthPts, y: data.p10,
+        type: "scatter", mode: "lines", name: "10th %ile",
+        line: { color: "rgba(99,102,241,0.3)", width: 1.5, dash: "dot" },
+      },
+      {
+        x: monthPts, y: data.p50,
+        type: "scatter", mode: "lines", name: "Median",
+        line: { color: "#7c3aed", width: 2.5 },
+      },
+    ], {
+      margin: { t: 10, b: 40, l: 60, r: 10 },
+      xaxis: { title: "Years", tickformat: ".0f" },
+      yaxis: { title: "Portfolio value", tickformat: "$,.0f" },
+      showlegend: true,
+      legend: { orientation: "h", y: -0.15 },
+      paper_bgcolor: "white",
+      plot_bgcolor: "white",
+      hovermode: "x unified",
+    }, { displayModeBar: false, responsive: true });
+
+    // Breakdown table
+    const tbody = document.getElementById("breakdownBody");
+    tbody.innerHTML = "";
+    const total = holdings.reduce((s, h) => s + (+h.allocation), 0);
+    holdings.forEach((h, i) => {
+      const contrib = ((+h.annualReturn) * (+h.allocation) / 100).toFixed(2);
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-slate-50";
+      tr.innerHTML = `
+        <td class="px-4 py-2">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full" style="background:${COLORS[i % COLORS.length]}"></div>
+            <span class="font-mono font-bold text-slate-800">${h.ticker}</span>
+          </div>
+        </td>
+        <td class="px-4 py-2 text-slate-600 max-w-[160px] truncate">${h.name||"—"}</td>
+        <td class="px-4 py-2"><span class="px-2 py-0.5 rounded text-xs font-medium ${h.source === 'ETF' ? 'source-etf' : 'source-asx'}">${h.source}</span></td>
+        <td class="px-4 py-2 text-right font-medium">${h.allocation}%</td>
+        <td class="px-4 py-2 text-right">${fmtPct(+h.annualReturn)}</td>
+        <td class="px-4 py-2 text-right">${fmtPct(+h.volatility)}</td>
+        <td class="px-4 py-2 text-right font-medium text-violet-700">+${contrib}%</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ─── Boot ────────────────────────────────────────────────────────────────
+  renderHoldings();
+  </script>
+</body>
+</html>
