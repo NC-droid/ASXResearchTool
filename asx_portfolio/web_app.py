@@ -27,13 +27,16 @@ import time
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from . import etf_fetcher, etf_scorer, stock_fetcher, stock_scorer
+# ETF modules — always required, imported at top level
+from . import etf_fetcher, etf_scorer
+
+# Stock + numpy modules imported lazily inside routes so a missing dep
+# never prevents the ETF page from starting up.
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 log = logging.getLogger("asx_portfolio.web")
@@ -74,7 +77,7 @@ class StockScreenRequest(BaseModel):
 
 
 class SimulateRequest(BaseModel):
-    holdings: list[dict] = Field(...)  # [{ticker, name, allocation, annualReturn, volatility, source}]
+    holdings: list[dict] = Field(...)
     initial_amount: float = Field(default=10_000.0)
     years: int = Field(default=10)
     sim_count: int = Field(default=500)
@@ -109,7 +112,6 @@ def _row_to_stock_payload(d: dict, include_history: bool = True) -> dict[str, An
 
 
 def _build_dividend_plan(picks: list[dict], target_quarterly_aud: float) -> dict[str, Any] | None:
-    """Compute the equal-weight investment per pick to hit the target quarterly dividend."""
     if not picks or target_quarterly_aud <= 0:
         return None
 
@@ -133,7 +135,6 @@ def _build_dividend_plan(picks: list[dict], target_quarterly_aud: float) -> dict
 
     per_etf = target_annual / sum_yields
     total = per_etf * n
-
     allocations = []
     zero_yield_count = 0
     for p, y in zip(picks, yields):
@@ -175,7 +176,7 @@ def _build_dividend_plan(picks: list[dict], target_quarterly_aud: float) -> dict
 
 
 # ---------------------------------------------------------------------------
-# ETF endpoints (existing)
+# ETF endpoints (original — untouched)
 # ---------------------------------------------------------------------------
 
 
@@ -251,14 +252,14 @@ def screen(req: ScreenRequest) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# ASX 200 Stocks endpoints (v2 new)
+# ASX 200 Stocks endpoints (v2 — lazy imports)
 # ---------------------------------------------------------------------------
 
 
 @app.get("/api/sectors")
 def get_sectors() -> dict[str, Any]:
-    """Return unique sectors in the fetched stock universe."""
     try:
+        from . import stock_fetcher
         stocks = stock_fetcher.get_stock_data(force_refresh=False)
         sectors = sorted({s.sector for s in stocks if s.sector})
         return {"sectors": sectors}
@@ -269,6 +270,11 @@ def get_sectors() -> dict[str, Any]:
 @app.post("/api/screen-stocks")
 def screen_stocks(req: StockScreenRequest) -> dict[str, Any]:
     started = time.time()
+    try:
+        from . import stock_fetcher, stock_scorer
+    except ImportError as exc:
+        raise HTTPException(status_code=500, detail=f"Stock modules not available: {exc}")
+
     try:
         stocks = stock_fetcher.get_stock_data(force_refresh=req.force_refresh)
     except RuntimeError as exc:
@@ -309,13 +315,17 @@ def screen_stocks(req: StockScreenRequest) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Monte Carlo simulation endpoint (v2 new)
+# Monte Carlo simulation endpoint (v2 — lazy numpy import)
 # ---------------------------------------------------------------------------
 
 
 @app.post("/api/simulate")
 def simulate_portfolio(req: SimulateRequest) -> dict[str, Any]:
-    """Monte Carlo simulation for a mixed ETF + stocks portfolio."""
+    try:
+        import numpy as np
+    except ImportError as exc:
+        raise HTTPException(status_code=500, detail=f"numpy not available: {exc}")
+
     holdings = req.holdings
     if not holdings:
         raise HTTPException(status_code=400, detail="No holdings provided")
