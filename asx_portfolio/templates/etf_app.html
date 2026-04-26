@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASX ETF Screener</title>
+  <title>ETF Screener — ASX Research Tool</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <style>
@@ -21,23 +21,88 @@
     .sortable th.sorted-asc::after { content: " \2191"; }
     .sortable th.sorted-desc::after { content: " \2193"; }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style id="design-system">
+    :root {
+      --bg:#0c0f1a;--bg2:#111624;--card:#161d2e;--card2:#1c2540;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+      --gold:#f0b429;--gold2:#fcd34d;--gold-dim:rgba(240,180,41,0.1);--gold-glow:rgba(240,180,41,0.22);
+      --teal:#2dd4bf;--teal-dim:rgba(45,212,191,0.1);
+      --violet:#a78bfa;--violet-dim:rgba(167,139,250,0.1);
+      --red:#f87171;--green:#4ade80;
+      --text:#dde2ef;--muted:#7d8899;--dim:#3a4255;
+    }
+    body{font-family:'Plus Jakarta Sans',sans-serif!important;background:var(--bg)!important;color:var(--text)!important;}
+    body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+    .asx-nav{background:rgba(12,15,26,0.92)!important;backdrop-filter:blur(20px)!important;border-bottom:1px solid var(--border)!important;position:sticky!important;top:0!important;z-index:200!important;}
+    .asx-nav-inner{max-width:1280px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+    .asx-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .asx-logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),#e8830a);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:15px;color:#0c0f1a;font-weight:700;box-shadow:0 2px 10px var(--gold-glow);}
+    .asx-logo-text{font-size:13px;font-weight:600;color:var(--text);}
+    .asx-logo-sub{font-size:10px;color:var(--muted);}
+    .asx-nav-links{display:flex;gap:4px;}
+    .asx-nav-link{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:all 0.18s;border:1px solid transparent;}
+    .asx-nav-link:hover{color:var(--text);background:rgba(255,255,255,0.05);border-color:var(--border2);}
+    .asx-nav-link.active{color:var(--gold);background:var(--gold-dim);border-color:var(--gold-glow);}
+    .asx-disclaimer{background:rgba(240,180,41,0.06);border-bottom:1px solid rgba(240,180,41,0.15);padding:8px 32px;font-size:11.5px;color:rgba(240,180,41,0.7);display:flex;align-items:center;gap:8px;}
+    .asx-disclaimer strong{color:rgba(240,180,41,0.9);font-weight:600;}
+    .save-strip{background:linear-gradient(90deg,rgba(240,180,41,0.06),rgba(240,180,41,0.02));border:1px solid rgba(240,180,41,0.18);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;}
+    .save-strip-text{font-size:12px;color:var(--muted);}
+    .save-strip-text strong{color:var(--text);}
+    .save-strip-btn{flex-shrink:0;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+    .save-strip-btn:hover{background:var(--gold);color:#0c0f1a;}
+    .save-strip-btn:disabled{opacity:0.4;cursor:not-allowed;}
+    .save-confirm{font-size:11px;color:var(--teal);font-weight:600;display:none;}
+    /* Tailwind dark overrides */
+    .bg-white,.bg-slate-50{background:var(--card)!important;}
+    .border-slate-200,.border-slate-100{border-color:var(--border)!important;}
+    .text-slate-900,.text-slate-800{color:var(--text)!important;}
+    .text-slate-700,.text-slate-600{color:#9ca8bc!important;}
+    .text-slate-500,.text-slate-400{color:var(--muted)!important;}
+    .bg-indigo-600{background:var(--gold)!important;color:#0c0f1a!important;}
+    .bg-indigo-50{background:var(--gold-dim)!important;}
+    .bg-indigo-500{background:var(--gold)!important;}
+    .text-indigo-700,.text-indigo-900,.text-indigo-800{color:var(--gold)!important;}
+    .border-indigo-200{border-color:var(--gold-glow)!important;}
+    .chip{background:var(--gold-dim)!important;color:var(--gold)!important;}
+    input[type=range]{accent-color:var(--gold)!important;}
+    input[type=text],input[type=number]{background:var(--card2)!important;border-color:var(--border2)!important;color:var(--text)!important;}
+    .num-pos{color:var(--green)!important;}
+    .num-neg{color:var(--red)!important;}
+    table{color:var(--text)!important;}
+    thead{background:var(--card2)!important;}
+    th{color:var(--muted)!important;}
+    .bg-amber-50{background:rgba(240,180,41,0.07)!important;}
+    .text-amber-800{color:var(--gold)!important;}
+    .border-amber-200{border-color:rgba(240,180,41,0.25)!important;}
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-  <header class="bg-white border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-md bg-indigo-600 text-white grid place-items-center font-bold">A</div>
+    <header class="asx-nav">
+    <div class="asx-nav-inner">
+      <a href="/" class="asx-logo">
+        <div class="asx-logo-mark">A</div>
         <div>
-          <div class="font-semibold text-slate-900">ASX ETF Screener</div>
-          <div class="text-xs text-slate-500">Interactive · risk-adjusted · powered by Yahoo Finance</div>
+          <div class="asx-logo-text">ASX Research Tool</div>
+          <div class="asx-logo-sub">Personal use only</div>
         </div>
-      </div>
-      <div class="flex items-center gap-3 text-sm">
-        <span id="status" class="text-slate-500">Idle</span>
-        <button id="refreshBtn" class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium">Refresh data</button>
-      </div>
+      </a>
+      <nav class="asx-nav-links">
+        <a href="/" class="asx-nav-link">Home</a>
+        <a href="/etfs" class="asx-nav-link active">ETF Screener</a>
+        <a href="/stocks" class="asx-nav-link">ASX 200</a>
+        <a href="/combined" class="asx-nav-link">Combined</a>
+      </nav>
     </div>
   </header>
+  <div class="asx-disclaimer">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <strong>Personal research tool only.</strong>&nbsp; This is not financial advice. Please do your own research and consult a licensed financial adviser before making any investment decisions.
+  </div>
 
   <main class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Inputs panel -->
@@ -120,6 +185,17 @@
       <section class="bg-white border border-slate-200 rounded-lg p-4 text-xs text-slate-500">
         <strong class="text-slate-700">Disclaimer:</strong> Personal research tool only. Yahoo data may be delayed ~15&ndash;20 minutes. Not financial advice.
       </section>
+      <!-- Save ETF picks to Combined -->
+      <div class="save-strip">
+        <div class="save-strip-text">
+          <strong>Take it further</strong><br>
+          Save these picks and mix with ASX stocks in the Combined Simulator.
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <span class="save-confirm" id="etfSaveConfirm">✓ Saved!</span>
+          <button class="save-strip-btn" id="etfSaveBtn" disabled onclick="saveEtfPicks()">Save to Combined →</button>
+        </div>
+      </div>
     </aside>
 
     <!-- Results panel -->
@@ -552,6 +628,41 @@
 
   // ---------- Init ----------
   loadCategories();
+  </script>
+
+  <script>
+  // ── ETF save-to-combined ──────────────────────────────────────────────────
+  let _etfCurrentPicks = [];
+  function saveEtfPicks() {
+    if (!_etfCurrentPicks.length) return;
+    const payload = _etfCurrentPicks.map(p => ({
+      ticker: p.ticker,
+      name: p.name || p.ticker,
+      source: 'ETF',
+      annualReturn: p.return_1y != null ? +(p.return_1y*100).toFixed(2) : (p.return_3y != null ? +(p.return_3y*100).toFixed(2) : 8.0),
+      volatility: p.volatility_1y != null ? +(p.volatility_1y*100).toFixed(2) : 14.0,
+      dividendYield: p.dividend_yield != null ? +(p.dividend_yield*100).toFixed(2) : 0,
+      category: p.category || '',
+      allocation: 0,
+    }));
+    localStorage.setItem('asx_etf_picks', JSON.stringify(payload));
+    const c = document.getElementById('etfSaveConfirm');
+    c.style.display = 'inline';
+    setTimeout(() => { c.style.display = 'none'; }, 2500);
+  }
+  // Patch renderResults to capture picks
+  const _etfPatchInterval = setInterval(() => {
+    if (typeof renderResults !== 'undefined') {
+      clearInterval(_etfPatchInterval);
+      const _origRender = renderResults;
+      window.renderResults = function(data) {
+        _origRender(data);
+        _etfCurrentPicks = data.picks || [];
+        const btn = document.getElementById('etfSaveBtn');
+        if (btn) btn.disabled = _etfCurrentPicks.length === 0;
+      };
+    }
+  }, 50);
   </script>
 </body>
 </html>
