@@ -382,6 +382,12 @@ def simulate_portfolio(req: SimulateRequest) -> dict[str, Any]:
 
 
 @app.get("/", response_class=HTMLResponse)
+def landing() -> str:
+    template_path = Path(__file__).parent / "templates" / "landing.html"
+    return template_path.read_text(encoding="utf-8")
+
+
+@app.get("/etfs", response_class=HTMLResponse)
 def index() -> str:
     template_path = Path(__file__).parent / "templates" / "etf_app.html"
     return template_path.read_text(encoding="utf-8")
