@@ -326,6 +326,8 @@
   let currentPicks = [];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  // Security: sanitise any string before inserting into innerHTML
+  const sanitise = s => s == null ? "" : String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   const fmtPct = (v, d=1) => v == null ? "—" : (v*100).toFixed(d) + "%";
   const fmtNum = (v, d=1) => v == null || isNaN(parseFloat(v)) ? "—" : parseFloat(v).toFixed(d);
   const fmtAUD = v => { if (v==null||isNaN(v)) return "—"; const n=parseFloat(v); if(n>=1e9) return `$${(n/1e9).toFixed(1)}B`; if(n>=1e6) return `$${(n/1e6).toFixed(0)}M`; return `$${n.toFixed(2)}`; };
@@ -486,10 +488,10 @@
         <div class="pick-top">
           <div class="pick-ident">
             <div class="pick-rank">#${i+1} pick</div>
-            <div class="pick-ticker">${p.ticker}</div>
-            <div class="pick-name">${p.name||"—"}</div>
+            <div class="pick-ticker">${sanitise(p.ticker)}</div>
+            <div class="pick-name">${sanitise(p.name)||"—"}</div>
             <div class="pick-badges">
-              <span class="badge badge-sector">${p.sector||"—"}</span>
+              <span class="badge badge-sector">${sanitise(p.sector)||"—"}</span>
             </div>
           </div>
           <div class="pick-price">
@@ -509,7 +511,7 @@
         </div>
         <div class="pick-pillars">${pillarHtml}</div>
         <div id="${sparkId}" class="pick-sparkline"></div>
-        ${rationales[i] ? `<div class="pick-rationale">${rationales[i]}</div>` : ""}
+        ${rationales[i] ? `<div class="pick-rationale">${sanitise(rationales[i])}</div>` : ""}
       `;
       list.appendChild(card);
 
@@ -536,9 +538,9 @@
       const tr = document.createElement("tr");
       const ret1y = r.return_1y;
       tr.innerHTML = `
-        <td class="mono" style="font-weight:700">${r.ticker}</td>
-        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${r.name||"—"}</td>
-        <td><span class="chip-sector">${r.sector||"—"}</span></td>
+        <td class="mono" style="font-weight:700">${sanitise(r.ticker)}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${sanitise(r.name)||"—"}</td>
+        <td><span class="chip-sector">${sanitise(r.sector)||"—"}</span></td>
         <td class="mono" style="text-align:right" data-sort="${r.composite_score??0}">${r.composite_score!=null?(+r.composite_score).toFixed(1):"—"}</td>
         <td class="mono" style="text-align:right" data-sort="${r.projected_return??-99}">${r.projected_return!=null?((+r.projected_return)*100).toFixed(1)+"%":"—"}</td>
         <td class="mono" style="text-align:right" data-sort="${r.return_1y??-99}"><span class="${ret1y!=null?(ret1y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_1y)}</span></td>
