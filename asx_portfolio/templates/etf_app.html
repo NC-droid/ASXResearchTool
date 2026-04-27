@@ -509,6 +509,7 @@
 
   <script>
   // ── Helpers ──────────────────────────────────────────────────────────────
+  const sanitise = s => s == null ? "" : String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   const fmtPct = (v, dp=2) => v == null ? "—" : (v*100).toFixed(dp) + "%";
   const fmtNum = (v, dp=2) => v == null ? "—" : Number(v).toFixed(dp);
   const debounce = (fn, ms=400) => { let h; return (...a) => { clearTimeout(h); h = setTimeout(() => fn(...a), ms); }; };
@@ -709,10 +710,10 @@
         <div class="pick-card-top">
           <div>
             <div class="pick-rank">#${i+1} pick</div>
-            <div class="pick-ticker">${p.ticker}</div>
-            <div class="pick-name">${p.name || "—"}</div>
+            <div class="pick-ticker">${sanitise(p.ticker)}</div>
+            <div class="pick-name">${sanitise(p.name) || "—"}</div>
           </div>
-          <div class="pick-cat">${p.category || "—"}</div>
+          <div class="pick-cat">${sanitise(p.category) || "—"}</div>
         </div>
         <div id="${sparkId}" class="pick-sparkline"></div>
         <div class="pick-stats">
@@ -742,7 +743,7 @@
           </div>
         </div>
         <div class="pick-pillars">${pillarHtml}</div>
-        ${rationales && rationales[i] ? `<div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:9px">${rationales[i]}</div>` : ""}
+        ${rationales && rationales[i] ? `<div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:9px">${sanitise(rationales[i])}</div>` : ""}
       `;
       grid.appendChild(card);
 
@@ -772,9 +773,9 @@
       const tr = document.createElement("tr");
       const ret1y = r.return_1y;
       tr.innerHTML = `
-        <td class="mono" style="font-weight:700">${r.ticker}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${r.name||"—"}</td>
-        <td><span class="chip-cat">${r.category||"—"}</span></td>
+        <td class="mono" style="font-weight:700">${sanitise(r.ticker)}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${sanitise(r.name)||"—"}</td>
+        <td><span class="chip-cat">${sanitise(r.category)||"—"}</span></td>
         <td class="mono" style="text-align:right" data-sort="${r.composite_score??0}">${r.composite_score!=null?(+r.composite_score).toFixed(1):"—"}</td>
         <td class="mono" style="text-align:right" data-sort="${r.return_1y??-99}"><span class="${ret1y!=null?(ret1y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_1y,1)}</span></td>
         <td class="mono" style="text-align:right" data-sort="${r.return_3y??-99}"><span class="${r.return_3y!=null?(r.return_3y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_3y,1)}</span></td>
@@ -834,8 +835,8 @@
       const tr = document.createElement("tr");
       const zero = a.yield <= 0;
       tr.innerHTML = `
-        <td class="mono" style="font-weight:700">${a.ticker}</td>
-        <td style="color:var(--muted)">${a.name??""}</td>
+        <td class="mono" style="font-weight:700">${sanitise(a.ticker)}</td>
+        <td style="color:var(--muted)">${sanitise(a.name??"")}</td>
         <td class="mono" style="text-align:right;${zero?'color:var(--amber)':''}">${(a.yield*100).toFixed(2)}%${zero?" ⚠":""}</td>
         <td class="mono" style="text-align:right;font-weight:700">${fmtAUD(a.investment_aud)}</td>
         <td class="mono" style="text-align:right">${fmtAUD(a.expected_annual_aud)}</td>
