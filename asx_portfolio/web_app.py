@@ -27,7 +27,10 @@ import time
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
@@ -41,13 +44,46 @@ from . import etf_fetcher, etf_scorer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 log = logging.getLogger("asx_portfolio.web")
 
-app = FastAPI(title="ASX ETF + Stock Screener", version="0.4.0")
+limiter = Limiter(key_func=get_remote_address, default_limits=["200/hour"])
+app = FastAPI(
+    title="ASX ETF + Stock Screener",
+    version="0.4.0",
+    docs_url=None,    # Disable Swagger UI in production
+    redoc_url=None,   # Disable ReDoc in production
+)
+# Allow the deployed domain + localhost for local dev
+_ALLOWED_ORIGINS = [
+    "https://etfpicker-ckddffard0fqa9dz.australiaeast-01.azurewebsites.net",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    """Add OWASP-recommended security headers to every response."""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.plot.ly https://fonts.googleapis.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none';"
+    )
+    return response
+
 
 
 # ---------------------------------------------------------------------------
@@ -205,12 +241,14 @@ def refresh() -> dict[str, Any]:
 
 
 @app.post("/api/screen")
-def screen(req: ScreenRequest) -> dict[str, Any]:
+@limiter.limit("30/minute")
+def screen(req: ScreenRequest, request: Request) -> dict[str, Any]:
     started = time.time()
     try:
         etfs = etf_fetcher.get_etf_data(force_refresh=req.force_refresh)
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        log.error("Screen error: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error. Please try again.")
 
     inputs = etf_scorer.ScreenInputs(
         risk_tolerance=req.risk_tolerance,
@@ -264,21 +302,25 @@ def get_sectors() -> dict[str, Any]:
         sectors = sorted({s.sector for s in stocks if s.sector})
         return {"sectors": sectors}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        log.error("Screen error: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error. Please try again.")
 
 
 @app.post("/api/screen-stocks")
-def screen_stocks(req: StockScreenRequest) -> dict[str, Any]:
+@limiter.limit("30/minute")
+def screen_stocks(req: StockScreenRequest, request: Request) -> dict[str, Any]:
     started = time.time()
     try:
         from . import stock_fetcher, stock_scorer
     except ImportError as exc:
-        raise HTTPException(status_code=500, detail=f"Stock modules not available: {exc}")
+        log.error("Stock module import error: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail="Stock screening is not available. Please try again.")
 
     try:
         stocks = stock_fetcher.get_stock_data(force_refresh=req.force_refresh)
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        log.error("Screen error: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error. Please try again.")
 
     inputs = stock_scorer.StockScreenInputs(
         risk_tolerance=req.risk_tolerance,
@@ -320,11 +362,13 @@ def screen_stocks(req: StockScreenRequest) -> dict[str, Any]:
 
 
 @app.post("/api/simulate")
-def simulate_portfolio(req: SimulateRequest) -> dict[str, Any]:
+@limiter.limit("20/minute")
+def simulate_portfolio(req: SimulateRequest, request: Request) -> dict[str, Any]:
     try:
         import numpy as np
     except ImportError as exc:
-        raise HTTPException(status_code=500, detail=f"numpy not available: {exc}")
+        log.error("numpy import error: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail="Simulation is not available. Please try again.")
 
     holdings = req.holdings
     if not holdings:
