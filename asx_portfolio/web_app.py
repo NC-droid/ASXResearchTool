@@ -48,8 +48,9 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/hour"])
 app = FastAPI(
     title="ASX ETF + Stock Screener",
     version="0.4.0",
-    docs_url=None,    # Disable Swagger UI in production
-    redoc_url=None,   # Disable ReDoc in production
+    docs_url=None,        # Disable Swagger UI in production
+    redoc_url=None,       # Disable ReDoc in production
+    openapi_url=None,     # Disable OpenAPI schema endpoint
 )
 # Allow the deployed domain + localhost for local dev
 _ALLOWED_ORIGINS = [
@@ -73,6 +74,9 @@ async def security_headers(request, call_next):
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # Remove framework disclosure
+    response.headers.pop("server", None)
+    response.headers.pop("x-powered-by", None)
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.plot.ly https://fonts.googleapis.com; "
@@ -97,7 +101,7 @@ class ScreenRequest(BaseModel):
     categories: list[str] = Field(default_factory=list)
     max_mer: float | None = Field(default=None)
     min_dividend_yield_annual: float = Field(default=0.0)
-    top_n: int = Field(default=3)
+    top_n: int = Field(default=3, ge=1, le=20)
     force_refresh: bool = Field(default=False)
     target_quarterly_dividend_aud: float = Field(default=0.0)
 
@@ -108,7 +112,7 @@ class StockScreenRequest(BaseModel):
     sectors: list[str] = Field(default_factory=list)
     min_dividend_yield: float = Field(default=0.0)
     min_market_cap_aud_m: float = Field(default=0.0)
-    top_n: int = Field(default=5)
+    top_n: int = Field(default=5, ge=1, le=20)
     force_refresh: bool = Field(default=False)
 
 
@@ -362,7 +366,7 @@ def screen_stocks(req: StockScreenRequest, request: Request) -> dict[str, Any]:
 
 
 @app.post("/api/simulate")
-@limiter.limit("20/minute")
+@limiter.limit("10/minute")
 def simulate_portfolio(req: SimulateRequest, request: Request) -> dict[str, Any]:
     try:
         import numpy as np
@@ -373,10 +377,26 @@ def simulate_portfolio(req: SimulateRequest, request: Request) -> dict[str, Any]
     holdings = req.holdings
     if not holdings:
         raise HTTPException(status_code=400, detail="No holdings provided")
+    if len(holdings) > 30:
+        raise HTTPException(status_code=400, detail="Maximum 30 holdings allowed")
 
     total_alloc = sum(h.get("allocation", 0) for h in holdings)
     if abs(total_alloc - 100.0) > 0.5:
-        raise HTTPException(status_code=400, detail=f"Allocations must sum to 100 (got {total_alloc})")
+        raise HTTPException(status_code=400, detail="Allocations must sum to 100")
+
+    # Validate individual holding inputs
+    for h in holdings:
+        ret = h.get("annualReturn", 0)
+        vol = h.get("volatility", 0)
+        amt = req.initial_amount
+        if not (-200 <= ret <= 500):
+            raise HTTPException(status_code=400, detail="Annual return must be between -200% and 500%")
+        if not (0 < vol <= 300):
+            raise HTTPException(status_code=400, detail="Volatility must be between 0% and 300%")
+        if not (100 <= amt <= 100_000_000):
+            raise HTTPException(status_code=400, detail="Initial amount must be between $100 and $100M")
+        if not (1 <= req.years <= 50):
+            raise HTTPException(status_code=400, detail="Time horizon must be between 1 and 50 years")
 
     weighted_return = sum(
         (h.get("annualReturn", 0) / 100) * (h.get("allocation", 0) / 100)
