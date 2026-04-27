@@ -164,11 +164,159 @@
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
-    @media (max-width:640px) { .page-wrap { padding:14px 14px 40px; } }
+  /* ── UX Improvements ── */
+
+  /* 2. Data freshness */
+  .freshness-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:10px; color:var(--muted); font-family:'Geist Mono',monospace;
+    background:var(--card2); border:1px solid var(--border); border-radius:99px;
+    padding:3px 9px; margin-left:8px; flex-shrink:0;
+  }
+  .freshness-badge .dot {
+    width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0;
+    animation: freshpulse 3s infinite;
+  }
+  .freshness-badge .dot.stale { background:var(--amber); animation:none; }
+  @keyframes freshpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* 3. Loading stages */
+  .loading-bar-wrap {
+    position:fixed; top:0; left:0; right:0; height:2px; z-index:9000;
+    background:transparent; pointer-events:none;
+  }
+  .loading-bar {
+    height:100%; background:linear-gradient(90deg,var(--gold),var(--teal));
+    width:0%; transition:width 0.4s ease; border-radius:0 2px 2px 0;
+  }
+  .loading-stage {
+    font-size:10px; color:var(--muted); margin-left:6px;
+    display:inline; font-style:italic;
+  }
+
+  /* 5. Empty state upgrades */
+  .empty-state-card {
+    background:var(--card); border:1px solid var(--border); border-radius:var(--r);
+    padding:28px 24px; text-align:center; display:none;
+  }
+  .empty-state-card.visible { display:block; }
+  .empty-state-icon { font-size:28px; margin-bottom:10px; }
+  .empty-state-title { font-size:15px; font-weight:600; color:var(--text); margin-bottom:6px; }
+  .empty-state-sub { font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+  .empty-suggest-chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  .empty-suggest-chip {
+    padding:5px 12px; border-radius:99px; font-size:11px; font-weight:600;
+    border:1px solid var(--border2); color:var(--muted); background:var(--card2);
+    cursor:pointer; transition:all 0.18s;
+  }
+  .empty-suggest-chip:hover { color:var(--gold); border-color:var(--gold-glow); background:var(--gold-dim); }
+
+  /* 6. Input microcopy */
+  .input-hint {
+    font-size:10px; color:var(--dim); margin-top:3px; line-height:1.4;
+    display:flex; align-items:flex-start; gap:4px;
+  }
+  .input-hint svg { flex-shrink:0; margin-top:1px; }
+
+  /* 7. Reset button */
+  .btn-reset-filters {
+    width:100%; padding:8px; border-radius:var(--r-sm);
+    background:transparent; border:1px solid var(--border2);
+    color:var(--muted); font-size:11px; font-weight:600;
+    cursor:pointer; transition:all 0.18s; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+    margin-top:4px;
+  }
+  .btn-reset-filters:hover { color:var(--red); border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.05); }
+
+  /* 1. Scoring transparency tooltip */
+  .score-explain {
+    background:var(--card2); border:1px solid var(--border2); border-radius:var(--r);
+    padding:12px 14px; margin-top:12px; display:none;
+  }
+  .score-explain.open { display:block; animation:fadeIn 0.2s ease; }
+  .score-explain-title {
+    font-size:10px; font-weight:700; color:var(--muted);
+    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;
+  }
+  .score-explain-row {
+    display:grid; grid-template-columns:80px 1fr 90px; gap:6px;
+    align-items:center; margin-bottom:5px; font-size:11px;
+  }
+  .score-explain-label { color:var(--text); font-weight:500; }
+  .score-explain-track { height:4px; background:var(--card3); border-radius:99px; overflow:hidden; }
+  .score-explain-fill { height:100%; background:linear-gradient(90deg,var(--red),var(--amber) 50%,var(--green)); border-radius:99px; }
+  .score-explain-desc { color:var(--muted); font-size:10px; line-height:1.4; }
+  .btn-explain {
+    display:inline-flex; align-items:center; gap:4px; margin-top:8px;
+    font-size:10px; color:var(--muted); background:none; border:none;
+    cursor:pointer; font-family:inherit; padding:0; transition:color 0.15s;
+  }
+  .btn-explain:hover { color:var(--gold); }
+
+  /* Toast notification */
+  .toast {
+    position:fixed; bottom:24px; right:24px; z-index:9999;
+    background:var(--card); border:1px solid var(--teal-glow);
+    border-radius:var(--r); padding:12px 18px;
+    display:flex; align-items:center; gap:10px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    transform:translateY(80px); opacity:0;
+    transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events:none; max-width:320px;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast-icon { width:18px; height:18px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; color:#0c0f1a; }
+  .toast-text { font-size:12px; color:var(--text); }
+
+  /* 4. Formula panel */
+  .formula-panel {
+    background:var(--card2); border:1px solid var(--border); border-radius:var(--r-sm);
+    padding:12px 14px; margin-top:12px; font-size:11px; color:var(--muted);
+    line-height:1.7;
+  }
+  .formula-panel strong { color:var(--text); }
+  .formula-eq {
+    font-family:'Geist Mono',monospace; font-size:11px;
+    color:var(--gold); background:var(--goldDim,rgba(240,180,41,0.08));
+    padding:4px 8px; border-radius:4px; display:inline-block; margin:4px 0;
+  }
+  .formula-source { font-size:10px; color:var(--dim); margin-top:4px; }
+
+  /* 8. Mobile fixes */
+  @media (max-width:720px) {
+    .page-wrap { grid-template-columns:1fr !important; gap:14px !important; padding:12px 12px 40px !important; }
+    .picks-grid { grid-template-columns:1fr !important; }
+    .pick-stats { grid-template-columns:repeat(2,1fr) !important; }
+    .kpi-grid { grid-template-columns:repeat(2,1fr) !important; }
+    .load-section { grid-template-columns:1fr !important; }
+    .sim-settings { grid-template-columns:1fr !important; }
+    .divplan-kpis { grid-template-columns:repeat(2,1fr) !important; }
+    .asx-nav-inner { padding:0 12px !important; }
+    .nav-links a { padding:5px 8px !important; font-size:11px !important; }
+    .picks-list .pick-card { padding:14px !important; }
+    .picks-list .pick-stats { grid-template-columns:repeat(2,1fr) !important; }
+    .picks-list .pick-pillars { grid-template-columns:1fr !important; }
+    input[type=range] { height:32px; }
+    .toggle-btn { padding:8px 6px !important; }
+    .sidebar .card { padding:14px !important; }
+  }
+  @media (max-width:480px) {
+    .hero-title { font-size:32px !important; }
+    .results-title { font-size:18px !important; }
+    .asx-logo-text { display:none; }
+    .nav-links a span { display:none; }
+  }
+
   </style>
 </head>
 <body>
 
+<div class="loading-bar-wrap"><div class="loading-bar" id="loadingBar"></div></div>
+<div class="toast" id="globalToast">
+  <div class="toast-icon">✓</div>
+  <div class="toast-text"></div>
+</div>
   <header class="asx-nav">
     <div class="asx-nav-inner">
       <a href="/" class="asx-logo">
@@ -187,6 +335,10 @@
       <div class="nav-right">
         <span id="status">Idle</span>
         <button class="btn-refresh" id="refreshBtn">↻ Refresh</button>
+        <span class="freshness-badge" id="freshnessBadge">
+        <span class="dot"></span>
+        <span class="freshness-text">—</span>
+      </span>
       </div>
     </div>
   </header>
@@ -227,6 +379,7 @@
           </div>
           <input id="yieldSlider" type="range" min="0" max="80" step="1" value="0" />
           <div class="range-hints"><span>0%</span><span>4%</span><span>8%+</span></div>
+          <div class="input-hint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Trailing 12-month dividend yield. 0 = no floor — all stocks included.</div>
         </div>
 
         <div class="form-row">
@@ -236,6 +389,7 @@
           </div>
           <input id="mcapSlider" type="range" min="0" max="20" step="1" value="0" />
           <div class="range-hints"><span>any</span><span>$1B</span><span>$20B+</span></div>
+          <div class="input-hint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Filters out smaller companies. $1B+ removes micro-caps; $20B+ restricts to ASX large-caps only.</div>
         </div>
 
         <div class="form-row">
@@ -266,6 +420,9 @@
         <div id="pillarWeights"></div>
       </div>
 
+      <!-- Reset filters -->
+      <button class="btn-reset-filters" onclick="resetAllFilters()">↺ Reset all filters</button>
+
       <!-- Save strip -->
       <div class="save-strip">
         <div class="save-strip-text">
@@ -292,7 +449,12 @@
         <span id="candidateCount"></span>
       </div>
 
-      <div class="empty-state" id="picksEmpty">No stocks match your filters. Try adjusting your sector selection or loosening the yield/market-cap requirements.</div>
+      <div class="empty-state-card" id="picksEmpty">
+        <div class="empty-state-icon">🔍</div>
+        <div class="empty-state-title">No stocks match these filters</div>
+        <div class="empty-state-sub" id="emptyStateSub">Try loosening your filters to see more results.</div>
+        <div class="empty-suggest-chips" id="emptySuggestChips"></div>
+      </div>
       <div class="picks-list" id="picksList"></div>
 
       <div class="table-card">
@@ -416,20 +578,35 @@
   // ── Screen API ────────────────────────────────────────────────────────────
   let inFlight = null;
   async function runScreen(forceRefresh=false) {
-    setStatus(forceRefresh ? "Refreshing…" : "Scoring…", true);
+    const stages = forceRefresh
+      ? ["Connecting to Yahoo Finance…","Fetching ASX 200 stocks…","Scoring fundamentals…","Ranking pillars…"]
+      : ["Scoring stocks…","Ranking by pillars…"];
+    let stageIdx = 0;
+    setStatus(stages[0], true);
+    startLoadingBar();
     if (inFlight) inFlight.abort();
     const ctrl = new AbortController(); inFlight = ctrl;
+    const stageTimer = setInterval(() => {
+      stageIdx = (stageIdx + 1) % stages.length;
+      if (document.getElementById("status").className === "stale")
+        document.getElementById("status").textContent = stages[stageIdx];
+    }, 1800);
     try {
       const r = await fetch("/api/screen-stocks", {
         method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({...state, force_refresh:forceRefresh}),
         signal:ctrl.signal,
       });
+      clearInterval(stageTimer);
       if (!r.ok) throw new Error("HTTP "+r.status);
       const j = await r.json();
       renderResults(j);
+      finishLoadingBar();
+      setFreshness(Date.now() - (j.elapsed_seconds||0)*1000);
       setStatus(`Updated · ${(j.elapsed_seconds??0).toFixed(2)}s`, false);
     } catch(e) {
+      clearInterval(stageTimer);
+      finishLoadingBar();
       if (e.name==="AbortError") return;
       setStatus("Error: "+e.message, false, true);
     }
@@ -448,7 +625,17 @@
     currentPicks = data.picks || [];
     document.getElementById("candidateCount").textContent = `${data.candidate_count} stocks match — showing top ${currentPicks.length}`;
     const empty = document.getElementById("picksEmpty");
-    empty.className = currentPicks.length===0 ? "empty-state visible" : "empty-state";
+    if (currentPicks.length===0) {
+      empty.className = "empty-state-card visible";
+      const suggestions = [];
+      if (state.sectors.length>0) suggestions.push({label:"Show all sectors", action:"clearSectors()"});
+      if (state.min_dividend_yield>0) suggestions.push({label:"Remove yield floor", action:"document.getElementById('yieldSlider').value=0;state.min_dividend_yield=0;document.getElementById('yieldLabel').textContent='0%';triggerScreen()"});
+      if (state.min_market_cap_aud_m>0) suggestions.push({label:"Remove market cap floor", action:"document.getElementById('mcapSlider').value=0;state.min_market_cap_aud_m=0;document.getElementById('mcapLabel').textContent='any';triggerScreen()"});
+      document.getElementById("emptySuggestChips").innerHTML = suggestions.map(s=>`<button class="empty-suggest-chip" onclick="${s.action}">${s.label}</button>`).join("");
+      document.getElementById("emptyStateSub").textContent = suggestions.length>0 ? "These filters might be too tight. Try one of these quick fixes:" : "Try widening your sector or yield filters.";
+    } else {
+      empty.className = "empty-state-card";
+    }
     renderPicks(currentPicks, data.rationales||[]);
     renderTable(data.all_filtered||[]);
     renderPillarWeights(data.pillar_weights);
@@ -612,6 +799,99 @@
     const c = document.getElementById("saveConfirm");
     c.style.display = "inline";
     setTimeout(() => { c.style.display = "none"; }, 2500);
+    showToast(`${payload.length} stock pick${payload.length!==1?'s':''} saved — head to Combined to simulate`);
+  }
+
+
+  // ── 3. Loading stages ────────────────────────────────────────────────────
+  let _loadingTimer = null;
+  function startLoadingBar() {
+    const bar = document.getElementById('loadingBar');
+    if (!bar) return;
+    bar.style.width = '10%';
+    let pct = 10;
+    clearInterval(_loadingTimer);
+    _loadingTimer = setInterval(() => {
+      if (pct < 85) { pct += (85 - pct) * 0.12; bar.style.width = pct + '%'; }
+    }, 300);
+  }
+  function finishLoadingBar() {
+    const bar = document.getElementById('loadingBar');
+    if (!bar) return;
+    clearInterval(_loadingTimer);
+    bar.style.width = '100%';
+    setTimeout(() => { bar.style.width = '0%'; }, 500);
+  }
+
+  // ── Toast notifications ───────────────────────────────────────────────────
+  function showToast(msg, icon='✓') {
+    const t = document.getElementById('globalToast');
+    if (!t) return;
+    t.querySelector('.toast-icon').textContent = icon;
+    t.querySelector('.toast-text').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── 2. Freshness updater ──────────────────────────────────────────────────
+  let _dataFetchedAt = null;
+  function setFreshness(ts) {
+    _dataFetchedAt = ts || Date.now();
+    updateFreshnessDisplay();
+  }
+  function updateFreshnessDisplay() {
+    const el = document.getElementById('freshnessBadge');
+    if (!el || !_dataFetchedAt) return;
+    const mins = Math.round((Date.now() - _dataFetchedAt) / 60000);
+    const dot = el.querySelector('.dot');
+    if (mins < 5) {
+      el.querySelector('.freshness-text').textContent = 'Live data';
+      dot.className = 'dot';
+    } else if (mins < 60) {
+      el.querySelector('.freshness-text').textContent = `${mins}m ago`;
+      dot.className = 'dot';
+    } else {
+      const hrs = Math.floor(mins / 60);
+      el.querySelector('.freshness-text').textContent = `${hrs}h ago`;
+      dot.className = 'dot stale';
+    }
+  }
+  setInterval(updateFreshnessDisplay, 30000);
+
+  // ── 1. Scoring transparency toggle ───────────────────────────────────────
+  function toggleScoreExplain(cardEl) {
+    const panel = cardEl.querySelector('.score-explain');
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    const btn = cardEl.querySelector('.btn-explain');
+    if (btn) btn.textContent = isOpen ? '▸ How is this score calculated?' : '▾ Hide score breakdown';
+  }
+
+  // ── 7. Reset all filters ─────────────────────────────────────────────────
+  function resetAllFilters() {
+    document.querySelectorAll('#risk-group .toggle-btn').forEach(b => {
+      b.removeAttribute('data-active');
+      if (b.dataset.value === 'medium') b.setAttribute('data-active','1');
+    });
+    document.querySelectorAll('#horizon-group .toggle-btn').forEach(b => {
+      b.removeAttribute('data-active');
+      if (b.dataset.value === 'medium') b.setAttribute('data-active','1');
+    });
+    state.risk_tolerance = 'medium';
+    state.horizon = 'medium';
+    document.getElementById('yieldSlider').value = 0;
+    state.min_dividend_yield = 0;
+    document.getElementById('yieldLabel').textContent = '0%';
+    document.getElementById('mcapSlider').value = 0;
+    state.min_market_cap_aud_m = 0;
+    document.getElementById('mcapLabel').textContent = 'any';
+    document.getElementById('topN').value = '5';
+    state.top_n = 5;
+    state.sectors = [];
+    document.querySelectorAll('#sectorChips .chip').forEach(c => c.removeAttribute('data-active'));
+    showToast('Filters reset to defaults');
+    triggerScreen();
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────
