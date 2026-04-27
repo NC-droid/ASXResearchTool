@@ -283,7 +283,12 @@ def fetch_stock(row: dict[str, str], period: str = "5y") -> StockData:
             sd.debt_equity = sd.debt_equity / 100.0  # yfinance returns as %, normalise
 
         # Income
-        sd.dividend_yield = _safe(info, "dividendYield", "trailingAnnualDividendYield")
+        raw_dy = _safe(info, "dividendYield", "trailingAnnualDividendYield")
+        # Yahoo Finance inconsistently returns yield as decimal (0.0752) or percent (7.52)
+        # Normalise: if value > 1.0, treat as percent and divide by 100
+        if not math.isnan(raw_dy) and raw_dy > 1.0:
+            raw_dy = raw_dy / 100.0
+        sd.dividend_yield = raw_dy
         sd.payout_ratio = _safe(info, "payoutRatio")
 
         # Price history
