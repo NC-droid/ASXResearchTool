@@ -76,11 +76,8 @@ async def security_headers(request, call_next):
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    # Remove framework disclosure headers (MutableHeaders has no .pop())
-    if "server" in response.headers:
-        del response.headers["server"]
-    if "x-powered-by" in response.headers:
-        del response.headers["x-powered-by"]
+    # Override server header with empty value (Azure/uvicorn re-adds it after del)
+    response.headers["server"] = ""
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.plot.ly https://fonts.googleapis.com; "
