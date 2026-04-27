@@ -299,11 +299,32 @@
       .picks-grid { grid-template-columns: 1fr; }
       .divplan-kpis { grid-template-columns: 1fr 1fr; }
     }
+    /* ── Mobile ── */
+    @media (max-width:720px) {
+      .page-wrap { grid-template-columns:1fr !important; gap:14px !important; padding:12px 12px 40px !important; }
+      .picks-grid { grid-template-columns:1fr !important; }
+      .pick-stats { grid-template-columns:repeat(2,1fr) !important; }
+      .kpi-grid { grid-template-columns:repeat(2,1fr) !important; }
+      .asx-nav-inner { padding:0 12px !important; }
+      .nav-links a { padding:5px 8px !important; font-size:11px !important; }
+      input[type=range] { height:32px; }
+      .toggle-btn { padding:8px 6px !important; }
+      .sidebar .card { padding:14px !important; }
+    }
+    @media (max-width:480px) {
+      .results-title { font-size:18px !important; }
+      .asx-logo-text { display:none; }
+    }
   </style>
 </head>
 <body>
 
   <!-- Nav -->
+<div class="loading-bar-wrap"><div class="loading-bar" id="loadingBar"></div></div>
+<div class="toast" id="globalToast">
+  <div class="toast-icon">✓</div>
+  <div class="toast-text"></div>
+</div>
   <header class="asx-nav">
     <div class="asx-nav-inner">
       <a href="/" class="asx-logo">
@@ -322,6 +343,10 @@
       <div class="nav-right">
         <span id="status">Idle</span>
         <button class="btn-refresh" id="refreshBtn">↻ Refresh</button>
+        <span class="freshness-badge" id="freshnessBadge">
+        <span class="dot"></span>
+        <span class="freshness-text">—</span>
+      </span>
       </div>
     </div>
   </header>
@@ -365,6 +390,7 @@
           </div>
           <input id="merSlider" type="range" min="0" max="100" step="1" value="100" />
           <div class="range-hints"><span>0.05%</span><span>1.00%</span><span>any</span></div>
+          <div class="input-hint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>MER = annual management expense ratio charged by the fund. Lower = more of the return stays with you.</div>
         </div>
 
         <div class="form-row">
@@ -373,7 +399,7 @@
             <span class="form-label-val" id="yieldLabel">0%</span>
           </div>
           <input id="yieldSlider" type="range" min="0" max="80" step="1" value="0" />
-          <div style="font-size:10px;color:var(--dim);margin-top:3px" id="yieldMonthlyHint">Set a yield floor to filter for income-paying ETFs.</div>
+          <div class="input-hint" id="yieldMonthlyHint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Trailing 12-month distribution yield. Set a floor to filter for income-paying ETFs.</div>
         </div>
 
         <div class="form-row">
@@ -392,7 +418,7 @@
             <input type="number" id="targetDividend" placeholder="e.g. 500" min="0" step="50" style="flex:1" />
             <span style="color:var(--muted);font-size:12px">/ qtr</span>
           </div>
-          <div style="font-size:10px;color:var(--dim);margin-top:4px">We'll size each holding to hit your quarterly target.</div>
+          <div class="input-hint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>We'll calculate how much to invest in each pick to generate your target income. Formula: Investment = Target ÷ Yield.</div>
         </div>
       </div>
 
@@ -411,6 +437,9 @@
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Heavier bars = more influence on the composite score.</div>
         <div id="pillarWeights"></div>
       </div>
+
+      <!-- Reset filters -->
+      <button class="btn-reset-filters" onclick="resetAllFilters()">↺ Reset all filters</button>
 
       <!-- Save to combined -->
       <div class="save-strip">
@@ -441,8 +470,11 @@
         <span id="candidateCount"></span>
       </div>
 
-      <div class="empty-state" id="picksEmpty">
-        No ETFs match your current filters. Try widening the categories, raising the MER cap, or lowering the minimum yield.
+      <div class="empty-state-card" id="picksEmpty">
+        <div class="empty-state-icon">🔍</div>
+        <div class="empty-state-title">No ETFs match these filters</div>
+        <div class="empty-state-sub" id="emptyStateSub">Try loosening your filters to see more results.</div>
+        <div class="empty-suggest-chips" id="emptySuggestChips"></div>
       </div>
       <div class="picks-grid" id="picksGrid"></div>
 
@@ -450,6 +482,11 @@
       <div class="divplan-card" id="dividendPlan">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div style="font-size:16px;font-weight:700;color:var(--text)">Investment plan to hit your dividend target</div>
+          <div class="formula-panel" style="margin-top:8px;margin-bottom:0">
+            <strong>Formula:</strong> Investment per ETF = Annual target ÷ Distribution yield<br>
+            <span class="formula-eq">Capital needed = (Quarterly target × 4) ÷ Average yield</span><br>
+            <span class="formula-source">Yield = trailing 12-month distribution yield from Yahoo Finance. Assumes equal weighting across picks. Does not account for tax, franking credits, or future yield changes.</span>
+          </div>
           <span id="planTotalsHeadline" style="font-size:11px;color:var(--muted)"></span>
         </div>
         <div class="divplan-kpis">
@@ -627,10 +664,20 @@
   // ── Screen API ────────────────────────────────────────────────────────────
   let inFlight = null;
   async function runScreen(forceRefresh = false) {
-    setStatus(forceRefresh ? "Refreshing data…" : "Scoring…", true);
+    const stages = forceRefresh
+      ? ["Connecting to Yahoo Finance…", "Fetching 84 ETFs…", "Scoring…"]
+      : ["Scoring ETFs…", "Ranking by pillars…"];
+    let stageIdx = 0;
+    setStatus(stages[0], true);
+    startLoadingBar();
     if (inFlight) inFlight.abort();
     const ctrl = new AbortController();
     inFlight = ctrl;
+    const stageTimer = setInterval(() => {
+      stageIdx = (stageIdx + 1) % stages.length;
+      if (document.getElementById('status').className === 'stale')
+        document.getElementById('status').textContent = stages[stageIdx];
+    }, 1800);
     try {
       const r = await fetch("/api/screen", {
         method: "POST",
@@ -638,11 +685,16 @@
         body: JSON.stringify({ ...state, force_refresh: forceRefresh }),
         signal: ctrl.signal,
       });
+      clearInterval(stageTimer);
       if (!r.ok) throw new Error("HTTP " + r.status);
       const j = await r.json();
       renderResults(j);
+      finishLoadingBar();
+      setFreshness(Date.now() - (j.elapsed_seconds || 0) * 1000);
       setStatus(`Updated · ${(j.elapsed_seconds ?? 0).toFixed(2)}s`, false);
     } catch(e) {
+      clearInterval(stageTimer);
+      finishLoadingBar();
       if (e.name === "AbortError") return;
       setStatus("Error: " + e.message, false, true);
     }
@@ -670,7 +722,20 @@
     _etfCurrentPicks = data.picks || [];
     document.getElementById("candidateCount").textContent = `${data.candidate_count} ETFs match — showing top ${data.picks.length}`;
     const empty = document.getElementById("picksEmpty");
-    empty.className = data.picks.length === 0 ? "empty-state visible" : "empty-state";
+    if (data.picks.length === 0) {
+      empty.className = "empty-state-card visible";
+      const suggestions = [];
+      if (state.max_mer !== null) suggestions.push({label:"Remove MER cap", action:"document.getElementById('merSlider').value=100;state.max_mer=null;document.getElementById('merLabel').textContent='no cap';triggerScreen()"});
+      if (state.min_dividend_yield_annual > 0) suggestions.push({label:"Remove yield floor", action:"document.getElementById('yieldSlider').value=0;state.min_dividend_yield_annual=0;document.getElementById('yieldLabel').textContent='0%';triggerScreen()"});
+      if (state.categories.length > 0) suggestions.push({label:"Show all categories", action:"selectAllCats()"});
+      if (state.risk_tolerance !== 'medium') suggestions.push({label:"Reset risk to Medium", action:"document.querySelectorAll('#risk-group .toggle-btn').forEach(b=>{b.removeAttribute('data-active');if(b.dataset.value==='medium')b.setAttribute('data-active','1')});state.risk_tolerance='medium';triggerScreen()"});
+      const chips = document.getElementById('emptySuggestChips');
+      chips.innerHTML = suggestions.map(s => `<button class="empty-suggest-chip" onclick="${s.action}">${s.label}</button>`).join('');
+      const sub = document.getElementById('emptyStateSub');
+      sub.textContent = suggestions.length > 0 ? "These filters might be too tight. Try one of these quick fixes:" : "Try widening your filters.";
+    } else {
+      empty.className = "empty-state-card";
+    }
     renderPicks(data.picks, data.rationales);
     renderTable(data.all_filtered);
     renderPillarWeights(data.pillar_weights);
@@ -883,6 +948,105 @@
     const c = document.getElementById("etfSaveConfirm");
     c.style.display = "inline";
     setTimeout(() => { c.style.display = "none"; }, 2500);
+    showToast(`${payload.length} ETF pick${payload.length!==1?'s':''} saved — head to Combined to simulate`);
+  }
+
+
+  // ── 3. Loading stages ────────────────────────────────────────────────────
+  let _loadingTimer = null;
+  function startLoadingBar() {
+    const bar = document.getElementById('loadingBar');
+    if (!bar) return;
+    bar.style.width = '10%';
+    let pct = 10;
+    clearInterval(_loadingTimer);
+    _loadingTimer = setInterval(() => {
+      if (pct < 85) { pct += (85 - pct) * 0.12; bar.style.width = pct + '%'; }
+    }, 300);
+  }
+  function finishLoadingBar() {
+    const bar = document.getElementById('loadingBar');
+    if (!bar) return;
+    clearInterval(_loadingTimer);
+    bar.style.width = '100%';
+    setTimeout(() => { bar.style.width = '0%'; }, 500);
+  }
+
+  // ── Toast notifications ───────────────────────────────────────────────────
+  function showToast(msg, icon='✓') {
+    const t = document.getElementById('globalToast');
+    if (!t) return;
+    t.querySelector('.toast-icon').textContent = icon;
+    t.querySelector('.toast-text').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── 2. Freshness updater ──────────────────────────────────────────────────
+  let _dataFetchedAt = null;
+  function setFreshness(ts) {
+    _dataFetchedAt = ts || Date.now();
+    updateFreshnessDisplay();
+  }
+  function updateFreshnessDisplay() {
+    const el = document.getElementById('freshnessBadge');
+    if (!el || !_dataFetchedAt) return;
+    const mins = Math.round((Date.now() - _dataFetchedAt) / 60000);
+    const dot = el.querySelector('.dot');
+    if (mins < 5) {
+      el.querySelector('.freshness-text').textContent = 'Live data';
+      dot.className = 'dot';
+    } else if (mins < 60) {
+      el.querySelector('.freshness-text').textContent = `${mins}m ago`;
+      dot.className = 'dot';
+    } else {
+      const hrs = Math.floor(mins / 60);
+      el.querySelector('.freshness-text').textContent = `${hrs}h ago`;
+      dot.className = 'dot stale';
+    }
+  }
+  setInterval(updateFreshnessDisplay, 30000);
+
+  // ── 1. Scoring transparency toggle ───────────────────────────────────────
+  function toggleScoreExplain(cardEl) {
+    const panel = cardEl.querySelector('.score-explain');
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    const btn = cardEl.querySelector('.btn-explain');
+    if (btn) btn.textContent = isOpen ? '▸ How is this score calculated?' : '▾ Hide score breakdown';
+  }
+
+  // ── 7. Reset all filters ─────────────────────────────────────────────────
+  function resetAllFilters() {
+    // Risk + horizon toggles
+    document.querySelectorAll('#risk-group .toggle-btn').forEach(b => {
+      b.removeAttribute('data-active');
+      if (b.dataset.value === 'medium') b.setAttribute('data-active','1');
+    });
+    document.querySelectorAll('#horizon-group .toggle-btn').forEach(b => {
+      b.removeAttribute('data-active');
+      if (b.dataset.value === 'medium') b.setAttribute('data-active','1');
+    });
+    state.risk_tolerance = 'medium';
+    state.horizon = 'medium';
+    // Sliders
+    document.getElementById('merSlider').value = 100;
+    state.max_mer = null;
+    document.getElementById('merLabel').textContent = 'no cap';
+    document.getElementById('yieldSlider').value = 0;
+    state.min_dividend_yield_annual = 0;
+    document.getElementById('yieldLabel').textContent = '0%';
+    document.getElementById('yieldMonthlyHint').textContent = 'Set a yield floor to filter for income-paying ETFs.';
+    document.getElementById('targetDividend').value = '';
+    state.target_quarterly_dividend_aud = 0;
+    document.getElementById('topN').value = '3';
+    state.top_n = 3;
+    // Categories
+    state.categories = [];
+    document.querySelectorAll('.chip-cat').forEach(c => c.removeAttribute('data-active'));
+    showToast('Filters reset to defaults');
+    triggerScreen();
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────
