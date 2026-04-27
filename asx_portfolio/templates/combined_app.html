@@ -387,6 +387,8 @@
   const COLORS = ["#a78bfa","#2dd4bf","#f0b429","#f87171","#4ade80","#fb923c","#38bdf8","#e879f9","#a3e635","#fbbf24","#6366f1","#10b981"];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  // Security: sanitise API-sourced strings before innerHTML
+  const sanitise = s => s == null ? "" : String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   const fmtAUD = v => { if(v==null||isNaN(v)) return "—"; const n=parseFloat(v); if(n>=1e6) return "$"+(n/1e6).toFixed(2)+"M"; if(n>=1e3) return "$"+(n/1e3).toFixed(1)+"K"; return "$"+n.toFixed(2); };
   const fmtPct = (v,d=1) => v==null||isNaN(v) ? "—" : parseFloat(v).toFixed(d)+"%";
 
@@ -441,13 +443,13 @@
       const color = COLORS[i % COLORS.length];
       row.innerHTML = `
         <div class="holding-swatch" style="background:${color}"></div>
-        <div class="holding-ticker">${h.ticker}</div>
-        <div class="holding-name">${h.name||""}</div>
-        <span class="source-badge ${h.source==='ETF'?'etf':'asx'}">${h.source}</span>
+        <div class="holding-ticker">${sanitise(h.ticker)}</div>
+        <div class="holding-name">${sanitise(h.name)||""}</div>
+        <span class="source-badge ${h.source==='ETF'?'etf':'asx'}">${sanitise(h.source)}</span>
         <input type="number" class="holding-alloc" min="0" max="100" step="1" value="${h.allocation}"
-          onchange="updateAllocation('${h.ticker}', this.value)" />
+          onchange="updateAllocation('${sanitise(h.ticker)}', this.value)" />
         <span class="holding-pct">%</span>
-        <button class="holding-remove" onclick="removeHolding('${h.ticker}')">×</button>`;
+        <button class="holding-remove" onclick="removeHolding('${sanitise(h.ticker)}')">×</button>`;
       list.appendChild(row);
     });
 
@@ -468,7 +470,7 @@
         bar.appendChild(seg);
         const item = document.createElement("span");
         item.className = "alloc-legend-item";
-        item.innerHTML = `<span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i%COLORS.length]};display:inline-block"></span>${h.ticker} ${h.allocation}%`;
+        item.innerHTML = `<span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i%COLORS.length]};display:inline-block"></span>${sanitise(h.ticker)} ${h.allocation}%`;
         legend.appendChild(item);
       }
     });
@@ -492,7 +494,10 @@
     if (!raw) { alert("No ETF picks saved yet.\n\nGo to the ETF Screener, run a screen, then click 'Save to Combined →'."); return; }
     try {
       const picks = JSON.parse(raw);
-      picks.forEach(p => addHolding({...p, source:"ETF"}));
+      // Schema validation: only load picks with expected shape
+      const valid = picks.filter(p => p && typeof p.ticker === 'string' && typeof p.annualReturn === 'number' && typeof p.volatility === 'number');
+      if (valid.length !== picks.length) console.warn('Some ETF picks had unexpected schema and were skipped.');
+      valid.forEach(p => addHolding({...p, source:"ETF"}));
       const badge = document.getElementById("etfBadge");
       badge.textContent = picks.length; badge.style.display="inline-flex";
     } catch { alert("Could not parse saved ETF picks."); }
@@ -503,7 +508,9 @@
     if (!raw) { alert("No ASX picks saved yet.\n\nGo to the ASX 200 Screener, run a screen, then click 'Save to Combined →'."); return; }
     try {
       const picks = JSON.parse(raw);
-      picks.forEach(p => addHolding({...p, source:"ASX"}));
+      const valid = picks.filter(p => p && typeof p.ticker === 'string' && typeof p.annualReturn === 'number' && typeof p.volatility === 'number');
+      if (valid.length !== picks.length) console.warn('Some ASX picks had unexpected schema and were skipped.');
+      valid.forEach(p => addHolding({...p, source:"ASX"}));
       const badge = document.getElementById("asxBadge");
       badge.textContent = picks.length; badge.style.display="inline-flex";
     } catch { alert("Could not parse saved ASX picks."); }
@@ -617,11 +624,11 @@
         <td>
           <div style="display:flex;align-items:center;gap:8px">
             <div style="width:10px;height:10px;border-radius:3px;background:${COLORS[i%COLORS.length]}"></div>
-            <span class="mono" style="font-weight:700">${h.ticker}</span>
+            <span class="mono" style="font-weight:700">${sanitise(h.ticker)}</span>
           </div>
         </td>
-        <td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis">${h.name||"—"}</td>
-        <td><span class="source-badge ${h.source==='ETF'?'etf':'asx'}">${h.source}</span></td>
+        <td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis">${sanitise(h.name)||"—"}</td>
+        <td><span class="source-badge ${h.source==='ETF'?'etf':'asx'}">${sanitise(h.source)}</span></td>
         <td class="mono" style="text-align:right;font-weight:700">${h.allocation}%</td>
         <td class="mono" style="text-align:right"><span class="${retPos?'num-pos':'num-neg'}">${fmtPct(+h.annualReturn)}</span></td>
         <td class="mono" style="text-align:right">${fmtPct(+h.volatility)}</td>
