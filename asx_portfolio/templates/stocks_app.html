@@ -308,15 +308,133 @@
     .nav-links a span { display:none; }
   }
 
+
+  /* ── Process journey banner ── */
+  .journey-banner {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 28px;
+  }
+  .journey-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .journey-label-outer {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--dim); white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .journey-steps {
+    display: flex; align-items: center; gap: 0; flex: 1;
+  }
+  .journey-step {
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none; padding: 6px 14px; border-radius: 8px;
+    transition: background 0.18s; flex-shrink: 0;
+  }
+  .journey-step:hover { background: rgba(255,255,255,0.04); }
+  .journey-step .journey-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    background: var(--card2); color: var(--muted);
+    border: 1px solid var(--border2);
+  }
+  .journey-step .journey-label {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    display: block; line-height: 1;
+  }
+  .journey-step .journey-sub {
+    font-size: 10px; color: var(--dim);
+    display: block; line-height: 1; margin-top: 2px;
+  }
+  .journey-step.active .journey-num {
+    background: var(--gold-dim); color: var(--gold);
+    border-color: var(--gold-glow);
+  }
+  .journey-step.active .journey-label { color: var(--gold); }
+  .journey-step.active .journey-sub { color: rgba(240,180,41,0.5); }
+  .journey-step.done .journey-num {
+    background: rgba(74,222,128,0.12); color: var(--green);
+    border-color: rgba(74,222,128,0.3);
+  }
+  .journey-step.done .journey-label { color: var(--green); }
+  .journey-step.done .journey-sub { color: rgba(74,222,128,0.4); }
+  .journey-connector {
+    flex: 1; height: 1px; background: var(--border); min-width: 16px; max-width: 60px;
+  }
+  .journey-connector.done { background: rgba(74,222,128,0.3); }
+  @media (max-width: 640px) {
+    .journey-banner { padding: 8px 12px; }
+    .journey-step .journey-sub { display: none; }
+    .journey-label-outer { display: none; }
+    .journey-step { padding: 5px 8px; gap: 5px; }
+    .journey-step .journey-label { font-size: 11px; }
+  }
+
+  /* ── Full-screen loading overlay ── */
+  .loading-overlay {
+    position: fixed; inset: 0; z-index: 8000;
+    background: rgba(12,15,26,0.85);
+    backdrop-filter: blur(4px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .loading-overlay.active {
+    opacity: 1; pointer-events: all;
+  }
+  .loading-spinner {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 3px solid var(--border2);
+    border-top-color: var(--gold);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-stage-text {
+    font-size: 14px; color: var(--text); font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    text-align: center; max-width: 280px; line-height: 1.5;
+  }
+  .loading-stage-sub {
+    font-size: 11px; color: var(--muted); text-align: center;
+  }
+  .loading-progress-track {
+    width: 220px; height: 3px; background: var(--border2);
+    border-radius: 99px; overflow: hidden;
+  }
+  .loading-progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--teal));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── Fix empty-state-card initial visibility ── */
+  .empty-state-card { display: none; }
+  .empty-state-card.visible { display: block; }
+
   </style>
 </head>
 <body>
 
-<div class="loading-bar-wrap"><div class="loading-bar" id="loadingBar"></div></div>
 <div class="toast" id="globalToast">
   <div class="toast-icon">✓</div>
   <div class="toast-text"></div>
 </div>
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div>
+      <div class="loading-stage-text" id="loadingStageText">Loading…</div>
+      <div class="loading-stage-sub">Fetching ASX 200 fundamentals from Yahoo Finance…</div>
+    </div>
+    <div class="loading-progress-track">
+      <div class="loading-progress-fill" id="loadingProgressFill"></div>
+    </div>
+  </div>
   <header class="asx-nav">
     <div class="asx-nav-inner">
       <a href="/" class="asx-logo">
@@ -348,6 +466,31 @@
     <strong>Personal research tool only.</strong>&nbsp; Not financial advice. Always speak with a licensed financial adviser before making investment decisions.
   </div>
 
+  <!-- Process Journey Banner -->
+  <div class="journey-banner">
+    <div class="journey-inner">
+      <div class="journey-label-outer">Your research journey</div>
+      <div class="journey-steps">
+    <a href="/etfs" class="journey-step done">
+      <span class="journey-num">✓</span>
+      <span class="journey-label">ETF Screener</span>
+      <span class="journey-sub">Pick your ETFs</span>
+    </a>
+    <div class="journey-connector done"></div>
+    <a href="/stocks" class="journey-step active">
+      <span class="journey-num">2</span>
+      <span class="journey-label">ASX 200 Stocks</span>
+      <span class="journey-sub">Pick your stocks</span>
+    </a>
+    <div class="journey-connector"></div>
+    <a href="/combined" class="journey-step">
+      <span class="journey-num">3</span>
+      <span class="journey-label">Combined Simulator</span>
+      <span class="journey-sub">Simulate & compare</span>
+    </a>
+      </div>
+    </div>
+  </div>
   <div class="page-wrap">
     <aside class="sidebar">
 
@@ -486,6 +629,7 @@
   // ── State ─────────────────────────────────────────────────────────────────
   const state = { risk_tolerance:"medium", horizon:"medium", sectors:[], min_dividend_yield:0.0, min_market_cap_aud_m:0.0, top_n:5 };
   let currentPicks = [];
+  let _stockCandidateCount = 0;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   // Security: sanitise any string before inserting into innerHTML
@@ -597,7 +741,6 @@
         body:JSON.stringify({...state, force_refresh:forceRefresh}),
         signal:ctrl.signal,
       });
-      clearInterval(stageTimer);
       if (!r.ok) throw new Error("HTTP "+r.status);
       const j = await r.json();
       renderResults(j);
@@ -605,7 +748,6 @@
       setFreshness(Date.now() - (j.elapsed_seconds||0)*1000);
       setStatus(`Updated · ${(j.elapsed_seconds??0).toFixed(2)}s`, false);
     } catch(e) {
-      clearInterval(stageTimer);
       finishLoadingBar();
       if (e.name==="AbortError") return;
       setStatus("Error: "+e.message, false, true);
@@ -623,6 +765,7 @@
   // ── Render ────────────────────────────────────────────────────────────────
   function renderResults(data) {
     currentPicks = data.picks || [];
+    _stockCandidateCount = data.candidate_count || 0;
     document.getElementById("candidateCount").textContent = `${data.candidate_count} stocks match — showing top ${currentPicks.length}`;
     const empty = document.getElementById("picksEmpty");
     if (currentPicks.length===0) {
@@ -803,24 +946,35 @@
   }
 
 
-  // ── 3. Loading stages ────────────────────────────────────────────────────
+
+  // ── Loading overlay (full-screen) ─────────────────────────────────────────
   let _loadingTimer = null;
-  function startLoadingBar() {
-    const bar = document.getElementById('loadingBar');
-    if (!bar) return;
-    bar.style.width = '10%';
-    let pct = 10;
+  function startLoadingBar(stages) {
+    const overlay = document.getElementById('loadingOverlay');
+    const stageText = document.getElementById('loadingStageText');
+    const fill = document.getElementById('loadingProgressFill');
+    if (!overlay) return;
+    overlay.classList.add('active');
+    fill.style.width = '8%';
+    let idx = 0;
+    if (stages && stages.length) stageText.textContent = stages[0];
+    let pct = 8;
     clearInterval(_loadingTimer);
     _loadingTimer = setInterval(() => {
-      if (pct < 85) { pct += (85 - pct) * 0.12; bar.style.width = pct + '%'; }
-    }, 300);
+      if (pct < 88) { pct += (88 - pct) * 0.1; fill.style.width = pct + '%'; }
+      if (stages && stages.length) {
+        idx = (idx + 1) % stages.length;
+        stageText.textContent = stages[idx];
+      }
+    }, 1400);
   }
   function finishLoadingBar() {
-    const bar = document.getElementById('loadingBar');
-    if (!bar) return;
     clearInterval(_loadingTimer);
-    bar.style.width = '100%';
-    setTimeout(() => { bar.style.width = '0%'; }, 500);
+    const overlay = document.getElementById('loadingOverlay');
+    const fill = document.getElementById('loadingProgressFill');
+    if (!overlay) return;
+    fill.style.width = '100%';
+    setTimeout(() => { overlay.classList.remove('active'); fill.style.width = '0%'; }, 400);
   }
 
   // ── Toast notifications ───────────────────────────────────────────────────
@@ -830,7 +984,7 @@
     t.querySelector('.toast-icon').textContent = icon;
     t.querySelector('.toast-text').textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+    setTimeout(() => t.classList.remove('show'), 3200);
   }
 
   // ── 2. Freshness updater ──────────────────────────────────────────────────
@@ -857,6 +1011,7 @@
     }
   }
   setInterval(updateFreshnessDisplay, 30000);
+
 
   // ── 1. Scoring transparency toggle ───────────────────────────────────────
   function toggleScoreExplain(cardEl) {
