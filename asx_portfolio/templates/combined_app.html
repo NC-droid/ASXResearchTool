@@ -1,1011 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Combined Simulator — ASX Research Tool</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:#0c0f1a; --bg2:#111624; --card:#161d2e; --card2:#1c2540; --card3:#212b42;
-      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
-      --gold:#f0b429; --gold-dim:rgba(240,180,41,0.12); --gold-glow:rgba(240,180,41,0.25);
-      --teal:#2dd4bf; --teal-dim:rgba(45,212,191,0.12); --teal-glow:rgba(45,212,191,0.25);
-      --violet:#a78bfa; --violet-dim:rgba(167,139,250,0.12); --violet-glow:rgba(167,139,250,0.25);
-      --red:#f87171; --green:#4ade80; --amber:#fbbf24;
-      --text:#dde2ef; --muted:#7d8899; --dim:#3a4255;
-      --r:10px; --r-sm:7px;
-    }
-    html { scroll-behavior: smooth; }
-    body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; line-height:1.5; }
-    body::after { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; }
-
-    /* Nav */
-    .asx-nav { background:rgba(12,15,26,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:200; }
-    .asx-nav-inner { max-width:1400px; margin:0 auto; padding:0 28px; height:58px; display:flex; align-items:center; justify-content:space-between; }
-    .asx-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-    .asx-logo-mark { width:32px; height:32px; background:linear-gradient(135deg,var(--gold),#e8830a); border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:'DM Serif Display',serif; font-size:15px; color:#0c0f1a; font-weight:700; box-shadow:0 2px 12px var(--gold-glow); }
-    .asx-logo-text { font-size:13px; font-weight:600; color:var(--text); }
-    .asx-logo-sub { font-size:10px; color:var(--muted); }
-    .nav-links { display:flex; gap:3px; }
-    .nav-link { padding:6px 13px; border-radius:7px; font-size:13px; font-weight:500; color:var(--muted); text-decoration:none; transition:all 0.18s; border:1px solid transparent; }
-    .nav-link:hover { color:var(--text); background:rgba(255,255,255,0.05); border-color:var(--border2); }
-    .nav-link.active { color:var(--violet); background:var(--violet-dim); border-color:var(--violet-glow); }
-
-    /* Disclaimer */
-    .disclaimer-bar { background:rgba(240,180,41,0.07); border-bottom:1px solid rgba(240,180,41,0.15); padding:7px 28px; font-size:11.5px; color:rgba(240,180,41,0.75); display:flex; align-items:center; gap:8px; }
-    .disclaimer-bar strong { color:rgba(240,180,41,0.95); }
-
-    /* Layout */
-    .page-wrap { max-width:1400px; margin:0 auto; padding:24px 28px 60px; display:grid; grid-template-columns:400px 1fr; gap:20px; }
-    @media (max-width:1000px) { .page-wrap { grid-template-columns:1fr; } }
-
-    /* Cards */
-    .card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:18px; }
-    .card-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:14px; }
-
-    /* Buttons */
-    .btn { border:none; border-radius:var(--r-sm); cursor:pointer; font-family:inherit; font-weight:600; transition:all 0.18s; }
-    .btn-ghost { background:var(--card2); border:1px solid var(--border2); color:var(--muted); font-size:12px; padding:7px 14px; }
-    .btn-ghost:hover { color:var(--text); border-color:var(--border2); background:var(--card3); }
-    .btn-gold { background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold-glow); font-size:12px; padding:7px 14px; }
-    .btn-gold:hover { background:var(--gold); color:#0c0f1a; }
-    .btn-teal { background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-glow); font-size:12px; padding:7px 14px; }
-    .btn-teal:hover { background:var(--teal); color:#0c0f1a; }
-    .btn-violet { background:var(--violet); color:#0c0f1a; font-size:14px; padding:13px 20px; width:100%; font-weight:800; letter-spacing:0.04em; }
-    .btn-violet:hover { background:#c4b5fd; transform:translateY(-1px); }
-    .btn-violet:disabled { background:var(--dim); color:var(--muted); cursor:not-allowed; transform:none; }
-    .btn-sm { font-size:11px; padding:4px 10px; border-radius:6px; }
-
-    /* Load strip */
-    .load-section { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .load-btn { background:var(--card2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:12px; cursor:pointer; text-align:left; transition:all 0.18s; font-family:inherit; width:100%; }
-    .load-btn:hover { border-color:var(--border2); background:var(--card3); }
-    .load-btn.etf:hover { border-color:var(--gold-glow); }
-    .load-btn.asx:hover { border-color:var(--teal-glow); }
-    .load-btn-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px; }
-    .load-btn.etf .load-btn-label { color:var(--gold); }
-    .load-btn.asx .load-btn-label { color:var(--teal); }
-    .load-btn-sub { font-size:11px; color:var(--muted); }
-    .load-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; border-radius:99px; font-size:10px; font-weight:700; padding:0 5px; }
-    .load-badge.etf { background:var(--gold); color:#0c0f1a; }
-    .load-badge.asx { background:var(--teal); color:#0c0f1a; }
-
-    /* Holdings list */
-    .holdings-list { display:flex; flex-direction:column; gap:6px; min-height:60px; }
-    .holding-row { display:flex; align-items:center; gap:8px; background:var(--card2); border-radius:7px; padding:8px 10px; }
-    .holding-swatch { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
-    .holding-ticker { font-family:'Geist Mono',monospace; font-size:12px; font-weight:700; color:var(--text); width:60px; flex-shrink:0; }
-    .holding-name { font-size:11px; color:var(--muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .source-badge { font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; flex-shrink:0; }
-    .source-badge.etf { background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold-glow); }
-    .source-badge.asx { background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-glow); }
-    .holding-alloc { width:56px; text-align:right; background:var(--card3); border:1px solid var(--border2); border-radius:5px; padding:4px 6px; color:var(--text); font-family:'Geist Mono',monospace; font-size:12px; outline:none; }
-    .holding-alloc:focus { border-color:var(--violet); }
-    .holding-pct { font-size:11px; color:var(--muted); }
-    .holding-remove { background:none; border:none; color:var(--dim); cursor:pointer; font-size:16px; line-height:1; padding:0 2px; transition:color 0.15s; }
-    .holding-remove:hover { color:var(--red); }
-    .empty-holdings { font-size:13px; color:var(--muted); text-align:center; padding:24px 0; font-style:italic; }
-
-    /* Alloc bar */
-    .alloc-bar { height:8px; border-radius:99px; background:var(--card2); overflow:hidden; display:flex; margin-top:10px; }
-    .alloc-seg { height:100%; transition:width 0.3s; }
-    .alloc-footer { display:flex; justify-content:space-between; align-items:center; margin-top:6px; }
-    .alloc-total { font-size:12px; }
-    .alloc-total.ok { color:var(--teal); font-weight:600; }
-    .alloc-total.warn { color:var(--red); }
-    .alloc-legend { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-    .alloc-legend-item { font-size:10px; color:var(--muted); display:flex; align-items:center; gap:4px; }
-
-    /* Sim settings */
-    .sim-settings { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .form-group { }
-    .form-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; display:flex; justify-content:space-between; }
-    .form-label-val { color:var(--text); text-transform:none; letter-spacing:0; font-family:'Geist Mono',monospace; }
-    input[type=number] { width:100%; background:var(--card2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:8px 10px; color:var(--text); font-family:inherit; font-size:13px; outline:none; }
-    input[type=number]:focus { border-color:var(--violet); box-shadow:0 0 0 2px var(--violet-dim); }
-    input[type=range] { width:100%; accent-color:var(--violet); }
-
-    /* Results */
-    .results { display:flex; flex-direction:column; gap:18px; }
-    .placeholder { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:48px; text-align:center; }
-    .placeholder-icon { font-size:36px; margin-bottom:12px; }
-    .placeholder-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); margin-bottom:6px; }
-    .placeholder-sub { font-size:13px; color:var(--muted); }
-
-    /* KPIs */
-    .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    @media (max-width:640px) { .kpi-grid { grid-template-columns:repeat(2,1fr); } }
-    .kpi-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:14px; }
-    .kpi-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:4px; }
-    .kpi-value { font-family:'DM Serif Display',serif; font-size:24px; color:var(--text); }
-    .kpi-value.green { color:var(--green); }
-    .kpi-value.red { color:var(--red); }
-    .kpi-value.gold { color:var(--gold); }
-    .kpi-value.violet { color:var(--violet); }
-    .kpi-sub { font-size:10px; color:var(--muted); margin-top:2px; }
-
-    /* Chart card */
-    .chart-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:18px; }
-    .chart-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-    .chart-title { font-size:14px; font-weight:700; color:var(--text); }
-    .chart-hint { font-size:11px; color:var(--muted); }
-    #mcChart { width:100%; height:260px; }
-
-    /* Breakdown table */
-    .table-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
-    .table-header { padding:14px 18px; border-bottom:1px solid var(--border); }
-    .table-title { font-size:14px; font-weight:700; color:var(--text); }
-    .table-wrap { overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; font-size:12px; }
-    thead tr { background:var(--card2); }
-    thead th { padding:9px 12px; text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); white-space:nowrap; }
-    tbody tr { border-top:1px solid var(--border); }
-    tbody tr:hover { background:rgba(255,255,255,0.02); }
-    tbody td { padding:9px 12px; color:var(--text); white-space:nowrap; }
-    .mono { font-family:'Geist Mono',monospace; }
-    .num-pos { color:var(--green); }
-    .num-neg { color:var(--red); }
-
-    /* Modal */
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; }
-    .modal-overlay.open { display:flex; }
-    .modal { background:var(--card); border:1px solid var(--border2); border-radius:14px; padding:22px; width:340px; max-width:90vw; }
-    .modal-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:16px; }
-    .modal-field { margin-bottom:12px; }
-    .modal-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:5px; }
-    .modal-input { width:100%; background:var(--card2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:8px 10px; color:var(--text); font-family:inherit; font-size:13px; outline:none; }
-    .modal-input:focus { border-color:var(--violet); box-shadow:0 0 0 2px var(--violet-dim); }
-    .modal-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .modal-footer { display:flex; gap:8px; margin-top:18px; }
-    .btn-modal-cancel { flex:1; background:var(--card2); border:1px solid var(--border2); color:var(--muted); border-radius:var(--r-sm); padding:9px; cursor:pointer; font-family:inherit; font-size:13px; }
-    .btn-modal-confirm { flex:1; background:var(--violet); color:#0c0f1a; border:none; border-radius:var(--r-sm); padding:9px; cursor:pointer; font-family:inherit; font-size:13px; font-weight:700; }
-    .btn-modal-confirm:hover { background:#c4b5fd; }
-
-    #simStatus { font-size:12px; color:var(--muted); text-align:center; margin-top:6px; }
-
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-    ::-webkit-scrollbar { width:5px; height:5px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
-  /* ── UX Improvements ── */
-
-  /* 2. Data freshness */
-  .freshness-badge {
-    display:inline-flex; align-items:center; gap:5px;
-    font-size:10px; color:var(--muted); font-family:'Geist Mono',monospace;
-    background:var(--card2); border:1px solid var(--border); border-radius:99px;
-    padding:3px 9px; margin-left:8px; flex-shrink:0;
-  }
-  .freshness-badge .dot {
-    width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0;
-    animation: freshpulse 3s infinite;
-  }
-  .freshness-badge .dot.stale { background:var(--amber); animation:none; }
-  @keyframes freshpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  /* 3. Loading stages */
-  .loading-bar-wrap {
-    position:fixed; top:0; left:0; right:0; height:2px; z-index:9000;
-    background:transparent; pointer-events:none;
-  }
-  .loading-bar {
-    height:100%; background:linear-gradient(90deg,var(--gold),var(--teal));
-    width:0%; transition:width 0.4s ease; border-radius:0 2px 2px 0;
-  }
-  .loading-stage {
-    font-size:10px; color:var(--muted); margin-left:6px;
-    display:inline; font-style:italic;
-  }
-
-  /* 5. Empty state upgrades */
-  .empty-state-card {
-    background:var(--card); border:1px solid var(--border); border-radius:var(--r);
-    padding:28px 24px; text-align:center; display:none;
-  }
-  .empty-state-card.visible { display:block; }
-  .empty-state-icon { font-size:28px; margin-bottom:10px; }
-  .empty-state-title { font-size:15px; font-weight:600; color:var(--text); margin-bottom:6px; }
-  .empty-state-sub { font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
-  .empty-suggest-chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
-  .empty-suggest-chip {
-    padding:5px 12px; border-radius:99px; font-size:11px; font-weight:600;
-    border:1px solid var(--border2); color:var(--muted); background:var(--card2);
-    cursor:pointer; transition:all 0.18s;
-  }
-  .empty-suggest-chip:hover { color:var(--gold); border-color:var(--gold-glow); background:var(--gold-dim); }
-
-  /* 6. Input microcopy */
-  .input-hint {
-    font-size:10px; color:var(--dim); margin-top:3px; line-height:1.4;
-    display:flex; align-items:flex-start; gap:4px;
-  }
-  .input-hint svg { flex-shrink:0; margin-top:1px; }
-
-  /* 7. Reset button */
-  .btn-reset-filters {
-    width:100%; padding:8px; border-radius:var(--r-sm);
-    background:transparent; border:1px solid var(--border2);
-    color:var(--muted); font-size:11px; font-weight:600;
-    cursor:pointer; transition:all 0.18s; font-family:inherit;
-    display:flex; align-items:center; justify-content:center; gap:5px;
-    margin-top:4px;
-  }
-  .btn-reset-filters:hover { color:var(--red); border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.05); }
-
-  /* 1. Scoring transparency tooltip */
-  .score-explain {
-    background:var(--card2); border:1px solid var(--border2); border-radius:var(--r);
-    padding:12px 14px; margin-top:12px; display:none;
-  }
-  .score-explain.open { display:block; animation:fadeIn 0.2s ease; }
-  .score-explain-title {
-    font-size:10px; font-weight:700; color:var(--muted);
-    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;
-  }
-  .score-explain-row {
-    display:grid; grid-template-columns:80px 1fr 90px; gap:6px;
-    align-items:center; margin-bottom:5px; font-size:11px;
-  }
-  .score-explain-label { color:var(--text); font-weight:500; }
-  .score-explain-track { height:4px; background:var(--card3); border-radius:99px; overflow:hidden; }
-  .score-explain-fill { height:100%; background:linear-gradient(90deg,var(--red),var(--amber) 50%,var(--green)); border-radius:99px; }
-  .score-explain-desc { color:var(--muted); font-size:10px; line-height:1.4; }
-  .btn-explain {
-    display:inline-flex; align-items:center; gap:4px; margin-top:8px;
-    font-size:10px; color:var(--muted); background:none; border:none;
-    cursor:pointer; font-family:inherit; padding:0; transition:color 0.15s;
-  }
-  .btn-explain:hover { color:var(--gold); }
-
-  /* Toast notification */
-  .toast {
-    position:fixed; bottom:24px; right:24px; z-index:9999;
-    background:var(--card); border:1px solid var(--teal-glow);
-    border-radius:var(--r); padding:12px 18px;
-    display:flex; align-items:center; gap:10px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.5);
-    transform:translateY(80px); opacity:0;
-    transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    pointer-events:none; max-width:320px;
-  }
-  .toast.show { transform:translateY(0); opacity:1; }
-  .toast-icon { width:18px; height:18px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; color:#0c0f1a; }
-  .toast-text { font-size:12px; color:var(--text); }
-
-  /* 4. Formula panel */
-  .formula-panel {
-    background:var(--card2); border:1px solid var(--border); border-radius:var(--r-sm);
-    padding:12px 14px; margin-top:12px; font-size:11px; color:var(--muted);
-    line-height:1.7;
-  }
-  .formula-panel strong { color:var(--text); }
-  .formula-eq {
-    font-family:'Geist Mono',monospace; font-size:11px;
-    color:var(--gold); background:var(--goldDim,rgba(240,180,41,0.08));
-    padding:4px 8px; border-radius:4px; display:inline-block; margin:4px 0;
-  }
-  .formula-source { font-size:10px; color:var(--dim); margin-top:4px; }
-
-  /* 8. Mobile fixes */
-  @media (max-width:720px) {
-    .page-wrap { grid-template-columns:1fr !important; gap:14px !important; padding:12px 12px 40px !important; }
-    .picks-grid { grid-template-columns:1fr !important; }
-    .pick-stats { grid-template-columns:repeat(2,1fr) !important; }
-    .kpi-grid { grid-template-columns:repeat(2,1fr) !important; }
-    .load-section { grid-template-columns:1fr !important; }
-    .sim-settings { grid-template-columns:1fr !important; }
-    .divplan-kpis { grid-template-columns:repeat(2,1fr) !important; }
-    .asx-nav-inner { padding:0 12px !important; }
-    .nav-links a { padding:5px 8px !important; font-size:11px !important; }
-    .picks-list .pick-card { padding:14px !important; }
-    .picks-list .pick-stats { grid-template-columns:repeat(2,1fr) !important; }
-    .picks-list .pick-pillars { grid-template-columns:1fr !important; }
-    input[type=range] { height:32px; }
-    .toggle-btn { padding:8px 6px !important; }
-    .sidebar .card { padding:14px !important; }
-  }
-  @media (max-width:480px) {
-    .hero-title { font-size:32px !important; }
-    .results-title { font-size:18px !important; }
-    .asx-logo-text { display:none; }
-    .nav-links a span { display:none; }
-  }
-
-
-  /* ── Process journey banner ── */
-  .journey-banner {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 28px;
-  }
-  .journey-inner {
-    max-width: 1400px; margin: 0 auto;
-    display: flex; align-items: center; gap: 20px;
-  }
-  .journey-label-outer {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--dim); white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .journey-steps {
-    display: flex; align-items: center; gap: 0; flex: 1;
-  }
-  .journey-step {
-    display: flex; align-items: center; gap: 8px;
-    text-decoration: none; padding: 6px 14px; border-radius: 8px;
-    transition: background 0.18s; flex-shrink: 0;
-  }
-  .journey-step:hover { background: rgba(255,255,255,0.04); }
-  .journey-step .journey-num {
-    width: 22px; height: 22px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; flex-shrink: 0;
-    background: var(--card2); color: var(--muted);
-    border: 1px solid var(--border2);
-  }
-  .journey-step .journey-label {
-    font-size: 12px; font-weight: 600; color: var(--muted);
-    display: block; line-height: 1;
-  }
-  .journey-step .journey-sub {
-    font-size: 10px; color: var(--dim);
-    display: block; line-height: 1; margin-top: 2px;
-  }
-  .journey-step.active .journey-num {
-    background: var(--gold-dim); color: var(--gold);
-    border-color: var(--gold-glow);
-  }
-  .journey-step.active .journey-label { color: var(--gold); }
-  .journey-step.active .journey-sub { color: rgba(240,180,41,0.5); }
-  .journey-step.done .journey-num {
-    background: rgba(74,222,128,0.12); color: var(--green);
-    border-color: rgba(74,222,128,0.3);
-  }
-  .journey-step.done .journey-label { color: var(--green); }
-  .journey-step.done .journey-sub { color: rgba(74,222,128,0.4); }
-  .journey-connector {
-    flex: 1; height: 1px; background: var(--border); min-width: 16px; max-width: 60px;
-  }
-  .journey-connector.done { background: rgba(74,222,128,0.3); }
-  @media (max-width: 640px) {
-    .journey-banner { padding: 8px 12px; }
-    .journey-step .journey-sub { display: none; }
-    .journey-label-outer { display: none; }
-    .journey-step { padding: 5px 8px; gap: 5px; }
-    .journey-step .journey-label { font-size: 11px; }
-  }
-
-  /* ── Full-screen loading overlay ── */
-  .loading-overlay {
-    position: fixed; inset: 0; z-index: 8000;
-    background: rgba(12,15,26,0.85);
-    backdrop-filter: blur(4px);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 20px;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.25s;
-  }
-  .loading-overlay.active {
-    opacity: 1; pointer-events: all;
-  }
-  .loading-spinner {
-    width: 48px; height: 48px; border-radius: 50%;
-    border: 3px solid var(--border2);
-    border-top-color: var(--gold);
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-stage-text {
-    font-size: 14px; color: var(--text); font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    text-align: center; max-width: 280px; line-height: 1.5;
-  }
-  .loading-stage-sub {
-    font-size: 11px; color: var(--muted); text-align: center;
-  }
-  .loading-progress-track {
-    width: 220px; height: 3px; background: var(--border2);
-    border-radius: 99px; overflow: hidden;
-  }
-  .loading-progress-fill {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, var(--gold), var(--teal));
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
-
-  /* ── Fix empty-state-card initial visibility ── */
-  .empty-state-card { display: none; }
-  .empty-state-card.visible { display: block; }
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
-<body>
-
-<div class="toast" id="globalToast">
-  <div class="toast-icon">✓</div>
-  <div class="toast-text"></div>
-</div>
-  <!-- Loading overlay -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div>
-      <div class="loading-stage-text" id="loadingStageText">Loading…</div>
-      <div class="loading-stage-sub">Running 500 Monte Carlo simulation paths…</div>
-    </div>
-    <div class="loading-progress-track">
-      <div class="loading-progress-fill" id="loadingProgressFill"></div>
-    </div>
-  </div>
-  <header class="asx-nav">
-    <div class="asx-nav-inner">
-      <a href="/" class="asx-logo">
-        <div class="asx-logo-mark">A</div>
-        <div>
-          <div class="asx-logo-text">ASX Research Tool</div>
-          <div class="asx-logo-sub">Personal use only</div>
-        </div>
-      </a>
-      <nav class="nav-links">
-        <a href="/" class="nav-link">Home</a>
-        <a href="/etfs" class="nav-link">ETF Screener</a>
-        <a href="/stocks" class="nav-link">ASX 200</a>
-        <a href="/combined" class="nav-link active">Combined</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="disclaimer-bar">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <strong>Personal research tool only.</strong>&nbsp; Simulated outcomes are illustrative only — not a forecast, guarantee, or financial advice. Past returns don't predict future results.
-  </div>
-
-  <!-- Process Journey Banner -->
-  <div class="journey-banner">
-    <div class="journey-inner">
-      <div class="journey-label-outer">Your research journey</div>
-      <div class="journey-steps">
-    <a href="/etfs" class="journey-step done">
-      <span class="journey-num">✓</span>
-      <span class="journey-label">ETF Screener</span>
-      <span class="journey-sub">Pick your ETFs</span>
-    </a>
-    <div class="journey-connector done"></div>
-    <a href="/stocks" class="journey-step done">
-      <span class="journey-num">✓</span>
-      <span class="journey-label">ASX 200 Stocks</span>
-      <span class="journey-sub">Pick your stocks</span>
-    </a>
-    <div class="journey-connector done"></div>
-    <a href="/combined" class="journey-step active">
-      <span class="journey-num">3</span>
-      <span class="journey-label">Combined Simulator</span>
-      <span class="journey-sub">Simulate & compare</span>
-    </a>
-      </div>
-    </div>
-  </div>
-  <div class="page-wrap">
-
-    <!-- Left panel: builder -->
-    <div style="display:flex;flex-direction:column;gap:16px">
-
-      <!-- Load saved picks -->
-      <div class="card">
-        <div class="card-title">Load saved picks</div>
-        <div class="load-section">
-          <button class="load-btn etf btn" id="loadEtfBtn">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <div class="load-btn-label">ETF picks</div>
-              <span class="load-badge etf" id="etfBadge" style="display:none"></span>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-purple-600">Portfolio Simulator</h1>
+                    <a href="/" class="text-gray-600 hover:text-gray-900">← Back</a>
+                </div>
             </div>
-            <div class="load-btn-sub">From ETF Screener →</div>
-          </button>
-          <button class="load-btn asx btn" id="loadAsxBtn">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <div class="load-btn-label">Stock picks</div>
-              <span class="load-badge asx" id="asxBadge" style="display:none"></span>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Input Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold mb-4">Portfolio Settings</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Initial Amount ($)</label>
+                                <input type="number" id="initialAmount" value="10000" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="100" max="100000000">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Time Horizon (years)</label>
+                                <input type="number" id="years" value="10" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" max="50">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Simulations</label>
+                                <input type="number" id="simCount" value="500" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="10" max="1000">
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div>
+                                <h3 class="font-bold mb-3">Holdings</h3>
+                                <div id="holdings" class="space-y-3 mb-4">
+                                    <div class="holding border-l-4 border-purple-600 pl-3">
+                                        <input type="text" placeholder="Ticker" class="holding-ticker w-full px-2 py-1 border border-gray-300 rounded text-sm mb-1">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input type="number" placeholder="Return %" class="holding-return w-full px-2 py-1 border border-gray-300 rounded text-sm" min="-200" max="500">
+                                            <input type="number" placeholder="Volatility %" class="holding-vol w-full px-2 py-1 border border-gray-300 rounded text-sm" min="0" max="300">
+                                        </div>
+                                        <input type="number" placeholder="Allocation %" class="holding-alloc w-full px-2 py-1 border border-gray-300 rounded text-sm mt-1" min="0" max="100" step="0.1">
+                                    </div>
+                                </div>
+                                <button id="addHoldingBtn" class="w-full bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 text-sm font-medium">
+                                    + Add Holding
+                                </button>
+                            </div>
+
+                            <button id="simulateBtn" class="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 font-medium mt-6">
+                                Run Simulation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="lg:col-span-2">
+                    <div id="results" class="space-y-4">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <p class="text-gray-500 text-center py-8">Configure your portfolio and click "Run Simulation"</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="load-btn-sub">From ASX 200 Screener →</div>
-          </button>
-        </div>
-        <p style="font-size:11px;color:var(--dim);margin-top:10px">Or add holdings manually with the + buttons below.</p>
-      </div>
-
-      <!-- Holdings -->
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-          <div class="card-title" style="margin-bottom:0">Portfolio Holdings</div>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost btn-sm" id="addEtfRowBtn">+ ETF</button>
-            <button class="btn btn-ghost btn-sm" id="addStockRowBtn">+ Stock</button>
-            <button class="btn btn-ghost btn-sm" id="equaliseBtn">⟳ Equal</button>
-          </div>
-        </div>
-
-        <div class="holdings-list" id="holdingsList">
-          <div class="empty-holdings" id="emptyHoldings">No holdings yet. Load from screeners or add manually.</div>
-        </div>
-
-        <!-- Alloc bar -->
-        <div class="alloc-bar" id="allocBar"></div>
-        <div class="alloc-footer">
-          <span class="alloc-total" id="allocTotal">0% allocated</span>
-          <span style="font-size:11px;color:var(--red);display:none" id="allocWarning">Must total 100%</span>
-        </div>
-        <div class="alloc-legend" id="allocLegend"></div>
-      </div>
-
-      <!-- Sim settings -->
-      <div class="card">
-        <div class="card-title">Simulation Parameters</div>
-        <div class="sim-settings" style="margin-bottom:16px">
-          <div class="form-group">
-            <div class="form-label">Initial investment</div>
-            <input type="number" id="initialAmount" value="10000" min="1000" step="1000" placeholder="$10,000" />
-          </div>
-          <div class="form-group">
-            <div class="form-label">
-              Time horizon
-              <span class="form-label-val" id="yearsLabel">10 yrs</span>
-            </div>
-            <input type="range" id="yearsSlider" min="1" max="30" step="1" value="10" />
-          </div>
-        </div>
-        <button class="btn btn-violet" id="simulateBtn" disabled>▶  Run Monte Carlo Simulation</button>
-        <p id="simStatus"></p>
-        <div class="formula-panel" style="margin-top:10px">
-          <strong>How the simulation works:</strong><br>
-          <span class="formula-eq">500 monthly paths using log-normal returns (Box-Muller transform)</span><br>
-          Each path simulates: Monthly return = weighted avg return + volatility × random shock (normal distribution)<br>
-          <span class="formula-source">⚠ Assets are modelled independently — correlation between holdings is not accounted for.
-          Portfolios with multiple stocks in the same sector may have lower real-world diversification than the simulation suggests.
-          Returns use trailing historical data; past performance does not predict future outcomes.</span>
-        </div>
-      </div>
-
+        </main>
     </div>
 
-    <!-- Right panel: results -->
-    <div class="results">
+    <script>
+        document.getElementById('addHoldingBtn').addEventListener('click', () => {
+            const holdingsDiv = document.getElementById('holdings');
+            const holding = document.createElement('div');
+            holding.className = 'holding border-l-4 border-purple-600 pl-3';
+            holding.innerHTML = `
+                <input type="text" placeholder="Ticker" class="holding-ticker w-full px-2 py-1 border border-gray-300 rounded text-sm mb-1">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" placeholder="Return %" class="holding-return w-full px-2 py-1 border border-gray-300 rounded text-sm" min="-200" max="500">
+                    <input type="number" placeholder="Volatility %" class="holding-vol w-full px-2 py-1 border border-gray-300 rounded text-sm" min="0" max="300">
+                </div>
+                <input type="number" placeholder="Allocation %" class="holding-alloc w-full px-2 py-1 border border-gray-300 rounded text-sm mt-1" min="0" max="100" step="0.1">
+                <button class="remove-holding text-red-600 text-xs mt-1 hover:text-red-800">Remove</button>
+            `;
+            holdingsDiv.appendChild(holding);
+            holding.querySelector('.remove-holding').addEventListener('click', () => holding.remove());
+        });
 
-      <div class="placeholder" id="resultsPlaceholder">
-        <div class="placeholder-icon">📊</div>
-        <div class="placeholder-title">Build your portfolio on the left</div>
-        <div class="placeholder-sub">Load ETF and ASX picks, set allocations to 100%, then run the simulation to see possible outcomes.</div>
-      </div>
+        document.getElementById('simulateBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('simulateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Simulating...';
 
-      <div id="resultsSection" style="display:none;flex-direction:column;gap:18px">
+            try {
+                const holdings = [];
+                document.querySelectorAll('.holding').forEach(h => {
+                    const ticker = h.querySelector('.holding-ticker').value;
+                    const ret = parseFloat(h.querySelector('.holding-return').value) || 0;
+                    const vol = parseFloat(h.querySelector('.holding-vol').value) || 15;
+                    const alloc = parseFloat(h.querySelector('.holding-alloc').value) || 0;
+                    if (ticker && alloc > 0) {
+                        holdings.push({
+                            ticker,
+                            annualReturn: ret,
+                            volatility: vol,
+                            allocation: alloc
+                        });
+                    }
+                });
 
-        <!-- KPIs -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Median outcome</div>
-            <div class="kpi-value green" id="kpiMedian">—</div>
-            <div class="kpi-sub" id="kpiHorizon"></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Bear case (10th %ile)</div>
-            <div class="kpi-value red" id="kpiBear">—</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Bull case (90th %ile)</div>
-            <div class="kpi-value gold" id="kpiBull">—</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Prob. of profit</div>
-            <div class="kpi-value" id="kpiProb">—</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Blended return / yr</div>
-            <div class="kpi-value violet" id="kpiReturn">—</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Portfolio volatility</div>
-            <div class="kpi-value" id="kpiVol">—</div>
-          </div>
-        </div>
+                if (holdings.length === 0) {
+                    alert('Please add at least one holding with allocation > 0');
+                    btn.disabled = false;
+                    btn.textContent = 'Run Simulation';
+                    return;
+                }
 
-        <!-- Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <div class="chart-title">Monte Carlo — 500 paths</div>
-            <div class="chart-hint">Dashed lines = 10th / 90th percentile</div>
-          </div>
-          <div id="mcChart"></div>
-        </div>
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        holdings,
+                        initial_amount: parseFloat(document.getElementById('initialAmount').value),
+                        years: parseInt(document.getElementById('years').value),
+                        sim_count: parseInt(document.getElementById('simCount').value)
+                    })
+                });
 
-        <!-- Breakdown table -->
-        <div class="table-card">
-          <div class="table-header">
-            <div class="table-title">Portfolio Breakdown</div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr>
-                <th>Ticker</th><th>Name</th><th>Source</th>
-                <th style="text-align:right">Allocation</th>
-                <th style="text-align:right">1Y Return</th>
-                <th style="text-align:right">Volatility</th>
-                <th style="text-align:right">Contribution</th>
-              </tr></thead>
-              <tbody id="breakdownBody"></tbody>
-            </table>
-          </div>
-        </div>
+                const data = await response.json();
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
 
-        <p style="font-size:11px;color:var(--dim);text-align:center;padding-bottom:8px">
-          For illustrative purposes only. Simulated paths use historical return proxies with log-normal monthly returns.
-          Not financial advice. Past performance does not predict future outcomes.
-        </p>
-      </div>
-    </div>
-  </div>
+                // Results summary
+                const summary = document.createElement('div');
+                summary.className = 'bg-white rounded-lg shadow p-6';
+                summary.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4">Results</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-purple-50 p-4 rounded">
+                            <p class="text-gray-600 text-sm">Expected Final Value (Median)</p>
+                            <p class="text-2xl font-bold text-purple-600">AUD $${data.mean_final?.toLocaleString('en-AU', {minimumFractionDigits: 2, maximumFractionDigits: 2}) || 'N/A'}</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded">
+                            <p class="text-gray-600 text-sm">Probability of Profit</p>
+                            <p class="text-2xl font-bold text-green-600">${(data.prob_profit * 100).toFixed(1)}%</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded">
+                            <p class="text-gray-600 text-sm">Weighted Return</p>
+                            <p class="text-2xl font-bold text-blue-600">${data.weighted_return_pct?.toFixed(2)}%</p>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded">
+                            <p class="text-gray-600 text-sm">Weighted Volatility</p>
+                            <p class="text-2xl font-bold text-orange-600">${data.weighted_vol_pct?.toFixed(2)}%</p>
+                        </div>
+                    </div>
+                `;
+                resultsDiv.appendChild(summary);
 
-  <!-- Add holding modal -->
-  <div class="modal-overlay" id="addModal">
-    <div class="modal">
-      <div class="modal-title" id="modalTitle">Add holding</div>
-      <div class="modal-field">
-        <div class="modal-label">Ticker (e.g. VAS.AX or BHP.AX)</div>
-        <input class="modal-input" id="modalTicker" type="text" placeholder="VAS.AX" />
-      </div>
-      <div class="modal-field">
-        <div class="modal-label">Display name</div>
-        <input class="modal-input" id="modalName" type="text" placeholder="Vanguard Australian Shares" />
-      </div>
-      <div class="modal-row">
-        <div class="modal-field">
-          <div class="modal-label">Annual return (%)</div>
-          <input class="modal-input" id="modalReturn" type="number" step="0.1" placeholder="9.8" />
-        </div>
-        <div class="modal-field">
-          <div class="modal-label">Volatility (%)</div>
-          <input class="modal-input" id="modalVol" type="number" step="0.1" placeholder="14.0" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-modal-cancel" id="modalCancel">Cancel</button>
-        <button class="btn-modal-confirm" id="modalConfirm">Add holding</button>
-      </div>
-    </div>
-  </div>
+                // Chart
+                const chartDiv = document.createElement('div');
+                chartDiv.id = 'simChart';
+                chartDiv.className = 'bg-white rounded-lg shadow p-6';
+                resultsDiv.appendChild(chartDiv);
 
-  <script>
-  // ── State ─────────────────────────────────────────────────────────────────
-  let holdings = [];
-  let initialAmount = 10000;
-  let years = 10;
-  let modalSource = "ETF";
-
-  const COLORS = ["#a78bfa","#2dd4bf","#f0b429","#f87171","#4ade80","#fb923c","#38bdf8","#e879f9","#a3e635","#fbbf24","#6366f1","#10b981"];
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  // Security: sanitise API-sourced strings before innerHTML
-  const sanitise = s => s == null ? "" : String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-  const fmtAUD = v => { if(v==null||isNaN(v)) return "—"; const n=parseFloat(v); if(n>=1e6) return "$"+(n/1e6).toFixed(2)+"M"; if(n>=1e3) return "$"+(n/1e3).toFixed(1)+"K"; return "$"+n.toFixed(2); };
-  const fmtPct = (v,d=1) => v==null||isNaN(v) ? "—" : parseFloat(v).toFixed(d)+"%";
-
-  // ── Year slider ───────────────────────────────────────────────────────────
-  document.getElementById("yearsSlider").addEventListener("input", e => {
-    years = +e.target.value;
-    document.getElementById("yearsLabel").textContent = years+" yr"+(years===1?"":"s");
-  });
-  document.getElementById("initialAmount").addEventListener("input", e => { initialAmount = +e.target.value || 10000; });
-
-  // ── Holdings management ───────────────────────────────────────────────────
-  function addHolding(h) {
-    const existing = holdings.findIndex(x => x.ticker === h.ticker);
-    if (existing >= 0) { holdings[existing] = {...holdings[existing], ...h}; }
-    else { holdings.push({allocation:0, ...h}); }
-    renderHoldings();
-  }
-
-  function removeHolding(ticker) {
-    holdings = holdings.filter(h => h.ticker !== ticker);
-    renderHoldings();
-  }
-
-  function updateAllocation(ticker, val) {
-    holdings = holdings.map(h => h.ticker===ticker ? {...h, allocation:Math.max(0,Math.min(100,+val||0))} : h);
-    renderHoldings();
-  }
-
-  function equalise() {
-    if (!holdings.length) return;
-    const each = Math.floor(100/holdings.length);
-    const rem = 100 - each*holdings.length;
-    holdings = holdings.map((h,i) => ({...h, allocation: each+(i===0?rem:0)}));
-    renderHoldings();
-  }
-
-  function renderHoldings() {
-    const list = document.getElementById("holdingsList");
-    list.innerHTML = "";
-
-    if (!holdings.length) {
-      const empty = document.createElement("div");
-      empty.className = "empty-holdings";
-      empty.textContent = "No holdings yet. Load from screeners or add manually.";
-      list.appendChild(empty);
-      updateAllocBar(); updateSimBtn(); return;
-    }
-
-    holdings.forEach((h, i) => {
-      const row = document.createElement("div");
-      row.className = "holding-row";
-      const color = COLORS[i % COLORS.length];
-      row.innerHTML = `
-        <div class="holding-swatch" style="background:${color}"></div>
-        <div class="holding-ticker">${sanitise(h.ticker)}</div>
-        <div class="holding-name">${sanitise(h.name)||""}</div>
-        <span class="source-badge ${h.source==='ETF'?'etf':'asx'}">${sanitise(h.source)}</span>
-        <input type="number" class="holding-alloc" min="0" max="100" step="1" value="${h.allocation}"
-          onchange="updateAllocation('${sanitise(h.ticker)}', this.value)" />
-        <span class="holding-pct">%</span>
-        <button class="holding-remove" onclick="removeHolding('${sanitise(h.ticker)}')">×</button>`;
-      list.appendChild(row);
-    });
-
-    updateAllocBar(); updateSimBtn();
-  }
-
-  function updateAllocBar() {
-    const total = holdings.reduce((s,h) => s+(+h.allocation||0), 0);
-    const bar = document.getElementById("allocBar");
-    const legend = document.getElementById("allocLegend");
-    bar.innerHTML = ""; legend.innerHTML = "";
-    holdings.forEach((h,i) => {
-      if (+h.allocation > 0) {
-        const seg = document.createElement("div");
-        seg.className = "alloc-seg";
-        seg.style.width = `${(+h.allocation/Math.max(total,100))*100}%`;
-        seg.style.background = COLORS[i%COLORS.length];
-        bar.appendChild(seg);
-        const item = document.createElement("span");
-        item.className = "alloc-legend-item";
-        item.innerHTML = `<span style="width:8px;height:8px;border-radius:2px;background:${COLORS[i%COLORS.length]};display:inline-block"></span>${sanitise(h.ticker)} ${h.allocation}%`;
-        legend.appendChild(item);
-      }
-    });
-    const totalEl = document.getElementById("allocTotal");
-    const warnEl = document.getElementById("allocWarning");
-    totalEl.textContent = `${total}% allocated`;
-    totalEl.className = `alloc-total ${total===100?"ok":"warn"}`;
-    warnEl.style.display = total===100 ? "none" : "inline";
-  }
-
-  function updateSimBtn() {
-    const total = holdings.reduce((s,h)=>s+(+h.allocation||0),0);
-    document.getElementById("simulateBtn").disabled = (total!==100 || holdings.length===0);
-  }
-
-  document.getElementById("equaliseBtn").addEventListener("click", equalise);
-
-  // ── Load from localStorage ────────────────────────────────────────────────
-  document.getElementById("loadEtfBtn").addEventListener("click", () => {
-    const raw = localStorage.getItem("asx_etf_picks");
-    if (!raw) { alert("No ETF picks saved yet.\n\nGo to the ETF Screener, run a screen, then click 'Save to Combined →'."); return; }
-    try {
-      const picks = JSON.parse(raw);
-      // Schema validation: only load picks with expected shape
-      const valid = picks.filter(p => p && typeof p.ticker === 'string' && typeof p.annualReturn === 'number' && typeof p.volatility === 'number');
-      if (valid.length !== picks.length) console.warn('Some ETF picks had unexpected schema and were skipped.');
-      valid.forEach(p => addHolding({...p, source:"ETF"}));
-      const badge = document.getElementById("etfBadge");
-      badge.textContent = valid.length; badge.style.display="inline-flex";
-      showToast(`${valid.length} ETF pick${valid.length!==1?"s":""} loaded`);
-    } catch { alert("Could not parse saved ETF picks."); }
-  });
-
-  document.getElementById("loadAsxBtn").addEventListener("click", () => {
-    const raw = localStorage.getItem("asx_stock_picks");
-    if (!raw) { alert("No ASX picks saved yet.\n\nGo to the ASX 200 Screener, run a screen, then click 'Save to Combined →'."); return; }
-    try {
-      const picks = JSON.parse(raw);
-      const valid = picks.filter(p => p && typeof p.ticker === 'string' && typeof p.annualReturn === 'number' && typeof p.volatility === 'number');
-      if (valid.length !== picks.length) console.warn('Some ASX picks had unexpected schema and were skipped.');
-      valid.forEach(p => addHolding({...p, source:"ASX"}));
-      const badge = document.getElementById("asxBadge");
-      badge.textContent = picks.length; badge.style.display="inline-flex";
-    } catch { alert("Could not parse saved ASX picks."); }
-  });
-
-  // ── Manual add ────────────────────────────────────────────────────────────
-  document.getElementById("addEtfRowBtn").addEventListener("click", () => openModal("ETF"));
-  document.getElementById("addStockRowBtn").addEventListener("click", () => openModal("ASX"));
-
-  function openModal(source) {
-    modalSource = source;
-    document.getElementById("modalTitle").textContent = `Add ${source} holding`;
-    ["modalTicker","modalName","modalReturn","modalVol"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("addModal").className = "modal-overlay open";
-  }
-
-  document.getElementById("modalCancel").addEventListener("click", () => {
-    document.getElementById("addModal").className = "modal-overlay";
-  });
-  document.getElementById("addModal").addEventListener("click", e => {
-    if (e.target === document.getElementById("addModal")) document.getElementById("addModal").className = "modal-overlay";
-  });
-  document.getElementById("modalConfirm").addEventListener("click", () => {
-    const ticker = document.getElementById("modalTicker").value.trim().toUpperCase();
-    const name   = document.getElementById("modalName").value.trim();
-    const ret    = parseFloat(document.getElementById("modalReturn").value);
-    const vol    = parseFloat(document.getElementById("modalVol").value);
-    if (!ticker) { alert("Please enter a ticker."); return; }
-    if (isNaN(ret)||isNaN(vol)) { alert("Please enter valid return and volatility values."); return; }
-    addHolding({ticker, name:name||ticker, source:modalSource, annualReturn:ret, volatility:vol});
-    document.getElementById("addModal").className = "modal-overlay";
-  });
-
-  // ── Simulate ──────────────────────────────────────────────────────────────
-  document.getElementById("simulateBtn").addEventListener("click", async () => {
-    const btn = document.getElementById("simulateBtn");
-    const status = document.getElementById("simStatus");
-    btn.disabled = true;
-    const simStages = ["Initialising 500 paths…","Generating monthly returns…","Computing percentiles…","Building charts…"];
-    startLoadingBar(simStages);
-
-    let simStageIdx = 0;
-    status.textContent = simStages[0];
-    const simStageTimer = setInterval(() => {
-      simStageIdx = (simStageIdx+1) % simStages.length;
-      status.textContent = simStages[simStageIdx];
-    }, 600);
-
-    const payload = {
-      holdings: holdings.map(h => ({
-        ticker:h.ticker, name:h.name,
-        allocation:+h.allocation,
-        annualReturn:+h.annualReturn,
-        volatility:+h.volatility,
-        source:h.source,
-      })),
-      initial_amount: initialAmount,
-      years, sim_count:500,
-    };
-
-    try {
-      const r = await fetch("/api/simulate", {
-        method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload),
-      });
-      if (!r.ok) { const e=await r.json(); throw new Error(e.detail||"HTTP "+r.status); }
-      const data = await r.json();
-      finishLoadingBar();
-      renderResults(data);
-      status.textContent = "Simulation complete.";
-      showToast("Simulation complete — 500 paths generated");
-    } catch(e) {
-      finishLoadingBar();
-      status.textContent = "Error: "+e.message;
-    } finally {
-      btn.disabled = false; updateSimBtn();
-    }
-  });
-
-  // ── Render results ────────────────────────────────────────────────────────
-  function renderResults(data) {
-    document.getElementById("resultsPlaceholder").style.display = "none";
-    const section = document.getElementById("resultsSection");
-    section.style.display = "flex";
-
-    document.getElementById("kpiMedian").textContent = fmtAUD(data.p50[data.p50.length-1]);
-    document.getElementById("kpiBear").textContent   = fmtAUD(data.p10[data.p10.length-1]);
-    document.getElementById("kpiBull").textContent   = fmtAUD(data.p90[data.p90.length-1]);
-    document.getElementById("kpiProb").textContent   = (data.prob_profit*100).toFixed(1)+"%";
-    document.getElementById("kpiReturn").textContent = data.weighted_return_pct.toFixed(2)+"%/yr";
-    document.getElementById("kpiVol").textContent    = data.weighted_vol_pct.toFixed(2)+"%";
-    document.getElementById("kpiHorizon").textContent = `${years}-year horizon · ${fmtAUD(initialAmount)} initial`;
-
-    const monthPts = data.p50.map((_,i) => +(i*data.step/12).toFixed(2));
-
-    Plotly.react("mcChart", [
-      { x:monthPts, y:data.p90, type:"scatter", mode:"lines", name:"90th %ile",
-        line:{color:"rgba(167,139,250,0.3)", width:1.5, dash:"dot"},
-        fill:"tonexty", fillcolor:"rgba(167,139,250,0.04)" },
-      { x:monthPts, y:data.p10, type:"scatter", mode:"lines", name:"10th %ile",
-        line:{color:"rgba(167,139,250,0.3)", width:1.5, dash:"dot"} },
-      { x:monthPts, y:data.p50, type:"scatter", mode:"lines", name:"Median",
-        line:{color:"#a78bfa", width:2.5} },
-    ], {
-      margin:{t:10,b:40,l:70,r:10},
-      xaxis:{title:"Years", tickformat:".0f", color:"#7d8899", gridcolor:"rgba(255,255,255,0.05)"},
-      yaxis:{title:"Portfolio value", tickformat:"$,.0f", color:"#7d8899", gridcolor:"rgba(255,255,255,0.05)"},
-      showlegend:true,
-      legend:{orientation:"h", y:-0.18, font:{color:"#7d8899",size:11}},
-      paper_bgcolor:"transparent", plot_bgcolor:"transparent",
-      font:{color:"#7d8899"},
-      hovermode:"x unified",
-    }, {displayModeBar:false, responsive:true});
-
-    // Breakdown
-    const tbody = document.getElementById("breakdownBody");
-    tbody.innerHTML = "";
-    holdings.forEach((h,i) => {
-      const contrib = ((+h.annualReturn)*(+h.allocation)/100).toFixed(2);
-      const retPos = +h.annualReturn >= 0;
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="width:10px;height:10px;border-radius:3px;background:${COLORS[i%COLORS.length]}"></div>
-            <span class="mono" style="font-weight:700">${sanitise(h.ticker)}</span>
-          </div>
-        </td>
-        <td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis">${sanitise(h.name)||"—"}</td>
-        <td><span class="source-badge ${h.source==='ETF'?'etf':'asx'}">${sanitise(h.source)}</span></td>
-        <td class="mono" style="text-align:right;font-weight:700">${h.allocation}%</td>
-        <td class="mono" style="text-align:right"><span class="${retPos?'num-pos':'num-neg'}">${fmtPct(+h.annualReturn)}</span></td>
-        <td class="mono" style="text-align:right">${fmtPct(+h.volatility)}</td>
-        <td class="mono" style="text-align:right;color:var(--violet);font-weight:600">+${contrib}%</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-
-
-  // ── 3. Loading stages ────────────────────────────────────────────────────
-  let _loadingTimer = null;
-  function startLoadingBar() {
-    const bar = document.getElementById('loadingBar');
-    if (!bar) return;
-    bar.style.width = '10%';
-    let pct = 10;
-    clearInterval(_loadingTimer);
-    _loadingTimer = setInterval(() => {
-      if (pct < 85) { pct += (85 - pct) * 0.12; bar.style.width = pct + '%'; }
-    }, 300);
-  }
-  function finishLoadingBar() {
-    const bar = document.getElementById('loadingBar');
-    if (!bar) return;
-    clearInterval(_loadingTimer);
-    bar.style.width = '100%';
-    setTimeout(() => { bar.style.width = '0%'; }, 500);
-  }
-
-  // ── Toast notifications ───────────────────────────────────────────────────
-  function showToast(msg, icon='✓') {
-    const t = document.getElementById('globalToast');
-    if (!t) return;
-    t.querySelector('.toast-icon').textContent = icon;
-    t.querySelector('.toast-text').textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
-
-  // ── 2. Freshness updater ──────────────────────────────────────────────────
-  let _dataFetchedAt = null;
-  function setFreshness(ts) {
-    _dataFetchedAt = ts || Date.now();
-    updateFreshnessDisplay();
-  }
-  function updateFreshnessDisplay() {
-    const el = document.getElementById('freshnessBadge');
-    if (!el || !_dataFetchedAt) return;
-    const mins = Math.round((Date.now() - _dataFetchedAt) / 60000);
-    const dot = el.querySelector('.dot');
-    if (mins < 5) {
-      el.querySelector('.freshness-text').textContent = 'Live data';
-      dot.className = 'dot';
-    } else if (mins < 60) {
-      el.querySelector('.freshness-text').textContent = `${mins}m ago`;
-      dot.className = 'dot';
-    } else {
-      const hrs = Math.floor(mins / 60);
-      el.querySelector('.freshness-text').textContent = `${hrs}h ago`;
-      dot.className = 'dot stale';
-    }
-  }
-  setInterval(updateFreshnessDisplay, 30000);
-
-  // ── Init ──────────────────────────────────────────────────────────────────
-  renderHoldings();
-  </script>
+                Plotly.newPlot('simChart', [
+                    { y: data.p10, name: 'P10 (Pessimistic)', line: {color: '#ef4444'} },
+                    { y: data.p50, name: 'P50 (Median)', line: {color: '#8b5cf6', width: 3} },
+                    { y: data.p90, name: 'P90 (Optimistic)', line: {color: '#10b981'} }
+                ], {
+                    title: 'Portfolio Growth Scenarios',
+                    xaxis: { title: 'Month' },
+                    yaxis: { title: 'Portfolio Value (AUD $)' },
+                    hovermode: 'x unified',
+                    responsive: true
+                }, {responsive: true});
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="bg-red-50 rounded-lg p-6"><p class="text-red-800">Error: ${error.message}</p></div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Run Simulation';
+            }
+        });
+    </script>
 </body>
 </html>

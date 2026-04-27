@@ -1,1058 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASX 200 Stocks — ASX Research Tool</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:#0c0f1a; --bg2:#111624; --card:#161d2e; --card2:#1c2540; --card3:#212b42;
-      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
-      --gold:#f0b429; --gold-dim:rgba(240,180,41,0.12); --gold-glow:rgba(240,180,41,0.25);
-      --teal:#2dd4bf; --teal-dim:rgba(45,212,191,0.12); --teal-glow:rgba(45,212,191,0.25);
-      --red:#f87171; --green:#4ade80; --amber:#fbbf24;
-      --text:#dde2ef; --muted:#7d8899; --dim:#3a4255;
-      --r:10px; --r-sm:7px;
-    }
-    html { scroll-behavior: smooth; }
-    body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; line-height:1.5; }
-    body::after { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; }
-
-    /* Nav */
-    .asx-nav { background:rgba(12,15,26,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:200; }
-    .asx-nav-inner { max-width:1400px; margin:0 auto; padding:0 28px; height:58px; display:flex; align-items:center; justify-content:space-between; }
-    .asx-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-    .asx-logo-mark { width:32px; height:32px; background:linear-gradient(135deg,var(--gold),#e8830a); border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:'DM Serif Display',serif; font-size:15px; color:#0c0f1a; font-weight:700; box-shadow:0 2px 12px var(--gold-glow); }
-    .asx-logo-text { font-size:13px; font-weight:600; color:var(--text); }
-    .asx-logo-sub { font-size:10px; color:var(--muted); }
-    .nav-links { display:flex; gap:3px; }
-    .nav-link { padding:6px 13px; border-radius:7px; font-size:13px; font-weight:500; color:var(--muted); text-decoration:none; transition:all 0.18s; border:1px solid transparent; }
-    .nav-link:hover { color:var(--text); background:rgba(255,255,255,0.05); border-color:var(--border2); }
-    .nav-link.active { color:var(--teal); background:var(--teal-dim); border-color:var(--teal-glow); }
-    .nav-right { display:flex; align-items:center; gap:10px; }
-    #status { font-size:12px; color:var(--muted); }
-    #status.stale { animation:pulse 1.5s infinite; color:var(--teal); }
-    #status.error { color:var(--red); }
-    .btn-refresh { padding:6px 14px; border-radius:7px; font-size:12px; font-weight:600; background:var(--card2); border:1px solid var(--border2); color:var(--text); cursor:pointer; transition:all 0.18s; font-family:inherit; }
-    .btn-refresh:hover { background:var(--card3); border-color:var(--teal-glow); color:var(--teal); }
-
-    /* Disclaimer */
-    .disclaimer-bar { background:rgba(240,180,41,0.07); border-bottom:1px solid rgba(240,180,41,0.15); padding:7px 28px; font-size:11.5px; color:rgba(240,180,41,0.75); display:flex; align-items:center; gap:8px; }
-    .disclaimer-bar strong { color:rgba(240,180,41,0.95); }
-
-    /* Layout */
-    .page-wrap { max-width:1400px; margin:0 auto; padding:20px 28px 60px; display:grid; grid-template-columns:320px 1fr; gap:20px; }
-    @media (max-width:960px) { .page-wrap { grid-template-columns:1fr; } }
-
-    /* Sidebar */
-    .sidebar { display:flex; flex-direction:column; gap:14px; }
-    .card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:18px; }
-    .card-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:14px; }
-
-    /* Toggle groups */
-    .toggle-group { display:flex; gap:3px; background:var(--bg2); border-radius:8px; padding:3px; border:1px solid var(--border); }
-    .toggle-btn { flex:1; padding:7px 8px; border-radius:6px; border:none; background:transparent; color:var(--muted); font-size:12px; font-weight:500; cursor:pointer; transition:all 0.18s; font-family:inherit; }
-    .toggle-btn:hover { color:var(--text); background:rgba(255,255,255,0.05); }
-    .toggle-btn[data-active="1"] { background:var(--card3); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.4); font-weight:600; }
-
-    /* Form */
-    .form-row { margin-bottom:14px; }
-    .form-row:last-child { margin-bottom:0; }
-    .form-label { display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:7px; }
-    .form-label-val { font-family:'Geist Mono',monospace; font-size:12px; color:var(--text); font-weight:500; text-transform:none; letter-spacing:0; }
-    input[type=range] { width:100%; accent-color:var(--teal); cursor:pointer; }
-    .range-hints { display:flex; justify-content:space-between; font-size:10px; color:var(--dim); margin-top:3px; }
-    select { width:100%; background:var(--card2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:8px 10px; color:var(--text); font-family:inherit; font-size:13px; cursor:pointer; outline:none; }
-    select:focus { border-color:var(--teal); }
-    option { background:var(--card2); }
-    input[type=text] { width:100%; background:var(--card2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:8px 10px; color:var(--text); font-family:inherit; font-size:13px; outline:none; }
-    input[type=text]:focus { border-color:var(--teal); box-shadow:0 0 0 2px var(--teal-dim); }
-
-    /* Sector chips */
-    .chips-wrap { display:flex; flex-wrap:wrap; gap:5px; }
-    .chip { padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.18s; border:1px solid var(--border2); color:var(--muted); background:transparent; font-family:inherit; }
-    .chip:hover { color:var(--text); background:var(--card2); }
-    .chip[data-active="1"] { color:var(--teal); background:var(--teal-dim); border-color:var(--teal-glow); }
-
-    /* Pillar weights */
-    .pillar-row { margin-bottom:8px; }
-    .pillar-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:3px; }
-    .pillar-track { height:5px; background:var(--card3); border-radius:99px; overflow:hidden; }
-    .pillar-fill { height:100%; background:var(--teal); border-radius:99px; transition:width 0.4s; }
-
-    /* Save strip */
-    .save-strip { background:linear-gradient(90deg,var(--teal-dim),rgba(45,212,191,0.04)); border:1px solid var(--teal-glow); border-radius:var(--r); padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .save-strip-text { font-size:12px; color:var(--muted); line-height:1.4; }
-    .save-strip-text strong { color:var(--text); display:block; margin-bottom:1px; }
-    .btn-save { flex-shrink:0; background:var(--teal); color:#0c0f1a; border:none; border-radius:var(--r-sm); padding:8px 16px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.18s; white-space:nowrap; font-family:inherit; }
-    .btn-save:hover { background:#5eead4; transform:translateY(-1px); }
-    .btn-save:disabled { background:var(--dim); color:var(--muted); cursor:not-allowed; transform:none; }
-    .save-confirm { font-size:11px; color:var(--teal); font-weight:700; display:none; white-space:nowrap; }
-
-    /* Results */
-    .results { display:flex; flex-direction:column; gap:18px; }
-    .results-header { display:flex; align-items:center; justify-content:space-between; }
-    .results-title { font-family:'DM Serif Display',serif; font-size:22px; color:var(--text); }
-    #candidateCount { font-size:12px; color:var(--muted); }
-
-    /* Pick cards */
-    .picks-list { display:flex; flex-direction:column; gap:14px; }
-    .pick-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:18px; transition:all 0.2s; animation:fadeIn 0.3s ease both; }
-    .pick-card:hover { border-color:var(--teal-glow); box-shadow:0 6px 24px rgba(0,0,0,0.4); }
-    .pick-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
-    .pick-ident .pick-rank { font-size:10px; color:var(--muted); margin-bottom:2px; }
-    .pick-ident .pick-ticker { font-family:'DM Serif Display',serif; font-size:24px; color:var(--text); line-height:1; }
-    .pick-ident .pick-name { font-size:12px; color:var(--muted); margin-top:3px; }
-    .pick-badges { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
-    .badge { font-size:10px; font-weight:600; padding:3px 9px; border-radius:99px; }
-    .badge-sector { background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-glow); }
-    .badge-rank { background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold-glow); }
-    .pick-price { text-align:right; }
-    .pick-price-val { font-family:'DM Serif Display',serif; font-size:22px; color:var(--text); }
-    .pick-price-sub { font-size:10px; color:var(--muted); margin-top:2px; }
-
-    .pick-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
-    @media (max-width:640px) { .pick-stats { grid-template-columns:repeat(2,1fr); } }
-    .stat-box { background:var(--card2); border-radius:7px; padding:8px 10px; }
-    .stat-box-label { font-size:10px; color:var(--muted); margin-bottom:3px; }
-    .stat-box-val { font-family:'Geist Mono',monospace; font-size:13px; font-weight:600; color:var(--text); }
-    .stat-box-val.pos { color:var(--green); }
-    .stat-box-val.neg { color:var(--red); }
-    .stat-box-val.gold { color:var(--gold); }
-
-    /* Pillar bars on pick card */
-    .pick-pillars { display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; margin-bottom:10px; }
-    .pp-row { display:grid; grid-template-columns:65px 1fr 28px; align-items:center; gap:5px; }
-    .pp-label { font-size:10px; color:var(--muted); }
-    .pp-track { height:4px; background:var(--card3); border-radius:99px; overflow:hidden; }
-    .pp-fill { height:100%; background:linear-gradient(90deg,var(--red),var(--amber) 50%,var(--green)); border-radius:99px; }
-    .pp-val { font-size:10px; color:var(--dim); font-family:'Geist Mono',monospace; text-align:right; }
-
-    .pick-sparkline { height:52px; margin:8px 0; }
-    .pick-rationale { font-size:11px; color:var(--muted); line-height:1.55; border-top:1px solid var(--border); padding-top:10px; margin-top:4px; }
-
-    .empty-state { background:rgba(45,212,191,0.06); border:1px solid var(--teal-glow); border-radius:var(--r); padding:18px; font-size:13px; color:var(--teal); display:none; }
-    .empty-state.visible { display:block; }
-
-    /* Table */
-    .table-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
-    .table-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-    .table-title { font-size:14px; font-weight:700; color:var(--text); }
-    .table-search { background:var(--card2); border:1px solid var(--border2); border-radius:6px; padding:6px 10px; color:var(--text); font-family:inherit; font-size:12px; outline:none; width:180px; }
-    .table-search:focus { border-color:var(--teal); }
-    .table-wrap { overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; font-size:12px; }
-    thead tr { background:var(--card2); }
-    thead th { padding:9px 12px; text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); cursor:pointer; user-select:none; white-space:nowrap; }
-    thead th:hover { color:var(--text); }
-    thead th.sorted-asc::after { content:" ↑"; color:var(--teal); }
-    thead th.sorted-desc::after { content:" ↓"; color:var(--teal); }
-    tbody tr { border-top:1px solid var(--border); transition:background 0.12s; }
-    tbody tr:hover { background:rgba(255,255,255,0.025); }
-    tbody td { padding:9px 12px; color:var(--text); white-space:nowrap; }
-    .mono { font-family:'Geist Mono',monospace; }
-    .num-pos { color:var(--green); }
-    .num-neg { color:var(--red); }
-    .chip-sector { display:inline-block; padding:2px 8px; border-radius:99px; font-size:10px; background:var(--teal-dim); color:var(--teal); border:1px solid var(--teal-glow); font-weight:600; }
-
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-    ::-webkit-scrollbar { width:5px; height:5px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
-  /* ── UX Improvements ── */
-
-  /* 2. Data freshness */
-  .freshness-badge {
-    display:inline-flex; align-items:center; gap:5px;
-    font-size:10px; color:var(--muted); font-family:'Geist Mono',monospace;
-    background:var(--card2); border:1px solid var(--border); border-radius:99px;
-    padding:3px 9px; margin-left:8px; flex-shrink:0;
-  }
-  .freshness-badge .dot {
-    width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0;
-    animation: freshpulse 3s infinite;
-  }
-  .freshness-badge .dot.stale { background:var(--amber); animation:none; }
-  @keyframes freshpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  /* 3. Loading stages */
-  .loading-bar-wrap {
-    position:fixed; top:0; left:0; right:0; height:2px; z-index:9000;
-    background:transparent; pointer-events:none;
-  }
-  .loading-bar {
-    height:100%; background:linear-gradient(90deg,var(--gold),var(--teal));
-    width:0%; transition:width 0.4s ease; border-radius:0 2px 2px 0;
-  }
-  .loading-stage {
-    font-size:10px; color:var(--muted); margin-left:6px;
-    display:inline; font-style:italic;
-  }
-
-  /* 5. Empty state upgrades */
-  .empty-state-card {
-    background:var(--card); border:1px solid var(--border); border-radius:var(--r);
-    padding:28px 24px; text-align:center; display:none;
-  }
-  .empty-state-card.visible { display:block; }
-  .empty-state-icon { font-size:28px; margin-bottom:10px; }
-  .empty-state-title { font-size:15px; font-weight:600; color:var(--text); margin-bottom:6px; }
-  .empty-state-sub { font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
-  .empty-suggest-chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
-  .empty-suggest-chip {
-    padding:5px 12px; border-radius:99px; font-size:11px; font-weight:600;
-    border:1px solid var(--border2); color:var(--muted); background:var(--card2);
-    cursor:pointer; transition:all 0.18s;
-  }
-  .empty-suggest-chip:hover { color:var(--gold); border-color:var(--gold-glow); background:var(--gold-dim); }
-
-  /* 6. Input microcopy */
-  .input-hint {
-    font-size:10px; color:var(--dim); margin-top:3px; line-height:1.4;
-    display:flex; align-items:flex-start; gap:4px;
-  }
-  .input-hint svg { flex-shrink:0; margin-top:1px; }
-
-  /* 7. Reset button */
-  .btn-reset-filters {
-    width:100%; padding:8px; border-radius:var(--r-sm);
-    background:transparent; border:1px solid var(--border2);
-    color:var(--muted); font-size:11px; font-weight:600;
-    cursor:pointer; transition:all 0.18s; font-family:inherit;
-    display:flex; align-items:center; justify-content:center; gap:5px;
-    margin-top:4px;
-  }
-  .btn-reset-filters:hover { color:var(--red); border-color:rgba(248,113,113,0.4); background:rgba(248,113,113,0.05); }
-
-  /* 1. Scoring transparency tooltip */
-  .score-explain {
-    background:var(--card2); border:1px solid var(--border2); border-radius:var(--r);
-    padding:12px 14px; margin-top:12px; display:none;
-  }
-  .score-explain.open { display:block; animation:fadeIn 0.2s ease; }
-  .score-explain-title {
-    font-size:10px; font-weight:700; color:var(--muted);
-    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;
-  }
-  .score-explain-row {
-    display:grid; grid-template-columns:80px 1fr 90px; gap:6px;
-    align-items:center; margin-bottom:5px; font-size:11px;
-  }
-  .score-explain-label { color:var(--text); font-weight:500; }
-  .score-explain-track { height:4px; background:var(--card3); border-radius:99px; overflow:hidden; }
-  .score-explain-fill { height:100%; background:linear-gradient(90deg,var(--red),var(--amber) 50%,var(--green)); border-radius:99px; }
-  .score-explain-desc { color:var(--muted); font-size:10px; line-height:1.4; }
-  .btn-explain {
-    display:inline-flex; align-items:center; gap:4px; margin-top:8px;
-    font-size:10px; color:var(--muted); background:none; border:none;
-    cursor:pointer; font-family:inherit; padding:0; transition:color 0.15s;
-  }
-  .btn-explain:hover { color:var(--gold); }
-
-  /* Toast notification */
-  .toast {
-    position:fixed; bottom:24px; right:24px; z-index:9999;
-    background:var(--card); border:1px solid var(--teal-glow);
-    border-radius:var(--r); padding:12px 18px;
-    display:flex; align-items:center; gap:10px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.5);
-    transform:translateY(80px); opacity:0;
-    transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    pointer-events:none; max-width:320px;
-  }
-  .toast.show { transform:translateY(0); opacity:1; }
-  .toast-icon { width:18px; height:18px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; color:#0c0f1a; }
-  .toast-text { font-size:12px; color:var(--text); }
-
-  /* 4. Formula panel */
-  .formula-panel {
-    background:var(--card2); border:1px solid var(--border); border-radius:var(--r-sm);
-    padding:12px 14px; margin-top:12px; font-size:11px; color:var(--muted);
-    line-height:1.7;
-  }
-  .formula-panel strong { color:var(--text); }
-  .formula-eq {
-    font-family:'Geist Mono',monospace; font-size:11px;
-    color:var(--gold); background:var(--goldDim,rgba(240,180,41,0.08));
-    padding:4px 8px; border-radius:4px; display:inline-block; margin:4px 0;
-  }
-  .formula-source { font-size:10px; color:var(--dim); margin-top:4px; }
-
-  /* 8. Mobile fixes */
-  @media (max-width:720px) {
-    .page-wrap { grid-template-columns:1fr !important; gap:14px !important; padding:12px 12px 40px !important; }
-    .picks-grid { grid-template-columns:1fr !important; }
-    .pick-stats { grid-template-columns:repeat(2,1fr) !important; }
-    .kpi-grid { grid-template-columns:repeat(2,1fr) !important; }
-    .load-section { grid-template-columns:1fr !important; }
-    .sim-settings { grid-template-columns:1fr !important; }
-    .divplan-kpis { grid-template-columns:repeat(2,1fr) !important; }
-    .asx-nav-inner { padding:0 12px !important; }
-    .nav-links a { padding:5px 8px !important; font-size:11px !important; }
-    .picks-list .pick-card { padding:14px !important; }
-    .picks-list .pick-stats { grid-template-columns:repeat(2,1fr) !important; }
-    .picks-list .pick-pillars { grid-template-columns:1fr !important; }
-    input[type=range] { height:32px; }
-    .toggle-btn { padding:8px 6px !important; }
-    .sidebar .card { padding:14px !important; }
-  }
-  @media (max-width:480px) {
-    .hero-title { font-size:32px !important; }
-    .results-title { font-size:18px !important; }
-    .asx-logo-text { display:none; }
-    .nav-links a span { display:none; }
-  }
-
-
-  /* ── Process journey banner ── */
-  .journey-banner {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 28px;
-  }
-  .journey-inner {
-    max-width: 1400px; margin: 0 auto;
-    display: flex; align-items: center; gap: 20px;
-  }
-  .journey-label-outer {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--dim); white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .journey-steps {
-    display: flex; align-items: center; gap: 0; flex: 1;
-  }
-  .journey-step {
-    display: flex; align-items: center; gap: 8px;
-    text-decoration: none; padding: 6px 14px; border-radius: 8px;
-    transition: background 0.18s; flex-shrink: 0;
-  }
-  .journey-step:hover { background: rgba(255,255,255,0.04); }
-  .journey-step .journey-num {
-    width: 22px; height: 22px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; flex-shrink: 0;
-    background: var(--card2); color: var(--muted);
-    border: 1px solid var(--border2);
-  }
-  .journey-step .journey-label {
-    font-size: 12px; font-weight: 600; color: var(--muted);
-    display: block; line-height: 1;
-  }
-  .journey-step .journey-sub {
-    font-size: 10px; color: var(--dim);
-    display: block; line-height: 1; margin-top: 2px;
-  }
-  .journey-step.active .journey-num {
-    background: var(--gold-dim); color: var(--gold);
-    border-color: var(--gold-glow);
-  }
-  .journey-step.active .journey-label { color: var(--gold); }
-  .journey-step.active .journey-sub { color: rgba(240,180,41,0.5); }
-  .journey-step.done .journey-num {
-    background: rgba(74,222,128,0.12); color: var(--green);
-    border-color: rgba(74,222,128,0.3);
-  }
-  .journey-step.done .journey-label { color: var(--green); }
-  .journey-step.done .journey-sub { color: rgba(74,222,128,0.4); }
-  .journey-connector {
-    flex: 1; height: 1px; background: var(--border); min-width: 16px; max-width: 60px;
-  }
-  .journey-connector.done { background: rgba(74,222,128,0.3); }
-  @media (max-width: 640px) {
-    .journey-banner { padding: 8px 12px; }
-    .journey-step .journey-sub { display: none; }
-    .journey-label-outer { display: none; }
-    .journey-step { padding: 5px 8px; gap: 5px; }
-    .journey-step .journey-label { font-size: 11px; }
-  }
-
-  /* ── Full-screen loading overlay ── */
-  .loading-overlay {
-    position: fixed; inset: 0; z-index: 8000;
-    background: rgba(12,15,26,0.85);
-    backdrop-filter: blur(4px);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 20px;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.25s;
-  }
-  .loading-overlay.active {
-    opacity: 1; pointer-events: all;
-  }
-  .loading-spinner {
-    width: 48px; height: 48px; border-radius: 50%;
-    border: 3px solid var(--border2);
-    border-top-color: var(--gold);
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-stage-text {
-    font-size: 14px; color: var(--text); font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    text-align: center; max-width: 280px; line-height: 1.5;
-  }
-  .loading-stage-sub {
-    font-size: 11px; color: var(--muted); text-align: center;
-  }
-  .loading-progress-track {
-    width: 220px; height: 3px; background: var(--border2);
-    border-radius: 99px; overflow: hidden;
-  }
-  .loading-progress-fill {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, var(--gold), var(--teal));
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
-
-  /* ── Fix empty-state-card initial visibility ── */
-  .empty-state-card { display: none; }
-  .empty-state-card.visible { display: block; }
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Screener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-<div class="toast" id="globalToast">
-  <div class="toast-icon">✓</div>
-  <div class="toast-text"></div>
-</div>
-  <!-- Loading overlay -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div>
-      <div class="loading-stage-text" id="loadingStageText">Loading…</div>
-      <div class="loading-stage-sub">Fetching ASX 200 fundamentals from Yahoo Finance…</div>
-    </div>
-    <div class="loading-progress-track">
-      <div class="loading-progress-fill" id="loadingProgressFill"></div>
-    </div>
-  </div>
-  <header class="asx-nav">
-    <div class="asx-nav-inner">
-      <a href="/" class="asx-logo">
-        <div class="asx-logo-mark">A</div>
-        <div>
-          <div class="asx-logo-text">ASX Research Tool</div>
-          <div class="asx-logo-sub">Personal use only</div>
-        </div>
-      </a>
-      <nav class="nav-links">
-        <a href="/" class="nav-link">Home</a>
-        <a href="/etfs" class="nav-link">ETF Screener</a>
-        <a href="/stocks" class="nav-link active">ASX 200</a>
-        <a href="/combined" class="nav-link">Combined</a>
-      </nav>
-      <div class="nav-right">
-        <span id="status">Idle</span>
-        <button class="btn-refresh" id="refreshBtn">↻ Refresh</button>
-        <span class="freshness-badge" id="freshnessBadge">
-        <span class="dot"></span>
-        <span class="freshness-text">—</span>
-      </span>
-      </div>
-    </div>
-  </header>
-
-  <div class="disclaimer-bar">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <strong>Personal research tool only.</strong>&nbsp; Not financial advice. Always speak with a licensed financial adviser before making investment decisions.
-  </div>
-
-  <!-- Process Journey Banner -->
-  <div class="journey-banner">
-    <div class="journey-inner">
-      <div class="journey-label-outer">Your research journey</div>
-      <div class="journey-steps">
-    <a href="/etfs" class="journey-step done">
-      <span class="journey-num">✓</span>
-      <span class="journey-label">ETF Screener</span>
-      <span class="journey-sub">Pick your ETFs</span>
-    </a>
-    <div class="journey-connector done"></div>
-    <a href="/stocks" class="journey-step active">
-      <span class="journey-num">2</span>
-      <span class="journey-label">ASX 200 Stocks</span>
-      <span class="journey-sub">Pick your stocks</span>
-    </a>
-    <div class="journey-connector"></div>
-    <a href="/combined" class="journey-step">
-      <span class="journey-num">3</span>
-      <span class="journey-label">Combined Simulator</span>
-      <span class="journey-sub">Simulate & compare</span>
-    </a>
-      </div>
-    </div>
-  </div>
-  <div class="page-wrap">
-    <aside class="sidebar">
-
-      <div class="card">
-        <div class="card-title">What are you looking for?</div>
-
-        <div class="form-row">
-          <div class="form-label">Risk tolerance</div>
-          <div class="toggle-group" id="risk-group">
-            <button class="toggle-btn" data-value="low">Low</button>
-            <button class="toggle-btn" data-value="medium" data-active="1">Medium</button>
-            <button class="toggle-btn" data-value="high">High</button>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-label">Investment horizon</div>
-          <div class="toggle-group" id="horizon-group">
-            <button class="toggle-btn" data-value="short">1–3 yrs</button>
-            <button class="toggle-btn" data-value="medium" data-active="1">3–7 yrs</button>
-            <button class="toggle-btn" data-value="long">7+ yrs</button>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-label">
-            Min. dividend yield
-            <span class="form-label-val" id="yieldLabel">0%</span>
-          </div>
-          <input id="yieldSlider" type="range" min="0" max="80" step="1" value="0" />
-          <div class="range-hints"><span>0%</span><span>4%</span><span>8%+</span></div>
-          <div class="input-hint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Trailing 12-month dividend yield. 0 = no floor — all stocks included.</div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-label">
-            Min. market cap
-            <span class="form-label-val" id="mcapLabel">any</span>
-          </div>
-          <input id="mcapSlider" type="range" min="0" max="20" step="1" value="0" />
-          <div class="range-hints"><span>any</span><span>$1B</span><span>$20B+</span></div>
-          <div class="input-hint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Filters out smaller companies. $1B+ removes micro-caps; $20B+ restricts to ASX large-caps only.</div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-label">Number of picks</div>
-          <select id="topN">
-            <option value="3">Top 3</option>
-            <option value="5" selected>Top 5</option>
-            <option value="10">Top 10</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Sectors -->
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="card-title" style="margin-bottom:0">Sector focus</div>
-          <button onclick="clearSectors()" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit">clear all</button>
-        </div>
-        <div class="chips-wrap" id="sectorChips">
-          <span style="font-size:12px;color:var(--muted);font-style:italic">Loading sectors…</span>
-        </div>
-      </div>
-
-      <!-- Pillar weights -->
-      <div class="card">
-        <div class="card-title">Active pillar weights</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Heavier bars = more influence on the composite score.</div>
-        <div id="pillarWeights"></div>
-      </div>
-
-      <!-- Reset filters -->
-      <button class="btn-reset-filters" onclick="resetAllFilters()">↺ Reset all filters</button>
-
-      <!-- Save strip -->
-      <div class="save-strip">
-        <div class="save-strip-text">
-          <strong>Take it to the Simulator</strong>
-          Save your stock picks and blend with ETFs in the Combined Portfolio Simulator.
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span class="save-confirm" id="saveConfirm">✓ Picks saved!</span>
-          <button class="btn-save" id="savePicksBtn" disabled onclick="savePicksToCombined()">Save to Combined →</button>
-        </div>
-      </div>
-
-      <div class="card" style="border-color:var(--dim)">
-        <div style="font-size:11px;color:var(--muted);line-height:1.6">
-          <strong style="color:var(--text)">Data note:</strong> Yahoo Finance data may be delayed. Scores are model outputs, not forecasts. Past performance doesn't predict future returns.
-        </div>
-      </div>
-
-    </aside>
-
-    <section class="results">
-      <div class="results-header">
-        <h2 class="results-title">Top ASX 200 Picks</h2>
-        <span id="candidateCount"></span>
-      </div>
-
-      <div class="empty-state-card" id="picksEmpty">
-        <div class="empty-state-icon">🔍</div>
-        <div class="empty-state-title">No stocks match these filters</div>
-        <div class="empty-state-sub" id="emptyStateSub">Try loosening your filters to see more results.</div>
-        <div class="empty-suggest-chips" id="emptySuggestChips"></div>
-      </div>
-      <div class="picks-list" id="picksList"></div>
-
-      <div class="table-card">
-        <div class="table-header">
-          <span class="table-title">Full ranking</span>
-          <input type="text" class="table-search" id="tableSearch" placeholder="Filter by ticker or name…" />
-        </div>
-        <div class="table-wrap">
-          <table id="rankingTable">
-            <thead><tr>
-              <th>Ticker</th><th>Name</th><th>Sector</th>
-              <th style="text-align:right">Score</th>
-              <th style="text-align:right">Proj. Ret.</th>
-              <th style="text-align:right">1Y Ret.</th>
-              <th style="text-align:right">3Y Ann.</th>
-              <th style="text-align:right">Vol. 1Y</th>
-              <th style="text-align:right">Div. Yield</th>
-              <th style="text-align:right">P/E</th>
-              <th style="text-align:right">ROE</th>
-            </tr></thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-  // ── State ─────────────────────────────────────────────────────────────────
-  const state = { risk_tolerance:"medium", horizon:"medium", sectors:[], min_dividend_yield:0.0, min_market_cap_aud_m:0.0, top_n:5 };
-  let currentPicks = [];
-  let _stockCandidateCount = 0;
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  // Security: sanitise any string before inserting into innerHTML
-  const sanitise = s => s == null ? "" : String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-  const fmtPct = (v, d=1) => v == null ? "—" : (v*100).toFixed(d) + "%";
-  const fmtNum = (v, d=1) => v == null || isNaN(parseFloat(v)) ? "—" : parseFloat(v).toFixed(d);
-  const fmtAUD = v => { if (v==null||isNaN(v)) return "—"; const n=parseFloat(v); if(n>=1e9) return `$${(n/1e9).toFixed(1)}B`; if(n>=1e6) return `$${(n/1e6).toFixed(0)}M`; return `$${n.toFixed(2)}`; };
-  const debounce = (fn,ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
-
-  // ── Toggle groups ─────────────────────────────────────────────────────────
-  function bindToggleGroup(id, key) {
-    document.getElementById(id).querySelectorAll(".toggle-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.getElementById(id).querySelectorAll(".toggle-btn").forEach(b => b.removeAttribute("data-active"));
-        btn.setAttribute("data-active","1");
-        state[key] = btn.dataset.value;
-        triggerScreen();
-      });
-    });
-  }
-  bindToggleGroup("risk-group","risk_tolerance");
-  bindToggleGroup("horizon-group","horizon");
-
-  // ── Sliders ───────────────────────────────────────────────────────────────
-  const YIELD_VALS = [0,.01,.02,.03,.04,.05,.06,.07,.08,.09,.10,.12,.15,.20];
-  document.getElementById("yieldSlider").addEventListener("input", e => {
-    const idx = Math.round(+e.target.value / 80 * (YIELD_VALS.length-1));
-    const v = YIELD_VALS[idx] || 0;
-    state.min_dividend_yield = v;
-    document.getElementById("yieldLabel").textContent = v===0 ? "0%" : (v*100).toFixed(1)+"%";
-    triggerScreen();
-  });
-
-  const MCAP_VALS = [0,100,250,500,1000,2000,3000,5000,7500,10000,12500,15000,17500,20000,25000,30000,40000,50000,75000,100000,200000];
-  document.getElementById("mcapSlider").addEventListener("input", e => {
-    const idx = Math.round(+e.target.value / 20 * (MCAP_VALS.length-1));
-    const v = MCAP_VALS[idx] || 0;
-    state.min_market_cap_aud_m = v;
-    document.getElementById("mcapLabel").textContent = v===0 ? "any" : v>=1000 ? `$${(v/1000).toFixed(0)}B` : `$${v}M`;
-    triggerScreen();
-  });
-
-  document.getElementById("topN").addEventListener("change", e => {
-    state.top_n = +e.target.value; triggerScreen();
-  });
-
-  // Table search
-  document.getElementById("tableSearch").addEventListener("input", e => {
-    const q = e.target.value.toLowerCase();
-    document.querySelectorAll("#tableBody tr").forEach(tr => {
-      tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
-    });
-  });
-
-  // ── Sectors ───────────────────────────────────────────────────────────────
-  async function loadSectors() {
-    try {
-      const r = await fetch("/api/sectors");
-      const j = await r.json();
-      renderSectorChips(j.sectors || []);
-    } catch { document.getElementById("sectorChips").textContent = "Could not load sectors."; }
-  }
-
-  function renderSectorChips(sectors) {
-    const container = document.getElementById("sectorChips");
-    container.innerHTML = "";
-    sectors.forEach(s => {
-      const btn = document.createElement("button");
-      btn.className = "chip"; btn.textContent = s; btn.dataset.sector = s;
-      btn.addEventListener("click", () => {
-        if (btn.getAttribute("data-active")==="1") {
-          btn.removeAttribute("data-active");
-          state.sectors = state.sectors.filter(x => x !== s);
-        } else {
-          btn.setAttribute("data-active","1");
-          if (!state.sectors.includes(s)) state.sectors.push(s);
-        }
-        triggerScreen();
-      });
-      container.appendChild(btn);
-    });
-  }
-
-  function clearSectors() {
-    state.sectors = [];
-    document.querySelectorAll("#sectorChips .chip").forEach(c => c.removeAttribute("data-active"));
-    triggerScreen();
-  }
-
-  // ── Screen API ────────────────────────────────────────────────────────────
-  let inFlight = null;
-  async function runScreen(forceRefresh=false) {
-    const stages = forceRefresh
-      ? ["Connecting to Yahoo Finance…","Fetching ASX 200 stocks…","Scoring fundamentals…","Ranking pillars…"]
-      : ["Scoring stocks…","Ranking by pillars…"];
-    let stageIdx = 0;
-    setStatus(stages[0], true);
-    startLoadingBar();
-    if (inFlight) inFlight.abort();
-    const ctrl = new AbortController(); inFlight = ctrl;
-    const stageTimer = setInterval(() => {
-      stageIdx = (stageIdx + 1) % stages.length;
-      if (document.getElementById("status").className === "stale")
-        document.getElementById("status").textContent = stages[stageIdx];
-    }, 1800);
-    try {
-      const r = await fetch("/api/screen-stocks", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({...state, force_refresh:forceRefresh}),
-        signal:ctrl.signal,
-      });
-      if (!r.ok) throw new Error("HTTP "+r.status);
-      const j = await r.json();
-      renderResults(j);
-      finishLoadingBar();
-      setFreshness(Date.now() - (j.elapsed_seconds||0)*1000);
-      setStatus(`Updated · ${(j.elapsed_seconds??0).toFixed(2)}s`, false);
-    } catch(e) {
-      finishLoadingBar();
-      if (e.name==="AbortError") return;
-      setStatus("Error: "+e.message, false, true);
-    }
-  }
-  const triggerScreen = debounce(() => runScreen(false), 350);
-
-  function setStatus(msg, busy, err=false) {
-    const el = document.getElementById("status");
-    el.textContent = msg;
-    el.className = busy ? "stale" : err ? "error" : "";
-  }
-  document.getElementById("refreshBtn").addEventListener("click", () => runScreen(true));
-
-  // ── Render ────────────────────────────────────────────────────────────────
-  function renderResults(data) {
-    currentPicks = data.picks || [];
-    _stockCandidateCount = data.candidate_count || 0;
-    document.getElementById("candidateCount").textContent = `${data.candidate_count} stocks match — showing top ${currentPicks.length}`;
-    const empty = document.getElementById("picksEmpty");
-    if (currentPicks.length===0) {
-      empty.className = "empty-state-card visible";
-      const suggestions = [];
-      if (state.sectors.length>0) suggestions.push({label:"Show all sectors", action:"clearSectors()"});
-      if (state.min_dividend_yield>0) suggestions.push({label:"Remove yield floor", action:"document.getElementById('yieldSlider').value=0;state.min_dividend_yield=0;document.getElementById('yieldLabel').textContent='0%';triggerScreen()"});
-      if (state.min_market_cap_aud_m>0) suggestions.push({label:"Remove market cap floor", action:"document.getElementById('mcapSlider').value=0;state.min_market_cap_aud_m=0;document.getElementById('mcapLabel').textContent='any';triggerScreen()"});
-      document.getElementById("emptySuggestChips").innerHTML = suggestions.map(s=>`<button class="empty-suggest-chip" onclick="${s.action}">${s.label}</button>`).join("");
-      document.getElementById("emptyStateSub").textContent = suggestions.length>0 ? "These filters might be too tight. Try one of these quick fixes:" : "Try widening your sector or yield filters.";
-    } else {
-      empty.className = "empty-state-card";
-    }
-    renderPicks(currentPicks, data.rationales||[]);
-    renderTable(data.all_filtered||[]);
-    renderPillarWeights(data.pillar_weights);
-    document.getElementById("savePicksBtn").disabled = currentPicks.length===0;
-  }
-
-  function renderPicks(picks, rationales) {
-    const list = document.getElementById("picksList");
-    list.innerHTML = "";
-    picks.forEach((p, i) => {
-      const card = document.createElement("article");
-      card.className = "pick-card";
-      card.style.animationDelay = (i*0.07)+"s";
-
-      const pillars = [
-        ["Value",    p.score_value],
-        ["Growth",   p.score_growth],
-        ["Quality",  p.score_quality],
-        ["Income",   p.score_income],
-        ["Momentum", p.score_momentum],
-        ["Risk",     p.score_risk],
-      ];
-      const pillarHtml = pillars.map(([label, score]) => {
-        const s = score != null ? Math.max(0, Math.min(100, score)) : 50;
-        return `<div class="pp-row">
-          <div class="pp-label">${label}</div>
-          <div class="pp-track"><div class="pp-fill" style="width:${s}%"></div></div>
-          <div class="pp-val">${Math.round(s)}</div>
-        </div>`;
-      }).join("");
-
-      const sparkId = `spark-${i}`;
-      const ret1y = p.return_1y;
-      const projRet = p.projected_return;
-
-      card.innerHTML = `
-        <div class="pick-top">
-          <div class="pick-ident">
-            <div class="pick-rank">#${i+1} pick</div>
-            <div class="pick-ticker">${sanitise(p.ticker)}</div>
-            <div class="pick-name">${sanitise(p.name)||"—"}</div>
-            <div class="pick-badges">
-              <span class="badge badge-sector">${sanitise(p.sector)||"—"}</span>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-green-600">ASX 200 Stock Screener</h1>
+                    <a href="/" class="text-gray-600 hover:text-gray-900">← Back</a>
+                </div>
             </div>
-          </div>
-          <div class="pick-price">
-            <div class="pick-price-val">$${p.price!=null?parseFloat(p.price).toFixed(2):"—"}</div>
-            <div class="pick-price-sub">${fmtAUD(p.market_cap)}</div>
-          </div>
-        </div>
-        <div class="pick-stats">
-          <div class="stat-box"><div class="stat-box-label">Composite</div><div class="stat-box-val">${fmtNum(p.composite_score,1)}</div></div>
-          <div class="stat-box"><div class="stat-box-label">Proj. Return</div><div class="stat-box-val gold">${projRet!=null?(projRet*100).toFixed(1)+"%":"—"}</div></div>
-          <div class="stat-box"><div class="stat-box-label">1Y Return</div><div class="stat-box-val ${ret1y!=null?(ret1y>=0?'pos':'neg'):''}">${fmtPct(ret1y)}</div></div>
-          <div class="stat-box"><div class="stat-box-label">Div. Yield</div><div class="stat-box-val pos">${p.dividend_yield!=null?((+p.dividend_yield)*100).toFixed(2)+"%":"—"}</div></div>
-          <div class="stat-box"><div class="stat-box-label">P/E Ratio</div><div class="stat-box-val">${fmtNum(p.pe_ratio,1)}</div></div>
-          <div class="stat-box"><div class="stat-box-label">ROE</div><div class="stat-box-val">${fmtPct(p.roe)}</div></div>
-          <div class="stat-box"><div class="stat-box-label">Volatility</div><div class="stat-box-val">${fmtPct(p.volatility_1y)}</div></div>
-          <div class="stat-box"><div class="stat-box-label">Beta</div><div class="stat-box-val">${fmtNum(p.beta,2)}</div></div>
-        </div>
-        <div class="pick-pillars">${pillarHtml}</div>
-        <div id="${sparkId}" class="pick-sparkline"></div>
-        ${rationales[i] ? `<div class="pick-rationale">${sanitise(rationales[i])}</div>` : ""}
-      `;
-      list.appendChild(card);
+        </header>
 
-      if (p.history_dates && p.history_prices && p.history_prices.length > 2) {
-        const isUp = p.history_prices[p.history_prices.length-1] >= p.history_prices[0];
-        Plotly.newPlot(sparkId, [{
-          x: p.history_dates, y: p.history_prices,
-          type:"scatter", mode:"lines",
-          line:{color: isUp ? "#4ade80":"#f87171", width:1.5},
-          fill:"tozeroy", fillcolor: isUp ? "rgba(74,222,128,0.06)":"rgba(248,113,113,0.06)",
-        }], {
-          margin:{t:0,b:0,l:0,r:0},
-          xaxis:{visible:false}, yaxis:{visible:false},
-          showlegend:false, paper_bgcolor:"transparent", plot_bgcolor:"transparent",
-        }, {displayModeBar:false, responsive:true});
-      }
-    });
-  }
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Filters Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow p-6 sticky top-4">
+                        <h2 class="text-xl font-bold mb-4">Filters</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Risk Tolerance</label>
+                                <select id="riskTolerance" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
 
-  function renderTable(rows) {
-    const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
-    rows.forEach(r => {
-      const tr = document.createElement("tr");
-      const ret1y = r.return_1y;
-      tr.innerHTML = `
-        <td class="mono" style="font-weight:700">${sanitise(r.ticker)}</td>
-        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${sanitise(r.name)||"—"}</td>
-        <td><span class="chip-sector">${sanitise(r.sector)||"—"}</span></td>
-        <td class="mono" style="text-align:right" data-sort="${r.composite_score??0}">${r.composite_score!=null?(+r.composite_score).toFixed(1):"—"}</td>
-        <td class="mono" style="text-align:right" data-sort="${r.projected_return??-99}">${r.projected_return!=null?((+r.projected_return)*100).toFixed(1)+"%":"—"}</td>
-        <td class="mono" style="text-align:right" data-sort="${r.return_1y??-99}"><span class="${ret1y!=null?(ret1y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_1y)}</span></td>
-        <td class="mono" style="text-align:right" data-sort="${r.return_3y??-99}"><span class="${r.return_3y!=null?(r.return_3y>=0?'num-pos':'num-neg'):''}">${fmtPct(r.return_3y)}</span></td>
-        <td class="mono" style="text-align:right" data-sort="${r.volatility_1y??99}">${fmtPct(r.volatility_1y)}</td>
-        <td class="mono" style="text-align:right" data-sort="${r.dividend_yield??0}" class="num-pos">${r.dividend_yield!=null?((+r.dividend_yield)*100).toFixed(2)+"%":"—"}</td>
-        <td class="mono" style="text-align:right" data-sort="${r.pe_ratio??9999}">${fmtNum(r.pe_ratio)}</td>
-        <td class="mono" style="text-align:right" data-sort="${r.roe??-99}"><span class="${r.roe!=null?(r.roe>=0?'num-pos':'num-neg'):''}">${fmtPct(r.roe)}</span></td>`;
-      tbody.appendChild(tr);
-    });
-    bindSortableTable();
-  }
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Sectors</label>
+                                <div id="sectors" class="space-y-2 max-h-48 overflow-y-auto">
+                                    <p class="text-gray-500 text-sm">Loading sectors...</p>
+                                </div>
+                            </div>
 
-  function bindSortableTable() {
-    const table = document.getElementById("rankingTable");
-    if (!table || table.dataset.bound==="1") return;
-    const tbody = table.tBodies[0];
-    table.querySelectorAll("th").forEach((th,i) => {
-      th.addEventListener("click", () => {
-        const rows = Array.from(tbody.rows);
-        const asc = !th.classList.contains("sorted-asc");
-        table.querySelectorAll("th").forEach(h => h.classList.remove("sorted-asc","sorted-desc"));
-        th.classList.add(asc ? "sorted-asc":"sorted-desc");
-        rows.sort((a,b) => {
-          const av=a.cells[i].dataset.sort??a.cells[i].innerText.trim();
-          const bv=b.cells[i].dataset.sort??b.cells[i].innerText.trim();
-          const an=parseFloat(av),bn=parseFloat(bv);
-          return !isNaN(an)&&!isNaN(bn) ? (asc?an-bn:bn-an) : (asc?av.localeCompare(bv):bv.localeCompare(av));
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Min Dividend Yield (%)</label>
+                                <input type="number" id="minDividend" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md" step="0.1" min="0">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Min Market Cap (AUD M)</label>
+                                <input type="number" id="minMarketCap" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md" step="100" min="0">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Results to Show</label>
+                                <input type="number" id="topN" value="5" class="w-full px-3 py-2 border border-gray-300 rounded-md" min="1" max="20">
+                            </div>
+
+                            <button id="screenBtn" class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 font-medium">
+                                Screen Stocks
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="lg:col-span-3">
+                    <div id="results" class="space-y-4">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <p class="text-gray-500 text-center py-8">Click "Screen Stocks" to start screening</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Load sectors on page load
+        fetch('/api/sectors')
+            .then(r => r.json())
+            .then(data => {
+                const sectorsDiv = document.getElementById('sectors');
+                sectorsDiv.innerHTML = '';
+                if (data.sectors && data.sectors.length > 0) {
+                    data.sectors.forEach(sector => {
+                        const label = document.createElement('label');
+                        label.className = 'flex items-center';
+                        label.innerHTML = `
+                            <input type="checkbox" value="${sector}" class="sector-check mr-2 rounded">
+                            <span class="text-sm text-gray-700">${sector}</span>
+                        `;
+                        sectorsDiv.appendChild(label);
+                    });
+                }
+            })
+            .catch(() => {
+                document.getElementById('sectors').innerHTML = '<p class="text-red-600 text-sm">Failed to load sectors</p>';
+            });
+
+        document.getElementById('screenBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('screenBtn');
+            btn.disabled = true;
+            btn.textContent = 'Screening...';
+
+            try {
+                const sectors = Array.from(document.querySelectorAll('.sector-check:checked')).map(c => c.value);
+                
+                const response = await fetch('/api/screen-stocks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        risk_tolerance: document.getElementById('riskTolerance').value,
+                        horizon: 'medium',
+                        sectors: sectors,
+                        min_dividend_yield: parseFloat(document.getElementById('minDividend').value),
+                        min_market_cap_aud_m: parseFloat(document.getElementById('minMarketCap').value),
+                        top_n: parseInt(document.getElementById('topN').value)
+                    })
+                });
+
+                const data = await response.json();
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+
+                if (data.picks && data.picks.length > 0) {
+                    data.picks.forEach((pick, idx) => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-white rounded-lg shadow p-6 border-l-4 border-green-600';
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-2xl font-bold text-gray-900">${pick.ticker || 'N/A'}</h3>
+                                    <p class="text-gray-600">${pick.name || 'Stock'}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold text-green-600">${(pick.score || 0).toFixed(1)}</p>
+                                    <p class="text-gray-600 text-sm">Score</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-gray-600 text-sm">Sector</p>
+                                    <p class="text-lg font-bold">${pick.sector || 'N/A'}</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-gray-600 text-sm">Yield</p>
+                                    <p class="text-lg font-bold">${(pick.dividend_yield * 100 || 0).toFixed(2)}%</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-gray-600 text-sm">P/E Ratio</p>
+                                    <p class="text-lg font-bold">${(pick.pe_ratio || 0).toFixed(1)}</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-gray-600 text-sm">Market Cap</p>
+                                    <p class="text-lg font-bold">AUD ${(pick.market_cap_aud_m || 0).toFixed(0)}M</p>
+                                </div>
+                            </div>
+                            ${data.rationales && data.rationales[idx] ? `<p class="text-gray-700 text-sm italic">💡 ${data.rationales[idx]}</p>` : ''}
+                        `;
+                        resultsDiv.appendChild(card);
+                    });
+                } else {
+                    resultsDiv.innerHTML = '<div class="bg-white rounded-lg shadow p-6"><p class="text-gray-500 text-center">No stocks match your filters. Try adjusting the criteria.</p></div>';
+                }
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="bg-red-50 rounded-lg p-6"><p class="text-red-800">Error: ${error.message}</p></div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Screen Stocks';
+            }
         });
-        rows.forEach(r => tbody.appendChild(r));
-      });
-    });
-    table.dataset.bound="1";
-  }
-
-  function renderPillarWeights(weights) {
-    if (!weights) return;
-    const container = document.getElementById("pillarWeights");
-    container.innerHTML = "";
-    const labels = {value:"Value",growth:"Growth",quality:"Quality",income:"Income",momentum:"Momentum",risk:"Risk"};
-    const order = ["value","growth","quality","income","momentum","risk"];
-    const maxW = Math.max(...order.map(k => weights[k]??0));
-    order.forEach(k => {
-      const w = weights[k]??0;
-      const div = document.createElement("div");
-      div.className = "pillar-row";
-      div.innerHTML = `
-        <div class="pillar-label"><span>${labels[k]}</span><span style="font-family:'Geist Mono',monospace">${(w*100).toFixed(0)}%</span></div>
-        <div class="pillar-track"><div class="pillar-fill" style="width:${maxW>0?(w/maxW*100).toFixed(0):0}%"></div></div>`;
-      container.appendChild(div);
-    });
-  }
-
-  // ── Save to Combined ──────────────────────────────────────────────────────
-  function savePicksToCombined() {
-    if (!currentPicks.length) return;
-    const payload = currentPicks.map(p => ({
-      ticker: p.ticker,
-      name: p.name || p.ticker,
-      source: "ASX",
-      annualReturn: p.return_1y != null ? +(p.return_1y*100).toFixed(2) : (p.return_3y!=null ? +(p.return_3y*100).toFixed(2) : 8.0),
-      volatility: p.volatility_1y != null ? +(p.volatility_1y*100).toFixed(2) : 18.0,
-      projectedReturn: p.projected_return != null ? +(p.projected_return*100).toFixed(2) : null,
-      dividendYield: p.dividend_yield != null ? +(p.dividend_yield*100).toFixed(2) : 0,
-      sector: p.sector || "",
-      allocation: 0,
-    }));
-    localStorage.setItem("asx_stock_picks", JSON.stringify(payload));
-    const c = document.getElementById("saveConfirm");
-    c.style.display = "inline";
-    setTimeout(() => { c.style.display = "none"; }, 2500);
-    showToast(`${payload.length} stock pick${payload.length!==1?'s':''} saved — head to Combined to simulate`);
-  }
-
-
-
-  // ── Loading overlay (full-screen) ─────────────────────────────────────────
-  let _loadingTimer = null;
-  function startLoadingBar(stages) {
-    const overlay = document.getElementById('loadingOverlay');
-    const stageText = document.getElementById('loadingStageText');
-    const fill = document.getElementById('loadingProgressFill');
-    if (!overlay) return;
-    overlay.classList.add('active');
-    fill.style.width = '8%';
-    let idx = 0;
-    if (stages && stages.length) stageText.textContent = stages[0];
-    let pct = 8;
-    clearInterval(_loadingTimer);
-    _loadingTimer = setInterval(() => {
-      if (pct < 88) { pct += (88 - pct) * 0.1; fill.style.width = pct + '%'; }
-      if (stages && stages.length) {
-        idx = (idx + 1) % stages.length;
-        stageText.textContent = stages[idx];
-      }
-    }, 1400);
-  }
-  function finishLoadingBar() {
-    clearInterval(_loadingTimer);
-    const overlay = document.getElementById('loadingOverlay');
-    const fill = document.getElementById('loadingProgressFill');
-    if (!overlay) return;
-    fill.style.width = '100%';
-    setTimeout(() => { overlay.classList.remove('active'); fill.style.width = '0%'; }, 400);
-  }
-
-  // ── Toast notifications ───────────────────────────────────────────────────
-  function showToast(msg, icon='✓') {
-    const t = document.getElementById('globalToast');
-    if (!t) return;
-    t.querySelector('.toast-icon').textContent = icon;
-    t.querySelector('.toast-text').textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3200);
-  }
-
-  // ── 2. Freshness updater ──────────────────────────────────────────────────
-  let _dataFetchedAt = null;
-  function setFreshness(ts) {
-    _dataFetchedAt = ts || Date.now();
-    updateFreshnessDisplay();
-  }
-  function updateFreshnessDisplay() {
-    const el = document.getElementById('freshnessBadge');
-    if (!el || !_dataFetchedAt) return;
-    const mins = Math.round((Date.now() - _dataFetchedAt) / 60000);
-    const dot = el.querySelector('.dot');
-    if (mins < 5) {
-      el.querySelector('.freshness-text').textContent = 'Live data';
-      dot.className = 'dot';
-    } else if (mins < 60) {
-      el.querySelector('.freshness-text').textContent = `${mins}m ago`;
-      dot.className = 'dot';
-    } else {
-      const hrs = Math.floor(mins / 60);
-      el.querySelector('.freshness-text').textContent = `${hrs}h ago`;
-      dot.className = 'dot stale';
-    }
-  }
-  setInterval(updateFreshnessDisplay, 30000);
-
-
-  // ── 1. Scoring transparency toggle ───────────────────────────────────────
-  function toggleScoreExplain(cardEl) {
-    const panel = cardEl.querySelector('.score-explain');
-    if (!panel) return;
-    const isOpen = panel.classList.contains('open');
-    panel.classList.toggle('open', !isOpen);
-    const btn = cardEl.querySelector('.btn-explain');
-    if (btn) btn.textContent = isOpen ? '▸ How is this score calculated?' : '▾ Hide score breakdown';
-  }
-
-  // ── 7. Reset all filters ─────────────────────────────────────────────────
-  function resetAllFilters() {
-    document.querySelectorAll('#risk-group .toggle-btn').forEach(b => {
-      b.removeAttribute('data-active');
-      if (b.dataset.value === 'medium') b.setAttribute('data-active','1');
-    });
-    document.querySelectorAll('#horizon-group .toggle-btn').forEach(b => {
-      b.removeAttribute('data-active');
-      if (b.dataset.value === 'medium') b.setAttribute('data-active','1');
-    });
-    state.risk_tolerance = 'medium';
-    state.horizon = 'medium';
-    document.getElementById('yieldSlider').value = 0;
-    state.min_dividend_yield = 0;
-    document.getElementById('yieldLabel').textContent = '0%';
-    document.getElementById('mcapSlider').value = 0;
-    state.min_market_cap_aud_m = 0;
-    document.getElementById('mcapLabel').textContent = 'any';
-    document.getElementById('topN').value = '5';
-    state.top_n = 5;
-    state.sectors = [];
-    document.querySelectorAll('#sectorChips .chip').forEach(c => c.removeAttribute('data-active'));
-    showToast('Filters reset to defaults');
-    triggerScreen();
-  }
-
-  // ── Init ──────────────────────────────────────────────────────────────────
-  loadSectors();
-  runScreen(false);
-  </script>
+    </script>
 </body>
-<!-- v2.1 -->
 </html>
