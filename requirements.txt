@@ -13,3 +13,4 @@ fastapi>=0.110
 uvicorn[standard]>=0.27
 pydantic>=2.5
 slowapi>=0.1.9
+gunicorn>=21.2
