@@ -471,6 +471,131 @@
       .nav-links    { display: none !important; }
     }
 
+    
+    /* ══════════════════════════════════════════════════════════
+       MOBILE UX IMPROVEMENTS
+       ══════════════════════════════════════════════════════════ */
+
+    /* 1. Sticky first column */
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: var(--card);
+    }
+    thead .sticky-col { background: var(--card2); z-index: 4; }
+    .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
+    .table-scroll-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 28px;
+      background: linear-gradient(to right, transparent, rgba(12,15,26,0.55));
+      pointer-events: none;
+    }
+
+    /* 2. Collapsible filter panel */
+    .filter-toggle-bar {
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      user-select: none;
+    }
+    .filter-toggle-bar:hover { background: var(--card2); }
+    .filter-toggle-count {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+    .filter-toggle-arrow { font-size: 12px; transition: transform 0.2s; color: var(--muted); }
+    .filter-toggle-arrow.open { transform: rotate(180deg); }
+    .sidebar-inner.collapsed { display: none; }
+
+    /* 3. Card view */
+    .mobile-card-list { display: none; }
+    .m-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .m-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .m-card-ticker { font-size: 16px; font-weight: 700; color: var(--text); font-family: var(--mono, monospace); }
+    .m-card-name { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+    .m-card-score-wrap { text-align: right; flex-shrink: 0; }
+    .m-card-score { font-size: 22px; font-weight: 700; color: var(--accent); font-family: var(--mono, monospace); }
+    .m-card-score-label { font-size: 10px; color: var(--muted); }
+    .m-card-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .m-metric { background: var(--card2); border-radius: 6px; padding: 6px 4px; text-align: center; }
+    .m-metric-val { font-size: 12px; font-weight: 600; font-family: var(--mono, monospace); color: var(--text); }
+    .m-metric-label { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .m-card-badge { display: inline-block; margin-top: 8px; font-size: 11px; padding: 2px 8px;
+      background: rgba(99,102,241,0.15); color: var(--accent); border-radius: 8px; }
+
+    /* 4. Bottom navigation bar */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 58px;
+      background: rgba(12,15,26,0.97);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 500;
+    }
+    .bottom-nav-inner {
+      display: flex;
+      height: 100%;
+      align-items: stretch;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .bottom-nav a {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 10px;
+      gap: 3px;
+      padding: 4px 0;
+      transition: color 0.15s;
+    }
+    .bottom-nav a.bn-active { color: var(--accent); }
+    .bottom-nav a svg { width: 20px; height: 20px; stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    @media (max-width: 720px) {
+      .filter-toggle-bar { display: flex; }
+      .mobile-card-list  { display: block; }
+      .desktop-table-wrap { display: none; }
+      .bottom-nav { display: block; }
+      .page-wrap  { padding-bottom: 76px !important; }
+    }
+    @media (min-width: 721px) {
+      .mobile-card-list { display: none !important; }
+      .bottom-nav       { display: none !important; }
+    }
+
     </style>
 </head>
 <body>
@@ -558,6 +683,8 @@
   </div>
   <div class="page-wrap">
     <aside class="sidebar">
+      <button class="filter-toggle-bar" id="filterToggleBar" aria-expanded="false"><span>Filters <span class="filter-toggle-count" id="filterCount" style="display:none"></span></span><span class="filter-toggle-arrow" id="filterArrow">▾</span></button>
+      <div id="sidebarInner" class="sidebar-inner">
 
       <div class="card">
         <div class="card-title">What are you looking for?</div>
@@ -608,7 +735,8 @@
             <option value="10">Top 10</option>
           </select>
         </div>
-      </div>
+            </div>
+</div>
 
       <!-- Sectors -->
       <div class="card">
@@ -656,6 +784,7 @@
         <h2 class="results-title">Top ASX 200 Picks</h2>
         <span id="candidateCount"></span>
       </div>
+      <div id="mobileCardList" class="mobile-card-list"></div>
 
       <div class="empty-state-card" id="picksEmpty">
         <div class="empty-state-icon">🔍</div>
@@ -673,7 +802,7 @@
         <div class="table-wrap">
           <table id="rankingTable">
             <thead><tr>
-              <th>Ticker</th><th>Name</th><th>Sector</th>
+              <th class="sticky-col">Ticker</th><th>Name</th><th>Sector</th>
               <th style="text-align:right">Score</th>
               <th style="text-align:right">Proj. Ret.</th>
               <th style="text-align:right">1Y Ret.</th>
@@ -845,7 +974,7 @@
       empty.className = "empty-state-card";
     }
     renderPicks(currentPicks, data.rationales||[]);
-    renderTable(data.all_filtered||[]);
+    renderTable(data.all_filtered||[]) renderMobileCards(data.all_filtered||[]);;
     renderPillarWeights(data.pillar_weights);
     document.getElementById("savePicksBtn").disabled = currentPicks.length===0;
   }
@@ -933,7 +1062,7 @@
       const tr = document.createElement("tr");
       const ret1y = r.return_1y;
       tr.innerHTML = `
-        <td class="mono" style="font-weight:700">${sanitise(r.ticker)}</td>
+        <td class="mono sticky-col" style="font-weight:700">${sanitise(r.ticker)}</td>
         <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${sanitise(r.name)||"—"}</td>
         <td><span class="chip-sector">${sanitise(r.sector)||"—"}</span></td>
         <td class="mono" style="text-align:right" data-sort="${r.composite_score??0}">${r.composite_score!=null?(+r.composite_score).toFixed(1):"—"}</td>
@@ -1148,7 +1277,94 @@
     });
   })();
 
-</script>
+
+  // ── Mobile card renderer (Stocks) ──
+  function _fmtPct(v, decimals) {
+    if (v == null || isNaN(+v)) return '—';
+    var p = (+v * 100).toFixed(decimals != null ? decimals : 1);
+    return (v >= 0 ? '+' : '') + p + '%';
+  }
+  function _numCls(v) { return v != null && !isNaN(+v) ? (v >= 0 ? 'num-pos' : 'num-neg') : ''; }
+  function renderMobileCards(rows) {
+    var list = document.getElementById('mobileCardList');
+    if (!list) return;
+    list.innerHTML = '';
+    (rows || []).forEach(function(r) {
+      var score = r.composite_score != null ? (+r.composite_score).toFixed(1) : '—';
+      var pe    = r.pe_ratio        != null ? 'PE ' + (+r.pe_ratio).toFixed(1)  : '—';
+      var div   = r.dividend_yield  != null ? (+r.dividend_yield * 100).toFixed(1) + '%' : '—';
+      var r1y   = _fmtPct(r.return_1y);
+      var r3y   = _fmtPct(r.return_3y);
+      var el = document.createElement('article');
+      el.className = 'm-card';
+      el.innerHTML =
+        '<div class="m-card-header">' +
+          '<div>' +
+            '<div class="m-card-ticker">' + sanitise(r.ticker) + '</div>' +
+            '<div class="m-card-name">'   + (sanitise(r.name) || '—') + '</div>' +
+          '</div>' +
+          '<div class="m-card-score-wrap">' +
+            '<div class="m-card-score">' + score + '</div>' +
+            '<div class="m-card-score-label">score</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="m-card-metrics">' +
+          '<div class="m-metric"><div class="m-metric-val ' + _numCls(r.return_1y) + '">' + r1y + '</div><div class="m-metric-label">1Y</div></div>' +
+          '<div class="m-metric"><div class="m-metric-val ' + _numCls(r.return_3y) + '">' + r3y + '</div><div class="m-metric-label">3Y CAGR</div></div>' +
+          '<div class="m-metric"><div class="m-metric-val">' + div  + '</div><div class="m-metric-label">Div yield</div></div>' +
+          '<div class="m-metric"><div class="m-metric-val">' + pe   + '</div><div class="m-metric-label">Valuation</div></div>' +
+        '</div>' +
+        (r.sector ? '<span class="m-card-badge">' + sanitise(r.sector) + '</span>' : '');
+      list.appendChild(el);
+    });
+  }
+
+  // ── Collapsible filter panel ──
+  (function() {
+    var bar   = document.getElementById('filterToggleBar');
+    var inner = document.getElementById('sidebarInner');
+    var arrow = document.getElementById('filterArrow');
+    var badge = document.getElementById('filterCount');
+    if (!bar || !inner) return;
+
+    function isMobile() { return window.innerWidth <= 720; }
+    function setCollapsed(v) {
+      inner.classList.toggle('collapsed', v);
+      bar.setAttribute('aria-expanded', String(!v));
+      if (arrow) arrow.classList.toggle('open', !v);
+    }
+    if (isMobile()) setCollapsed(true);
+    window.addEventListener('resize', function() { if (!isMobile()) setCollapsed(false); });
+    bar.addEventListener('click', function() {
+      setCollapsed(!inner.classList.contains('collapsed'));
+    });
+
+    function countActiveFilters() {
+      var n = 0;
+      document.querySelectorAll('.toggle-btn[data-active]').forEach(function(b) {
+        if (b.dataset.active === '1') n++;
+      });
+      var mer = document.getElementById('merSlider');
+      var yld = document.getElementById('yieldSlider');
+      var mkt = document.getElementById('mktCapSlider');
+      if (mer && +mer.value < +mer.max) n++;
+      if (yld && +yld.value > +yld.min) n++;
+      if (mkt && +mkt.value > +mkt.min) n++;
+      return n;
+    }
+    window.updateFilterCount = function() {
+      if (!badge) return;
+      var n = countActiveFilters();
+      badge.textContent = n || '';
+      badge.style.display = n ? 'inline' : 'none';
+    };
+    document.querySelectorAll('.toggle-btn, input[type=range]').forEach(function(el) {
+      el.addEventListener('click', function() { setTimeout(window.updateFilterCount, 50); });
+      el.addEventListener('input', window.updateFilterCount);
+    });
+  })();
+
+  </script>
 </body>
 <!-- v2.1 -->
 </html>

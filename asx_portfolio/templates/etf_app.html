@@ -478,6 +478,133 @@
       .nav-links    { display: none !important; }
     }
 
+    
+    /* ══════════════════════════════════════════════════════════
+       MOBILE UX IMPROVEMENTS
+       ══════════════════════════════════════════════════════════ */
+
+    /* 1. Sticky first column */
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: var(--card);
+    }
+    thead .sticky-col { background: var(--card2); z-index: 4; }
+    .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    /* fade hint that table scrolls */
+    .table-scroll-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 32px;
+      background: linear-gradient(to right, transparent, rgba(12,15,26,0.6));
+      pointer-events: none;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .table-scroll-wrap { position: relative; }
+
+    /* 2. Collapsible filter panel */
+    .filter-toggle-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      user-select: none;
+    }
+    .filter-toggle-bar:hover { background: var(--card2); }
+    .filter-toggle-count {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+    .filter-toggle-arrow {
+      font-size: 12px;
+      transition: transform 0.2s;
+      color: var(--muted);
+    }
+    .filter-toggle-arrow.open { transform: rotate(180deg); }
+    .sidebar-inner { transition: none; }
+    .sidebar-inner.collapsed { display: none; }
+
+    /* 3. Card view (mobile) */
+    .mobile-card-list { display: none; }
+    .m-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .m-card:hover { border-color: var(--accent); }
+    .m-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .m-card-ticker { font-size: 16px; font-weight: 700; color: var(--text); font-family: var(--mono); }
+    .m-card-name { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .m-card-score { font-size: 22px; font-weight: 700; color: var(--accent); font-family: var(--mono); flex-shrink: 0; }
+    .m-card-score-label { font-size: 10px; color: var(--muted); text-align: right; }
+    .m-card-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .m-metric { background: var(--card2); border-radius: 6px; padding: 6px 8px; text-align: center; }
+    .m-metric-val { font-size: 13px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+    .m-metric-label { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .m-card-cat { display: inline-block; margin-top: 8px; font-size: 11px; padding: 2px 8px; background: rgba(99,102,241,0.15); color: var(--accent); border-radius: 8px; }
+
+    /* 4. Bottom navigation bar */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 58px;
+      background: rgba(12,15,26,0.97);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      z-index: 500;
+      align-items: stretch;
+    }
+    .bottom-nav a {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 10px;
+      gap: 4px;
+      transition: color 0.15s;
+      padding: 4px 0;
+    }
+    .bottom-nav a.active { color: var(--accent); }
+    .bottom-nav a svg { width: 20px; height: 20px; }
+    /* Push page content above bottom bar */
+    .page-wrap { padding-bottom: 80px !important; }
+
+    @media (max-width: 720px) {
+      .filter-toggle-bar { display: flex; }
+      .mobile-card-list { display: block; }
+      #rankingTable, .results-header ~ .table-scroll-wrap { }
+      .bottom-nav { display: flex; }
+      /* Hide desktop table on mobile */
+      .desktop-table-wrap { display: none; }
+    }
+    @media (min-width: 721px) {
+      .mobile-card-list { display: none !important; }
+      .bottom-nav { display: none !important; }
+    }
+
     </style>
 </head>
 <body>
@@ -569,6 +696,8 @@
 
     <!-- ── Sidebar ── -->
     <aside class="sidebar">
+<button class="filter-toggle-bar" id="filterToggleBar" aria-expanded="false"><span>Filters <span class="filter-toggle-count" id="filterCount" style="display:none">0</span></span><span class="filter-toggle-arrow" id="filterArrow">▾</span></button>
+      <div id="sidebarInner" class="sidebar-inner">
 
       <div class="card">
         <div class="card-title">What are you looking for?</div>
@@ -628,7 +757,8 @@
           </div>
           <div class="input-hint"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>We'll calculate how much to invest in each pick to generate your target income. Formula: Investment = Target ÷ Yield.</div>
         </div>
-      </div>
+            </div>
+</div>
 
       <!-- Asset categories -->
       <div class="card">
@@ -677,6 +807,8 @@
         <h2 class="results-title">Top ETF Picks</h2>
         <span id="candidateCount"></span>
       </div>
+      <div id="mobileCardList" class="mobile-card-list"></div>
+
 
       <div class="empty-state-card" id="picksEmpty">
         <div class="empty-state-icon">🔍</div>
@@ -730,10 +862,10 @@
           <input type="text" class="table-search" id="tableSearch" placeholder="Filter by ticker or name…" />
         </div>
         <div class="table-wrap">
-          <table id="rankingTable">
+          <div class="table-scroll-wrap desktop-table-wrap"><table id="rankingTable">
             <thead><tr>
-              <th>Ticker</th>
-              <th>Name</th>
+              <th class="sticky-col">Ticker</th>
+              <th class="sticky-col">Name</th>
               <th>Category</th>
               <th style="text-align:right">Score</th>
               <th style="text-align:right">1Y</th>
@@ -745,7 +877,7 @@
               <th style="text-align:right">MER</th>
             </tr></thead>
             <tbody id="tableBody"></tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -940,7 +1072,7 @@
       empty.className = "empty-state-card";
     }
     renderPicks(data.picks, data.rationales);
-    renderTable(data.all_filtered);
+    renderTable(data.all_filtered); renderMobileCards(data.all_filtered);
     renderPillarWeights(data.pillar_weights);
     renderDividendPlan(data.dividend_plan);
     const btn = document.getElementById("etfSaveBtn");
@@ -1041,7 +1173,7 @@
       const tr = document.createElement("tr");
       const ret1y = r.return_1y;
       tr.innerHTML = `
-        <td class="mono" style="font-weight:700">${sanitise(r.ticker)}</td>
+        <td class="mono sticky-col" style="font-weight:700">${sanitise(r.ticker)}</td>
         <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${sanitise(r.name)||"—"}</td>
         <td><span class="chip-cat">${sanitise(r.category)||"—"}</span></td>
         <td class="mono" style="text-align:right" data-sort="${r.composite_score??0}">${r.composite_score!=null?(+r.composite_score).toFixed(1):"—"}</td>
@@ -1103,7 +1235,7 @@
       const tr = document.createElement("tr");
       const zero = a.yield <= 0;
       tr.innerHTML = `
-        <td class="mono" style="font-weight:700">${sanitise(a.ticker)}</td>
+        <td class="mono sticky-col" style="font-weight:700">${sanitise(a.ticker)}</td>
         <td style="color:var(--muted)">${sanitise(a.name??"")}</td>
         <td class="mono" style="text-align:right;${zero?'color:var(--amber)':''}">${(a.yield*100).toFixed(2)}%${zero?" ⚠":""}</td>
         <td class="mono" style="text-align:right;font-weight:700">${fmtAUD(a.investment_aud)}</td>
@@ -1298,6 +1430,189 @@
     });
   })();
 
-</script>
+
+  function fmtPctCard(v) {
+    if (v == null || isNaN(v)) return '—';
+    const pct = (v * 100).toFixed(1);
+    return (v >= 0 ? '+' : '') + pct + '%';
+  }
+  function colorClass(v) {
+    if (v == null || isNaN(v)) return '';
+    return v >= 0 ? 'num-pos' : 'num-neg';
+  }
+  function renderMobileCards(rows) {
+    const list = document.getElementById('mobileCardList');
+    if (!list) return;
+    list.innerHTML = '';
+    (rows || []).forEach(r => {
+      const score = r.composite_score != null ? (+r.composite_score).toFixed(1) : '—';
+      const yield_ = r.dividend_yield != null ? (r.dividend_yield * 100).toFixed(1) + '%' : '—';
+      const mer    = r.mer != null ? (r.mer * 100).toFixed(2) + '%' : '—';
+      const r1y    = fmtPctCard(r.return_1y);
+      const r3y    = fmtPctCard(r.return_3y);
+      const card = document.createElement('article');
+      card.className = 'm-card';
+      card.innerHTML = `
+        <div class="m-card-header">
+          <div>
+            <div class="m-card-ticker">${sanitise(r.ticker)}</div>
+            <div class="m-card-name">${sanitise(r.name) || '—'}</div>
+          </div>
+          <div>
+            <div class="m-card-score">${score}</div>
+            <div class="m-card-score-label">score</div>
+          </div>
+        </div>
+        <div class="m-card-metrics">
+          <div class="m-metric"><div class="m-metric-val ${colorClass(r.return_1y)}">${r1y}</div><div class="m-metric-label">1Y</div></div>
+          <div class="m-metric"><div class="m-metric-val ${colorClass(r.return_3y)}">${r3y}</div><div class="m-metric-label">3Y CAGR</div></div>
+          <div class="m-metric"><div class="m-metric-val">${yield_}</div><div class="m-metric-label">Yield</div></div>
+          <div class="m-metric"><div class="m-metric-val">${mer}</div><div class="m-metric-label">MER</div></div>
+        </div>
+        ${r.category ? `<span class="m-card-cat">${sanitise(r.category)}</span>` : ''}
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  // Collapsible filter panel
+  (function() {
+    const bar    = document.getElementById('filterToggleBar');
+    const inner  = document.getElementById('sidebarInner');
+    const arrow  = document.getElementById('filterArrow');
+    const badge  = document.getElementById('filterCount');
+    if (!bar || !inner) return;
+
+    // Start collapsed on mobile
+    function isMobile() { return window.innerWidth <= 720; }
+    function setCollapsed(v) {
+      inner.classList.toggle('collapsed', v);
+      if (arrow) arrow.classList.toggle('open', !v);
+    }
+    if (isMobile()) setCollapsed(true);
+    window.addEventListener('resize', () => { if (!isMobile()) setCollapsed(false); });
+
+    bar.addEventListener('click', () => {
+      const isCollapsed = inner.classList.contains('collapsed');
+      setCollapsed(!isCollapsed);
+    });
+
+    // Count active filters and update badge
+    window.updateFilterCount = function() {
+      if (!isMobile() || !badge) return;
+      let count = 0;
+      // risk / horizon toggles
+      document.querySelectorAll('.toggle-btn[data-active]').forEach(() => count++);
+      // sliders that are non-default (simple heuristic)
+      const mer   = document.getElementById('merSlider');
+      const yield_ = document.getElementById('yieldSlider');
+      if (mer   && mer.value   < 100) count++;
+      if (yield_ && yield_.value > 0)  count++;
+      badge.textContent = count || '';
+      badge.style.display = count ? 'inline' : 'none';
+    };
+    // Hook filter changes
+    document.querySelectorAll('.toggle-btn, input[type=range]').forEach(el => {
+      el.addEventListener('change', () => window.updateFilterCount && window.updateFilterCount());
+      el.addEventListener('click',  () => window.updateFilterCount && window.updateFilterCount());
+      el.addEventListener('input',  () => window.updateFilterCount && window.updateFilterCount());
+    });
+  })();
+
+  // ── Mobile card renderer (ETF) ──
+  function _fmtPct(v, decimals) {
+    if (v == null || isNaN(+v)) return '—';
+    var p = (+v * 100).toFixed(decimals != null ? decimals : 1);
+    return (v >= 0 ? '+' : '') + p + '%';
+  }
+  function _numCls(v) { return v != null && !isNaN(+v) ? (v >= 0 ? 'num-pos' : 'num-neg') : ''; }
+  function renderMobileCards(rows) {
+    var list = document.getElementById('mobileCardList');
+    if (!list) return;
+    list.innerHTML = '';
+    (rows || []).forEach(function(r) {
+      var score = r.composite_score != null ? (+r.composite_score).toFixed(1) : '—';
+      var yld   = r.dividend_yield  != null ? (+r.dividend_yield * 100).toFixed(1) + '%' : '—';
+      var mer   = r.mer             != null ? (+r.mer * 100).toFixed(2) + '%' : '—';
+      var r1y   = _fmtPct(r.return_1y);
+      var r3y   = _fmtPct(r.return_3y);
+      var el = document.createElement('article');
+      el.className = 'm-card';
+      el.innerHTML =
+        '<div class="m-card-header">' +
+          '<div>' +
+            '<div class="m-card-ticker">' + sanitise(r.ticker) + '</div>' +
+            '<div class="m-card-name">'   + (sanitise(r.name) || '—') + '</div>' +
+          '</div>' +
+          '<div class="m-card-score-wrap">' +
+            '<div class="m-card-score">' + score + '</div>' +
+            '<div class="m-card-score-label">score</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="m-card-metrics">' +
+          '<div class="m-metric"><div class="m-metric-val ' + _numCls(r.return_1y) + '">' + r1y + '</div><div class="m-metric-label">1Y</div></div>' +
+          '<div class="m-metric"><div class="m-metric-val ' + _numCls(r.return_3y) + '">' + r3y + '</div><div class="m-metric-label">3Y CAGR</div></div>' +
+          '<div class="m-metric"><div class="m-metric-val">' + yld + '</div><div class="m-metric-label">Yield</div></div>' +
+          '<div class="m-metric"><div class="m-metric-val">' + mer + '</div><div class="m-metric-label">MER</div></div>' +
+        '</div>' +
+        (r.category ? '<span class="m-card-badge">' + sanitise(r.category) + '</span>' : '');
+      list.appendChild(el);
+    });
+  }
+
+  // ── Collapsible filter panel ──
+  (function() {
+    var bar   = document.getElementById('filterToggleBar');
+    var inner = document.getElementById('sidebarInner');
+    var arrow = document.getElementById('filterArrow');
+    var badge = document.getElementById('filterCount');
+    if (!bar || !inner) return;
+
+    function isMobile() { return window.innerWidth <= 720; }
+    function setCollapsed(v) {
+      inner.classList.toggle('collapsed', v);
+      bar.setAttribute('aria-expanded', String(!v));
+      if (arrow) arrow.classList.toggle('open', !v);
+    }
+    if (isMobile()) setCollapsed(true);
+    window.addEventListener('resize', function() { if (!isMobile()) setCollapsed(false); });
+    bar.addEventListener('click', function() {
+      setCollapsed(!inner.classList.contains('collapsed'));
+    });
+
+    function countActiveFilters() {
+      var n = 0;
+      document.querySelectorAll('.toggle-btn[data-active]').forEach(function(b) {
+        if (b.dataset.active === '1') n++;
+      });
+      var mer = document.getElementById('merSlider');
+      var yld = document.getElementById('yieldSlider');
+      var mkt = document.getElementById('mktCapSlider');
+      if (mer && +mer.value < +mer.max) n++;
+      if (yld && +yld.value > +yld.min) n++;
+      if (mkt && +mkt.value > +mkt.min) n++;
+      return n;
+    }
+    window.updateFilterCount = function() {
+      if (!badge) return;
+      var n = countActiveFilters();
+      badge.textContent = n || '';
+      badge.style.display = n ? 'inline' : 'none';
+    };
+    document.querySelectorAll('.toggle-btn, input[type=range]').forEach(function(el) {
+      el.addEventListener('click', function() { setTimeout(window.updateFilterCount, 50); });
+      el.addEventListener('input', window.updateFilterCount);
+    });
+  })();
+
+  </script>
+<nav class="bottom-nav" aria-label="Page navigation"><div class="bottom-nav-inner">
+<a href="/etfs" class="bn-active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg><span>ETFs</span></a>
+<a href="/stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="22 12 18 12 15 19 9 5 6 12 2 12"/></svg><span>Stocks</span></a>
+<a href="/combined"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Combined</span></a>
+<a href="/picks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Picks</span></a>
+<a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg><span>Portfolio</span></a>
+</div></nav>
+
 </body>
 </html>
