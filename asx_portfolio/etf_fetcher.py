@@ -237,43 +237,58 @@ def fetch_one(row: pd.Series, period: str = DEFAULT_HISTORY_PERIOD) -> ETFData:
 # Cached universe fetch
 # ---------------------------------------------------------------------------
 
-
 _cache_lock = threading.Lock()
 _cache: dict[str, ETFData] = {}
 _cache_timestamp: float = 0.0
+_cache_refreshing: bool = False  # FIX: prevents concurrent Yahoo refresh storms
 
 
 def get_etf_data(force_refresh: bool = False, workers: int = 8) -> list[ETFData]:
-    """Return the full list of fetched ETFs, refreshing the cache if stale."""
-    global _cache_timestamp
+    """Return the full list of fetched ETFs, refreshing the cache if stale.
+
+    Only one refresh runs at a time — a second concurrent caller that finds
+    the cache stale will receive the (slightly stale) cached data rather than
+    triggering a duplicate Yahoo fetch.
+    """
+    global _cache_timestamp, _cache_refreshing
+
     with _cache_lock:
         is_stale = (time.time() - _cache_timestamp) > CACHE_TTL_SECONDS
         if _cache and not force_refresh and not is_stale:
             return list(_cache.values())
+        # FIX: if another thread is already refreshing, return stale data
+        if _cache_refreshing:
+            log.debug("Cache refresh already in progress, returning stale data")
+            return list(_cache.values())
+        _cache_refreshing = True
 
     log.info("Refreshing ETF cache (force=%s, stale=%s)", force_refresh, is_stale)
-    universe = load_etf_universe()
-    results: dict[str, ETFData] = {}
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(fetch_one, row): row["ticker"] for _, row in universe.iterrows()}
-        for fut in as_completed(futures):
-            ticker = futures[fut]
-            try:
-                etf = fut.result()
-            except Exception as exc:  # noqa: BLE001
-                log.debug("Unhandled fetch error for %s: %s", ticker, exc)
-                continue
-            if etf.ok:
-                results[ticker] = etf
-            else:
-                log.debug("Drop %s: %s", ticker, etf.error)
+    try:
+        universe = load_etf_universe()
+        results: dict[str, ETFData] = {}
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(fetch_one, row): row["ticker"] for _, row in universe.iterrows()}
+            for fut in as_completed(futures):
+                ticker = futures[fut]
+                try:
+                    etf = fut.result()
+                except Exception as exc:  # noqa: BLE001
+                    log.debug("Unhandled fetch error for %s: %s", ticker, exc)
+                    continue
+                if etf.ok:
+                    results[ticker] = etf
+                else:
+                    log.debug("Drop %s: %s", ticker, etf.error)
 
-    with _cache_lock:
-        _cache.clear()
-        _cache.update(results)
-        _cache_timestamp = time.time()
-    log.info("Cache refreshed: %d / %d ETFs usable", len(results), len(universe))
-    return list(results.values())
+        with _cache_lock:
+            _cache.clear()
+            _cache.update(results)
+            _cache_timestamp = time.time()
+        log.info("Cache refreshed: %d / %d ETFs usable", len(results), len(universe))
+        return list(results.values())
+    finally:
+        with _cache_lock:
+            _cache_refreshing = False
 
 
 def cache_status() -> dict[str, Any]:

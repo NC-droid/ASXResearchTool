@@ -1,5 +1,39 @@
+# Python
 __pycache__/
-*.pyc
-.DS_Store
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
 .venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets — NEVER commit real credentials
 .env
+
+# Portfolio state — contains personal investment data
+portfolio_state.json
+
+# Reports — generated output, not source
+reports/
+
+# Site build output — generated, not source
+site/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo

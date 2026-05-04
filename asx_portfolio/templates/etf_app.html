@@ -423,7 +423,62 @@
   .empty-state-card { display: none; }
   .empty-state-card.visible { display: block; }
 
-  </style>
+  
+    /* ---- Hamburger / mobile nav (injected) ---- */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px 8px;
+      border: none;
+      background: none;
+      margin-left: auto;
+      z-index: 1100;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 23px;
+      height: 2px;
+      background: var(--text, #e2e8f0);
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    .mobile-nav {
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      top: 56px;
+      left: 0; right: 0;
+      background: rgba(10, 12, 22, 0.97);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 12px 0 20px;
+      z-index: 1050;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      color: var(--text, #e2e8f0);
+      text-decoration: none;
+      padding: 14px 24px;
+      font-size: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.15s;
+    }
+    .mobile-nav a:hover { background: rgba(255,255,255,0.06); }
+    .mobile-nav a.active { color: var(--accent, #6366f1); font-weight: 600; }
+
+    @media (max-width: 720px) {
+      .nav-hamburger { display: flex !important; }
+      .nav-links    { display: none !important; }
+    }
+
+    </style>
 </head>
 <body>
 
@@ -457,7 +512,17 @@
         <a href="/etfs" class="nav-link active">ETF Screener</a>
         <a href="/stocks" class="nav-link">ASX 200</a>
         <a href="/combined" class="nav-link">Combined</a>
-      </nav>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav" id="mobile-nav">
+    <a href="/" class="active">ETFs</a>
+    <a href="/stocks">Stocks</a>
+    <a href="/combined">Combined</a>
+    <a href="/picks">Today's Picks</a>
+    <a href="/portfolio">Portfolio</a>
+    <a href="/archive">Archive</a>
+</div>
+
       <div class="nav-right">
         <span id="status">Idle</span>
         <button class="btn-refresh" id="refreshBtn">↻ Refresh</button>
@@ -1203,5 +1268,36 @@
   loadCategories();
   runScreen(false);
   </script>
+<script>
+
+  // Hamburger menu toggle (injected)
+  (function() {
+    var btn = document.getElementById('nav-hamburger');
+    var nav = document.getElementById('mobile-nav');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() {
+      var open = nav.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+      if (!btn.contains(e.target) && !nav.contains(e.target)) {
+        nav.classList.remove('open');
+        btn.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    // Close on nav link click (single-page feel)
+    nav.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        nav.classList.remove('open');
+        btn.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  })();
+
+</script>
 </body>
 </html>

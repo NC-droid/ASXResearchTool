@@ -16,6 +16,48 @@
     .sortable th:hover { background: #f3f4f6; }
     .sortable th.sorted-asc::after { content: " \2191"; }
     .sortable th.sorted-desc::after { content: " \2193"; }
+
+    /* ---- Hamburger / mobile nav (injected) ---- */
+    @media (max-width: 640px) {
+      .base-nav-links { display: none !important; }
+      .base-hamburger { display: flex !important; }
+    }
+    .base-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px 8px;
+      border: none;
+      background: none;
+    }
+    .base-hamburger span { display: block; width: 22px; height: 2px; background: #1e293b; border-radius: 2px; transition: all 0.25s; }
+    .base-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .base-hamburger.open span:nth-child(2) { opacity: 0; }
+    .base-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+    .base-mobile-nav {
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      top: 73px; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid #e2e8f0;
+      z-index: 1050;
+      padding: 8px 0 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .base-mobile-nav.open { display: flex; }
+    .base-mobile-nav a {
+      display: block;
+      padding: 12px 24px;
+      font-size: 15px;
+      color: #334155;
+      text-decoration: none;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .base-mobile-nav a:hover { background: #f8fafc; }
+    .base-mobile-nav a.active-link { color: #4f46e5; font-weight: 600; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -28,14 +70,22 @@
           <div class="text-xs text-slate-500">Daily fundamental screener &middot; private research</div>
         </div>
       </div>
-      <nav class="flex gap-1 text-sm">
+      <nav id="base-nav-links" class="base-nav-links flex gap-1 text-sm">
         <a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='picks' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Today's Picks</a>
         <a href="portfolio.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='portfolio' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Portfolio</a>
         <a href="archive.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='archive' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Archive</a>
         <a href="backtest.html" class="px-3 py-2 rounded-md hover:bg-slate-100 {% if active=='backtest' %}bg-indigo-50 text-indigo-700 font-medium{% endif %}">Backtest</a>
       </nav>
     </div>
+  <button class="base-hamburger" id="base-hamburger" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   </header>
+  <nav class="base-mobile-nav" id="base-mobile-nav">
+    <a href="index.html" {% if active=='picks' %}class="active-link"{% endif %}>Today's Picks</a>
+    <a href="portfolio.html" {% if active=='portfolio' %}class="active-link"{% endif %}>Portfolio</a>
+    <a href="archive.html" {% if active=='archive' %}class="active-link"{% endif %}>Archive</a>
+    <a href="backtest.html" {% if active=='backtest' %}class="active-link"{% endif %}>Backtest</a>
+  </nav>
+
 
   <main class="max-w-6xl mx-auto px-6 py-8">
     {% block content %}{% endblock %}
@@ -69,5 +119,25 @@
       });
     });
   </script>
+
+<script>
+  (function() {
+    var btn = document.getElementById('base-hamburger');
+    var nav = document.getElementById('base-mobile-nav');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', function() {
+      var open = nav.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', function(e) {
+      if (!btn.contains(e.target) && !nav.contains(e.target)) {
+        nav.classList.remove('open');
+        btn.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+</script>
 </body>
 </html>

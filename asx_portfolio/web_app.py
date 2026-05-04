@@ -15,7 +15,7 @@ Endpoints:
   * ``POST /api/simulate``      — body: SimulateRequest; runs Monte Carlo simulation
   * ``GET /api/categories``     — returns the list of available ETF asset categories
   * ``GET /api/sectors``        — returns the list of available stock sectors
-  * ``GET /api/refresh``        — force-refresh the ETF Yahoo cache
+  * ``GET /api/refresh``        — force-refresh the ETF Yahoo cache (rate-limited: 2/min)
   * ``GET /api/health``         — diagnostic info on cache state
 """
 
@@ -44,13 +44,21 @@ from . import etf_fetcher, etf_scorer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 log = logging.getLogger("asx_portfolio.web")
 
+# NOTE: get_remote_address reads X-Forwarded-For, which can be spoofed on
+# deployments without a trusted reverse proxy. For Azure App Service the
+# platform injects a trusted X-Forwarded-For, so this is acceptable here.
+# If self-hosting behind nginx/caddy, configure trusted_proxies in slowapi.
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/hour"])
 app = FastAPI(
     title="ASX ETF + Stock Screener",
-    version="0.4.0",
+    version="0.4.1",
     docs_url=None,    # Disable Swagger UI in production
     redoc_url=None,   # Disable ReDoc in production
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Allow the deployed domain + localhost for local dev
 _ALLOWED_ORIGINS = [
     "https://etfpicker-ckddffard0fqa9dz.australiaeast-01.azurewebsites.net",
@@ -73,6 +81,9 @@ async def security_headers(request, call_next):
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # NOTE: 'unsafe-inline' is required because the SPA templates use inline <script> blocks.
+    # To tighten this further, move all JS to external .js files served from /static and
+    # remove 'unsafe-inline'. Tracked as a future hardening task.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.plot.ly https://fonts.googleapis.com; "
@@ -84,6 +95,19 @@ async def security_headers(request, call_next):
     )
     return response
 
+
+# ---------------------------------------------------------------------------
+# Template cache — read each file once, not on every request
+# ---------------------------------------------------------------------------
+
+_template_cache: dict[str, str] = {}
+
+def _render_template(name: str) -> str:
+    """Read a template from disk, caching the result in memory."""
+    if name not in _template_cache:
+        path = Path(__file__).parent / "templates" / name
+        _template_cache[name] = path.read_text(encoding="utf-8")
+    return _template_cache[name]
 
 
 # ---------------------------------------------------------------------------
@@ -115,7 +139,9 @@ class StockScreenRequest(BaseModel):
 class SimulateRequest(BaseModel):
     holdings: list[dict] = Field(...)
     initial_amount: float = Field(default=10_000.0)
-    years: int = Field(default=10)
+    # FIX: cap years to prevent (sim_count × years × 12) matrix blowing up RAM.
+    # 1000 paths × 50 years × 12 months = 600K floats — acceptable ceiling.
+    years: int = Field(default=10, ge=1, le=50)
     sim_count: int = Field(default=500)
 
 
@@ -212,7 +238,7 @@ def _build_dividend_plan(picks: list[dict], target_quarterly_aud: float) -> dict
 
 
 # ---------------------------------------------------------------------------
-# ETF endpoints (original — untouched)
+# ETF endpoints
 # ---------------------------------------------------------------------------
 
 
@@ -230,7 +256,8 @@ def health() -> dict[str, Any]:
 
 
 @app.get("/api/refresh")
-def refresh() -> dict[str, Any]:
+@limiter.limit("2/minute")   # FIX: was unlimited — could spam Yahoo and exhaust memory
+def refresh(request: Request) -> dict[str, Any]:
     started = time.time()
     data = etf_fetcher.get_etf_data(force_refresh=True)
     return {
@@ -290,7 +317,7 @@ def screen(req: ScreenRequest, request: Request) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# ASX 200 Stocks endpoints (v2 — lazy imports)
+# ASX 200 Stocks endpoints (lazy imports)
 # ---------------------------------------------------------------------------
 
 
@@ -302,7 +329,7 @@ def get_sectors() -> dict[str, Any]:
         sectors = sorted({s.sector for s in stocks if s.sector})
         return {"sectors": sectors}
     except Exception as exc:
-        log.error("Screen error: %s", exc, exc_info=True)
+        log.error("Sectors error: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error. Please try again.")
 
 
@@ -357,7 +384,7 @@ def screen_stocks(req: StockScreenRequest, request: Request) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Monte Carlo simulation endpoint (v2 — lazy numpy import)
+# Monte Carlo simulation endpoint (lazy numpy import)
 # ---------------------------------------------------------------------------
 
 
@@ -387,6 +414,8 @@ def simulate_portfolio(req: SimulateRequest, request: Request) -> dict[str, Any]
         for h in holdings
     ))
 
+    # req.years is now bounded [1, 50] by the Pydantic model, preventing
+    # memory exhaustion from huge sim matrices.
     months = req.years * 12
     monthly_return = weighted_return / 12
     monthly_vol = weighted_vol / math.sqrt(12)
@@ -421,32 +450,28 @@ def simulate_portfolio(req: SimulateRequest, request: Request) -> dict[str, Any]
 
 
 # ---------------------------------------------------------------------------
-# Page routes
+# Page routes — templates are cached in memory after first load
 # ---------------------------------------------------------------------------
 
 
 @app.get("/", response_class=HTMLResponse)
 def landing() -> str:
-    template_path = Path(__file__).parent / "templates" / "landing.html"
-    return template_path.read_text(encoding="utf-8")
+    return _render_template("landing.html")
 
 
 @app.get("/etfs", response_class=HTMLResponse)
 def index() -> str:
-    template_path = Path(__file__).parent / "templates" / "etf_app.html"
-    return template_path.read_text(encoding="utf-8")
+    return _render_template("etf_app.html")
 
 
 @app.get("/stocks", response_class=HTMLResponse)
 def stocks_page() -> str:
-    template_path = Path(__file__).parent / "templates" / "stocks_app.html"
-    return template_path.read_text(encoding="utf-8")
+    return _render_template("stocks_app.html")
 
 
 @app.get("/combined", response_class=HTMLResponse)
 def combined_page() -> str:
-    template_path = Path(__file__).parent / "templates" / "combined_app.html"
-    return template_path.read_text(encoding="utf-8")
+    return _render_template("combined_app.html")
 
 
 # ---------------------------------------------------------------------------

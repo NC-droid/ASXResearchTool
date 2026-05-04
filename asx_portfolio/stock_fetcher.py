@@ -88,47 +88,49 @@ class StockData:
 
 _TICKERS_CSV = Path(__file__).parent / "data" / "asx200_tickers.csv"
 
+# FIX: removed NCM.AX (Newcrest — delisted after Newmont merger); replaced with
+# current ASX 200 constituents as of 2025.
 _FALLBACK_TICKERS: list[dict[str, str]] = [
-    {"ticker": "BHP.AX", "name": "BHP Group", "sector": "Materials"},
-    {"ticker": "CBA.AX", "name": "Commonwealth Bank", "sector": "Financials"},
-    {"ticker": "CSL.AX", "name": "CSL Limited", "sector": "Healthcare"},
-    {"ticker": "NAB.AX", "name": "National Australia Bank", "sector": "Financials"},
-    {"ticker": "WBC.AX", "name": "Westpac Banking", "sector": "Financials"},
-    {"ticker": "ANZ.AX", "name": "ANZ Group", "sector": "Financials"},
-    {"ticker": "WES.AX", "name": "Wesfarmers", "sector": "Consumer Discretionary"},
-    {"ticker": "RIO.AX", "name": "Rio Tinto", "sector": "Materials"},
-    {"ticker": "MQG.AX", "name": "Macquarie Group", "sector": "Financials"},
-    {"ticker": "WOW.AX", "name": "Woolworths Group", "sector": "Consumer Staples"},
-    {"ticker": "TLS.AX", "name": "Telstra Group", "sector": "Communication Services"},
-    {"ticker": "FMG.AX", "name": "Fortescue Ltd", "sector": "Materials"},
-    {"ticker": "GMG.AX", "name": "Goodman Group", "sector": "Real Estate"},
-    {"ticker": "TCL.AX", "name": "Transurban Group", "sector": "Industrials"},
-    {"ticker": "ALL.AX", "name": "Aristocrat Leisure", "sector": "Consumer Discretionary"},
-    {"ticker": "REA.AX", "name": "REA Group", "sector": "Technology"},
-    {"ticker": "COL.AX", "name": "Coles Group", "sector": "Consumer Staples"},
-    {"ticker": "QAN.AX", "name": "Qantas Airways", "sector": "Industrials"},
-    {"ticker": "AGL.AX", "name": "AGL Energy", "sector": "Utilities"},
-    {"ticker": "AMP.AX", "name": "AMP Limited", "sector": "Financials"},
-    {"ticker": "ASX.AX", "name": "ASX Limited", "sector": "Financials"},
-    {"ticker": "CPU.AX", "name": "Computershare", "sector": "Technology"},
-    {"ticker": "IAG.AX", "name": "Insurance Australia Group", "sector": "Financials"},
-    {"ticker": "MIN.AX", "name": "Mineral Resources", "sector": "Materials"},
-    {"ticker": "NXT.AX", "name": "NextDC", "sector": "Technology"},
-    {"ticker": "PLS.AX", "name": "Pilbara Minerals", "sector": "Materials"},
-    {"ticker": "QBE.AX", "name": "QBE Insurance Group", "sector": "Financials"},
-    {"ticker": "RMD.AX", "name": "ResMed Inc", "sector": "Healthcare"},
-    {"ticker": "SCG.AX", "name": "Scentre Group", "sector": "Real Estate"},
-    {"ticker": "SEK.AX", "name": "Seek Limited", "sector": "Technology"},
-    {"ticker": "SHL.AX", "name": "Sonic Healthcare", "sector": "Healthcare"},
-    {"ticker": "SUN.AX", "name": "Suncorp Group", "sector": "Financials"},
-    {"ticker": "XRO.AX", "name": "Xero Limited", "sector": "Technology"},
-    {"ticker": "WDS.AX", "name": "Woodside Energy", "sector": "Energy"},
-    {"ticker": "MPL.AX", "name": "Medibank Private", "sector": "Healthcare"},
-    {"ticker": "NST.AX", "name": "Northern Star Resources", "sector": "Materials"},
-    {"ticker": "TWE.AX", "name": "Treasury Wine Estates", "sector": "Consumer Staples"},
-    {"ticker": "STO.AX", "name": "Santos Limited", "sector": "Energy"},
-    {"ticker": "NCM.AX", "name": "Newmont (ASX)", "sector": "Materials"},
-    {"ticker": "ORA.AX", "name": "Orora Limited", "sector": "Materials"},
+    {"ticker": "BHP.AX",  "name": "BHP Group",                      "sector": "Materials"},
+    {"ticker": "CBA.AX",  "name": "Commonwealth Bank",              "sector": "Financials"},
+    {"ticker": "CSL.AX",  "name": "CSL Limited",                    "sector": "Healthcare"},
+    {"ticker": "NAB.AX",  "name": "National Australia Bank",        "sector": "Financials"},
+    {"ticker": "WBC.AX",  "name": "Westpac Banking",                "sector": "Financials"},
+    {"ticker": "ANZ.AX",  "name": "ANZ Group",                      "sector": "Financials"},
+    {"ticker": "WES.AX",  "name": "Wesfarmers",                     "sector": "Consumer Discretionary"},
+    {"ticker": "RIO.AX",  "name": "Rio Tinto",                      "sector": "Materials"},
+    {"ticker": "MQG.AX",  "name": "Macquarie Group",                "sector": "Financials"},
+    {"ticker": "WOW.AX",  "name": "Woolworths Group",               "sector": "Consumer Staples"},
+    {"ticker": "TLS.AX",  "name": "Telstra Group",                  "sector": "Communication Services"},
+    {"ticker": "FMG.AX",  "name": "Fortescue Ltd",                  "sector": "Materials"},
+    {"ticker": "GMG.AX",  "name": "Goodman Group",                  "sector": "Real Estate"},
+    {"ticker": "TCL.AX",  "name": "Transurban Group",               "sector": "Industrials"},
+    {"ticker": "ALL.AX",  "name": "Aristocrat Leisure",             "sector": "Consumer Discretionary"},
+    {"ticker": "REA.AX",  "name": "REA Group",                      "sector": "Technology"},
+    {"ticker": "COL.AX",  "name": "Coles Group",                    "sector": "Consumer Staples"},
+    {"ticker": "QAN.AX",  "name": "Qantas Airways",                 "sector": "Industrials"},
+    {"ticker": "AGL.AX",  "name": "AGL Energy",                     "sector": "Utilities"},
+    {"ticker": "AMP.AX",  "name": "AMP Limited",                    "sector": "Financials"},
+    {"ticker": "ASX.AX",  "name": "ASX Limited",                    "sector": "Financials"},
+    {"ticker": "CPU.AX",  "name": "Computershare",                  "sector": "Technology"},
+    {"ticker": "IAG.AX",  "name": "Insurance Australia Group",      "sector": "Financials"},
+    {"ticker": "MIN.AX",  "name": "Mineral Resources",              "sector": "Materials"},
+    {"ticker": "NXT.AX",  "name": "NextDC",                         "sector": "Technology"},
+    {"ticker": "PLS.AX",  "name": "Pilbara Minerals",               "sector": "Materials"},
+    {"ticker": "QBE.AX",  "name": "QBE Insurance Group",            "sector": "Financials"},
+    {"ticker": "RMD.AX",  "name": "ResMed Inc",                     "sector": "Healthcare"},
+    {"ticker": "SCG.AX",  "name": "Scentre Group",                  "sector": "Real Estate"},
+    {"ticker": "SEK.AX",  "name": "Seek Limited",                   "sector": "Technology"},
+    {"ticker": "SHL.AX",  "name": "Sonic Healthcare",               "sector": "Healthcare"},
+    {"ticker": "SUN.AX",  "name": "Suncorp Group",                  "sector": "Financials"},
+    {"ticker": "XRO.AX",  "name": "Xero Limited",                   "sector": "Technology"},
+    {"ticker": "WDS.AX",  "name": "Woodside Energy",                "sector": "Energy"},
+    {"ticker": "MPL.AX",  "name": "Medibank Private",               "sector": "Healthcare"},
+    {"ticker": "NST.AX",  "name": "Northern Star Resources",        "sector": "Materials"},
+    {"ticker": "TWE.AX",  "name": "Treasury Wine Estates",          "sector": "Consumer Staples"},
+    {"ticker": "STO.AX",  "name": "Santos Limited",                 "sector": "Energy"},
+    {"ticker": "NEM.AX",  "name": "Newmont Corporation (ASX CDI)",  "sector": "Materials"},  # replaced NCM.AX
+    {"ticker": "ORA.AX",  "name": "Orora Limited",                  "sector": "Materials"},
 ]
 
 
@@ -137,7 +139,6 @@ def _load_tickers() -> list[dict[str, str]]:
     if _TICKERS_CSV.exists():
         try:
             df = pd.read_csv(_TICKERS_CSV)
-            # Ensure .AX suffix
             rows = []
             for _, row in df.iterrows():
                 t = str(row.get("ticker", "")).strip()
@@ -219,12 +220,10 @@ def _sharpe(ret: float, vol: float, rf: float = 0.04) -> float:
 def _projected_return(sd: StockData) -> float:
     """Gordon Growth Model proxy: div_yield + sustainable_growth + val_reversion."""
     div = sd.dividend_yield if not math.isnan(sd.dividend_yield) else 0.0
-    # Sustainable growth: ROE * retention ratio
     roe = sd.roe if not math.isnan(sd.roe) else 0.0
     payout = sd.payout_ratio if not math.isnan(sd.payout_ratio) else 0.5
     payout = max(0.0, min(1.0, payout))
     sustainable_g = roe * (1 - payout)
-    # Valuation reversion: if PE is available, mean-revert toward 15x over 5 years
     val_rev = 0.0
     if not math.isnan(sd.pe_ratio) and sd.pe_ratio > 0:
         fair_pe = 15.0
@@ -284,8 +283,6 @@ def fetch_stock(row: dict[str, str], period: str = "5y") -> StockData:
 
         # Income
         raw_dy = _safe(info, "dividendYield", "trailingAnnualDividendYield")
-        # Yahoo Finance inconsistently returns yield as decimal (0.0752) or percent (7.52)
-        # Normalise: if value > 1.0, treat as percent and divide by 100
         if not math.isnan(raw_dy) and raw_dy > 1.0:
             raw_dy = raw_dy / 100.0
         sd.dividend_yield = raw_dy
@@ -331,34 +328,49 @@ def fetch_stock(row: dict[str, str], period: str = "5y") -> StockData:
 _cache_lock = threading.Lock()
 _cache: dict[str, StockData] = {}
 _cache_timestamp: float = 0.0
+_cache_refreshing: bool = False  # FIX: prevents concurrent Yahoo refresh storms
 _CACHE_TTL = 4 * 3600  # 4 hours
 
 
 def get_stock_data(force_refresh: bool = False, workers: int = 8) -> list[StockData]:
-    """Return the full list of fetched stocks, refreshing the cache if stale."""
-    global _cache, _cache_timestamp
+    """Return the full list of fetched stocks, refreshing the cache if stale.
+
+    Only one refresh runs at a time — a second concurrent caller that finds
+    the cache stale will receive the (slightly stale) cached data rather than
+    triggering a duplicate Yahoo fetch.
+    """
+    global _cache, _cache_timestamp, _cache_refreshing
+
     with _cache_lock:
         age = time.time() - _cache_timestamp
         if _cache and not force_refresh and age < _CACHE_TTL:
             return list(_cache.values())
+        # FIX: if another thread is already refreshing, return stale data
+        if _cache_refreshing:
+            return list(_cache.values())
+        _cache_refreshing = True
 
-    tickers = _load_tickers()
-    results: dict[str, StockData] = {}
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(fetch_stock, row): row["ticker"] for row in tickers}
-        for fut in as_completed(futures):
-            ticker = futures[fut]
-            try:
-                sd = fut.result()
-                if sd.ok:
-                    results[ticker] = sd
-            except Exception:
-                pass
+    try:
+        tickers = _load_tickers()
+        results: dict[str, StockData] = {}
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(fetch_stock, row): row["ticker"] for row in tickers}
+            for fut in as_completed(futures):
+                ticker = futures[fut]
+                try:
+                    sd = fut.result()
+                    if sd.ok:
+                        results[ticker] = sd
+                except Exception:
+                    pass
 
-    with _cache_lock:
-        _cache = results
-        _cache_timestamp = time.time()
-    return list(results.values())
+        with _cache_lock:
+            _cache = results
+            _cache_timestamp = time.time()
+        return list(results.values())
+    finally:
+        with _cache_lock:
+            _cache_refreshing = False
 
 
 def cache_status() -> dict[str, Any]:
