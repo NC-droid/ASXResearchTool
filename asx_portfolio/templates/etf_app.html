@@ -924,10 +924,17 @@
   <!-- ── Next-step modal ───────────────────────────────────────────────── -->
   <div id="nextStepModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:16px">
     <div style="background:var(--card);border-radius:16px;padding:32px 28px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.28);text-align:center;position:relative">
-      <div style="font-size:40px;margin-bottom:12px">🎯</div>
+      <div style="font-size:13px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">Step 1 of 3 complete ✓</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:20px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</div>
+        <div style="width:40px;height:3px;background:var(--primary);border-radius:2px"></div>
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+        <div style="width:40px;height:3px;background:var(--border);border-radius:2px"></div>
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--muted);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
+      </div>
       <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">ETF picks saved!</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5" id="nextStepModalMsg">Head to the Combined Simulator to model your full portfolio — mix ETFs with direct stocks and run scenario analysis.</div>
-      <a href="/combined" style="display:inline-block;background:var(--primary);color:#fff;font-weight:700;font-size:15px;padding:13px 28px;border-radius:10px;text-decoration:none;margin-bottom:12px;width:100%;box-sizing:border-box">Go to Combined Simulator →</a>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5" id="nextStepModalMsg">Now pick your ASX direct stocks to complete your portfolio before running the combined simulation.</div>
+      <a href="/stocks" style="display:inline-block;background:var(--primary);color:#fff;font-weight:700;font-size:15px;padding:13px 28px;border-radius:10px;text-decoration:none;margin-bottom:12px;width:100%;box-sizing:border-box">Step 2: Pick ASX Stocks →</a>
       <br>
       <button onclick="document.getElementById('nextStepModal').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:6px 0;text-decoration:underline">Stay here and keep browsing</button>
     </div>
@@ -1333,7 +1340,7 @@
     // Show next-step modal
     const modal = document.getElementById("nextStepModal");
     document.getElementById("nextStepModalMsg").textContent =
-      `${payload.length} ETF pick${payload.length!==1?"s":""} saved. Head to the Combined Simulator to model your full portfolio — mix ETFs with direct stocks and run scenario analysis.`;
+      `${payload.length} ETF pick${payload.length!==1?"s":""} saved. Now head to Step 2 to pick your ASX direct stocks before running the combined simulation.`;
     modal.style.display = "flex";
     modal.onclick = function(e) { if (e.target === modal) modal.style.display = "none"; };
   }
