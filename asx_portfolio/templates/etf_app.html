@@ -892,8 +892,8 @@
         <div style="margin-top:8px;font-size:11px;color:var(--muted)">Equal-weight allocation across picks. Yield figures are trailing 12-month — future distributions may differ.</div>
       </div>
 
-      <!-- Full ranking table -->
-      <div class="table-card">
+      <!-- Full ranking table (hidden — picks grid is the primary view) -->
+      <div class="table-card" style="display:none">
         <div class="table-header">
           <span class="table-title">Full ranking</span>
           <input type="text" class="table-search" id="tableSearch" placeholder="Filter by ticker or name…" />
@@ -919,6 +919,18 @@
       </div>
 
     </section>
+  </div>
+
+  <!-- ── Next-step modal ───────────────────────────────────────────────── -->
+  <div id="nextStepModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:16px">
+    <div style="background:var(--card);border-radius:16px;padding:32px 28px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.28);text-align:center;position:relative">
+      <div style="font-size:40px;margin-bottom:12px">🎯</div>
+      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">ETF picks saved!</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5" id="nextStepModalMsg">Head to the Combined Simulator to model your full portfolio — mix ETFs with direct stocks and run scenario analysis.</div>
+      <a href="/combined" style="display:inline-block;background:var(--primary);color:#fff;font-weight:700;font-size:15px;padding:13px 28px;border-radius:10px;text-decoration:none;margin-bottom:12px;width:100%;box-sizing:border-box">Go to Combined Simulator →</a>
+      <br>
+      <button onclick="document.getElementById('nextStepModal').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:6px 0;text-decoration:underline">Stay here and keep browsing</button>
+    </div>
   </div>
 
   <script>
@@ -1318,10 +1330,12 @@
       allocation: 0,
     }));
     localStorage.setItem("asx_etf_picks", JSON.stringify(payload));
-    const c = document.getElementById("etfSaveConfirm");
-    c.style.display = "inline";
-    setTimeout(() => { c.style.display = "none"; }, 2500);
-    showToast(`${payload.length} ETF pick${payload.length!==1?'s':''} saved — head to Combined to simulate`);
+    // Show next-step modal
+    const modal = document.getElementById("nextStepModal");
+    document.getElementById("nextStepModalMsg").textContent =
+      `${payload.length} ETF pick${payload.length!==1?"s":""} saved. Head to the Combined Simulator to model your full portfolio — mix ETFs with direct stocks and run scenario analysis.`;
+    modal.style.display = "flex";
+    modal.onclick = function(e) { if (e.target === modal) modal.style.display = "none"; };
   }
 
 
