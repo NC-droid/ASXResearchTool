@@ -1011,8 +1011,9 @@
       empty.className = "empty-state-card";
     }
     renderPicks(currentPicks, data.rationales||[]);
-    renderTable(data.all_filtered||[]) renderMobileCards(data.all_filtered||[]);;
-    window.handleStaleness(data.cache_age_seconds, data.is_stale, screenStocks);
+    renderTable(data.all_filtered||[]);
+    renderMobileCards(data.all_filtered||[]);
+    window.handleStaleness(data.cache_age_seconds, data.is_stale, runScreen);
     renderPillarWeights(data.pillar_weights);
     document.getElementById("savePicksBtn").disabled = currentPicks.length===0;
   }

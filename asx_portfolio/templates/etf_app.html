@@ -1110,7 +1110,7 @@
     }
     renderPicks(data.picks, data.rationales);
     renderTable(data.all_filtered); renderMobileCards(data.all_filtered);
-    window.handleStaleness(data.cache_age_seconds, data.is_stale, screen);
+    window.handleStaleness(data.cache_age_seconds, data.is_stale, runScreen);
     renderPillarWeights(data.pillar_weights);
     renderDividendPlan(data.dividend_plan);
     const btn = document.getElementById("etfSaveBtn");
