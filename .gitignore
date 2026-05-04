@@ -19,6 +19,9 @@ ENV/
 # Environment / secrets — NEVER commit real credentials
 .env
 
+# Disk cache — generated at runtime, never commit
+asx_portfolio/cache/
+
 # Portfolio state — contains personal investment data
 portfolio_state.json
 

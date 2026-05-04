@@ -32,7 +32,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 # ETF modules — always required, imported at top level
@@ -94,6 +94,32 @@ async def security_headers(request, call_next):
         "frame-ancestors 'none';"
     )
     return response
+
+
+# ---------------------------------------------------------------------------
+# Cache-Control helper — attaches freshness headers to JSON API responses
+# ---------------------------------------------------------------------------
+
+def _json_response_with_cache_headers(
+    body: dict,
+    cache_age_seconds: float | None,
+    ttl_seconds: int,
+) -> JSONResponse:
+    """Return a JSONResponse with Cache-Control and X-Cache-Age headers.
+
+    Cache-Control strategy for POST endpoints (browsers don't cache POST
+    natively, but the header is consumed by the client-side stale-while-
+    revalidate logic and by any intermediate CDN that supports it):
+      - max-age=<ttl>: serve from cache for this many seconds without recheck
+      - stale-while-revalidate=<ttl*4>: continue serving stale while refreshing
+    """
+    resp = JSONResponse(content=body)
+    resp.headers["Cache-Control"] = (
+        f"max-age={ttl_seconds}, stale-while-revalidate={ttl_seconds * 4}"
+    )
+    if cache_age_seconds is not None:
+        resp.headers["X-Cache-Age"] = str(round(cache_age_seconds))
+    return resp
 
 
 # ---------------------------------------------------------------------------
@@ -269,13 +295,17 @@ def refresh(request: Request) -> dict[str, Any]:
 
 @app.post("/api/screen")
 @limiter.limit("30/minute")
-def screen(req: ScreenRequest, request: Request) -> dict[str, Any]:
+def screen(req: ScreenRequest, request: Request):
     started = time.time()
     try:
         etfs = etf_fetcher.get_etf_data(force_refresh=req.force_refresh)
     except RuntimeError as exc:
         log.error("Screen error: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error. Please try again.")
+
+    cs = etf_fetcher.cache_status()
+    cache_age = cs.get("age_seconds")
+    is_stale  = cs.get("stale", False)
 
     inputs = etf_scorer.ScreenInputs(
         risk_tolerance=req.risk_tolerance,
@@ -287,16 +317,18 @@ def screen(req: ScreenRequest, request: Request) -> dict[str, Any]:
     )
     scored = etf_scorer.score(etfs, inputs)
     if scored is None or scored.empty:
-        return {
+        body = {
             "picks": [],
             "all_filtered": [],
             "rationales": [],
             "pillar_weights": etf_scorer._pillar_weights(inputs.normalised()),
             "candidate_count": 0,
             "dividend_plan": None,
-            "fetched_at": etf_fetcher.cache_status().get("age_seconds"),
+            "cache_age_seconds": round(cache_age, 1) if cache_age is not None else None,
+            "is_stale": is_stale,
             "elapsed_seconds": round(time.time() - started, 2),
         }
+        return _json_response_with_cache_headers(body, cache_age, etf_fetcher.CACHE_TTL_SECONDS)
 
     top = etf_scorer.select_top(scored, n=inputs.normalised().top_n)
     rationales = [etf_scorer.build_rationale(row) for _, row in top.iterrows()]
@@ -305,15 +337,18 @@ def screen(req: ScreenRequest, request: Request) -> dict[str, Any]:
     pick_payloads = [_row_to_payload(top.iloc[i].to_dict(), include_history=True) for i in range(len(top))]
     dividend_plan = _build_dividend_plan(pick_payloads, req.target_quarterly_dividend_aud)
 
-    return {
+    body = {
         "picks": pick_payloads,
         "all_filtered": [_row_to_payload(scored.iloc[i].to_dict(), include_history=False) for i in range(len(scored))],
         "rationales": rationales,
         "pillar_weights": pillar_weights,
         "candidate_count": len(scored),
         "dividend_plan": dividend_plan,
+        "cache_age_seconds": round(cache_age, 1) if cache_age is not None else None,
+        "is_stale": is_stale,
         "elapsed_seconds": round(time.time() - started, 2),
     }
+    return _json_response_with_cache_headers(body, cache_age, etf_fetcher.CACHE_TTL_SECONDS)
 
 
 # ---------------------------------------------------------------------------
@@ -335,7 +370,7 @@ def get_sectors() -> dict[str, Any]:
 
 @app.post("/api/screen-stocks")
 @limiter.limit("30/minute")
-def screen_stocks(req: StockScreenRequest, request: Request) -> dict[str, Any]:
+def screen_stocks(req: StockScreenRequest, request: Request):
     started = time.time()
     try:
         from . import stock_fetcher, stock_scorer
@@ -349,6 +384,10 @@ def screen_stocks(req: StockScreenRequest, request: Request) -> dict[str, Any]:
         log.error("Screen error: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error. Please try again.")
 
+    cs = stock_fetcher.cache_status()
+    cache_age = cs.get("age_seconds")
+    is_stale  = cache_age is not None and cache_age > stock_fetcher._CACHE_TTL
+
     inputs = stock_scorer.StockScreenInputs(
         risk_tolerance=req.risk_tolerance,
         horizon=req.horizon,
@@ -360,27 +399,33 @@ def screen_stocks(req: StockScreenRequest, request: Request) -> dict[str, Any]:
     scored = stock_scorer.score(stocks, inputs)
 
     if scored is None or scored.empty:
-        return {
+        body = {
             "picks": [],
             "all_filtered": [],
             "rationales": [],
             "pillar_weights": stock_scorer._pillar_weights(inputs.normalised()),
             "candidate_count": 0,
+            "cache_age_seconds": round(cache_age, 1) if cache_age is not None else None,
+            "is_stale": is_stale,
             "elapsed_seconds": round(time.time() - started, 2),
         }
+        return _json_response_with_cache_headers(body, cache_age, stock_fetcher._CACHE_TTL)
 
     top = stock_scorer.select_top(scored, n=inputs.normalised().top_n)
     rationales = [stock_scorer.build_rationale(row) for _, row in top.iterrows()]
     pillar_weights = top.iloc[0].get("pillar_weights", {}) if len(top) else stock_scorer._pillar_weights(inputs.normalised())
 
-    return {
+    body = {
         "picks": [_row_to_stock_payload(top.iloc[i].to_dict(), include_history=True) for i in range(len(top))],
         "all_filtered": [_row_to_stock_payload(scored.iloc[i].to_dict(), include_history=False) for i in range(len(scored))],
         "rationales": rationales,
         "pillar_weights": pillar_weights,
         "candidate_count": len(scored),
+        "cache_age_seconds": round(cache_age, 1) if cache_age is not None else None,
+        "is_stale": is_stale,
         "elapsed_seconds": round(time.time() - started, 2),
     }
+    return _json_response_with_cache_headers(body, cache_age, stock_fetcher._CACHE_TTL)
 
 
 # ---------------------------------------------------------------------------

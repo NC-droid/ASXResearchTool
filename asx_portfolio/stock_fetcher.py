@@ -1,12 +1,14 @@
 """ASX 200 stock data fetcher — mirrors etf_fetcher.py.
 
 Fetches fundamental + price data for ASX 200 constituents via yfinance,
-caches results in-memory with a configurable TTL, and exposes a
-``get_stock_data()`` function consumed by stock_scorer and web_app.
+caches results in-memory with a configurable TTL, persists to disk so a
+server restart serves data instantly while a background refresh runs.
 """
 
 from __future__ import annotations
 
+import dataclasses
+import json
 import math
 import threading
 import time
@@ -16,6 +18,9 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
+_DISK_CACHE_PATH = Path(__file__).parent / "cache" / "stock_cache.json"
+DISK_CACHE_STALE_HOURS = 24
 
 # ---------------------------------------------------------------------------
 # Data model
@@ -322,14 +327,88 @@ def fetch_stock(row: dict[str, str], period: str = "5y") -> StockData:
 
 
 # ---------------------------------------------------------------------------
+# Disk cache — survives server restarts
+# ---------------------------------------------------------------------------
+
+def _nan_safe(v: Any) -> Any:
+    """Convert NaN/Inf floats to None for JSON serialisation."""
+    if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+        return None
+    return v
+
+
+def _stock_to_dict(sd: StockData) -> dict:
+    d = dataclasses.asdict(sd)
+    return {k: _nan_safe(v) for k, v in d.items()}
+
+
+def _stock_from_dict(d: dict) -> StockData:
+    fields = {f.name: f for f in dataclasses.fields(StockData)}
+    kwargs: dict = {}
+    for name, fld in fields.items():
+        val = d.get(name)
+        if val is None:
+            if fld.default is dataclasses.MISSING:
+                val = ""
+            elif isinstance(fld.default, float) and math.isnan(fld.default):
+                val = float("nan")
+        kwargs[name] = val
+    return StockData(**kwargs)
+
+
+def _save_disk_cache(data: dict[str, StockData], timestamp: float) -> None:
+    try:
+        _DISK_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "timestamp": timestamp,
+            "version": 1,
+            "data": {k: _stock_to_dict(v) for k, v in data.items()},
+        }
+        tmp = _DISK_CACHE_PATH.with_suffix(".tmp")
+        tmp.write_text(json.dumps(payload, allow_nan=False))
+        tmp.replace(_DISK_CACHE_PATH)
+        import logging as _log
+        _log.getLogger(__name__).info("Stock disk cache written: %d entries", len(data))
+    except Exception as exc:  # noqa: BLE001
+        import logging as _log
+        _log.getLogger(__name__).warning("Stock disk cache write failed: %s", exc)
+
+
+def _load_disk_cache() -> tuple[dict[str, StockData], float]:
+    import logging as _log
+    _logger = _log.getLogger(__name__)
+    try:
+        if not _DISK_CACHE_PATH.exists():
+            return {}, 0.0
+        payload = json.loads(_DISK_CACHE_PATH.read_text())
+        timestamp = float(payload.get("timestamp", 0))
+        age_hours = (time.time() - timestamp) / 3600
+        if age_hours > DISK_CACHE_STALE_HOURS:
+            _logger.info("Stock disk cache too old (%.1f h) — ignoring", age_hours)
+            return {}, 0.0
+        data = {k: _stock_from_dict(v) for k, v in payload.get("data", {}).items()}
+        _logger.info("Stock disk cache loaded: %d entries, age %.1f h", len(data), age_hours)
+        return data, timestamp
+    except Exception as exc:  # noqa: BLE001
+        _logger.warning("Stock disk cache load failed: %s", exc)
+        return {}, 0.0
+
+
+# ---------------------------------------------------------------------------
 # Cached universe fetch
 # ---------------------------------------------------------------------------
 
 _cache_lock = threading.Lock()
 _cache: dict[str, StockData] = {}
 _cache_timestamp: float = 0.0
-_cache_refreshing: bool = False  # FIX: prevents concurrent Yahoo refresh storms
+_cache_refreshing: bool = False  # prevents concurrent Yahoo refresh storms
 _CACHE_TTL = 4 * 3600  # 4 hours
+
+# Seed in-memory cache from disk at import time so the first request is fast
+_disk_data, _disk_ts = _load_disk_cache()
+if _disk_data:
+    _cache.update(_disk_data)
+    _cache_timestamp = _disk_ts
 
 
 def get_stock_data(force_refresh: bool = False, workers: int = 8) -> list[StockData]:
@@ -345,7 +424,6 @@ def get_stock_data(force_refresh: bool = False, workers: int = 8) -> list[StockD
         age = time.time() - _cache_timestamp
         if _cache and not force_refresh and age < _CACHE_TTL:
             return list(_cache.values())
-        # FIX: if another thread is already refreshing, return stale data
         if _cache_refreshing:
             return list(_cache.values())
         _cache_refreshing = True
@@ -364,9 +442,11 @@ def get_stock_data(force_refresh: bool = False, workers: int = 8) -> list[StockD
                 except Exception:
                     pass
 
+        now = time.time()
         with _cache_lock:
             _cache = results
-            _cache_timestamp = time.time()
+            _cache_timestamp = now
+        _save_disk_cache(results, now)
         return list(results.values())
     finally:
         with _cache_lock:
@@ -380,4 +460,5 @@ def cache_status() -> dict[str, Any]:
             "cached_count": len(_cache),
             "age_seconds": round(age, 1) if age is not None else None,
             "ttl_seconds": _CACHE_TTL,
+            "disk_cache_exists": _DISK_CACHE_PATH.exists(),
         }

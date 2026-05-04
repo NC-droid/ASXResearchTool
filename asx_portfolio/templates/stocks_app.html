@@ -596,6 +596,38 @@
       .bottom-nav       { display: none !important; }
     }
 
+    
+    /* ── Stale-data refresh banner ── */
+    .refresh-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 14px;
+      animation: banner-in 0.3s ease;
+    }
+    @keyframes banner-in { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .refresh-banner.visible { display: flex; }
+    .refresh-banner-spinner {
+      width: 14px; height: 14px; flex-shrink: 0;
+      border: 2px solid rgba(99,102,241,0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .refresh-banner-text { flex: 1; }
+    .refresh-banner-dismiss {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1;
+    }
+    .refresh-banner-dismiss:hover { color: var(--text); }
+
     </style>
 </head>
 <body>
@@ -780,7 +812,12 @@
     </aside>
 
     <section class="results">
-      <div class="results-header">
+            <div class="refresh-banner" id="refreshBanner" role="status" aria-live="polite">
+        <div class="refresh-banner-spinner"></div>
+        <span class="refresh-banner-text" id="refreshBannerText">Data is from the cache — fetching fresh prices in the background…</span>
+        <button class="refresh-banner-dismiss" id="refreshBannerDismiss" aria-label="Dismiss">✕</button>
+      </div>
+<div class="results-header">
         <h2 class="results-title">Top ASX 200 Picks</h2>
         <span id="candidateCount"></span>
       </div>
@@ -975,6 +1012,7 @@
     }
     renderPicks(currentPicks, data.rationales||[]);
     renderTable(data.all_filtered||[]) renderMobileCards(data.all_filtered||[]);;
+    window.handleStaleness(data.cache_age_seconds, data.is_stale, screenStocks);
     renderPillarWeights(data.pillar_weights);
     document.getElementById("savePicksBtn").disabled = currentPicks.length===0;
   }
@@ -1362,6 +1400,47 @@
       el.addEventListener('click', function() { setTimeout(window.updateFilterCount, 50); });
       el.addEventListener('input', window.updateFilterCount);
     });
+  })();
+
+  
+  // ── Stale-while-revalidate banner ──
+  (function() {
+    var banner   = document.getElementById('refreshBanner');
+    var bannerTxt = document.getElementById('refreshBannerText');
+    var dismiss  = document.getElementById('refreshBannerDismiss');
+    if (!banner) return;
+
+    if (dismiss) dismiss.addEventListener('click', function() {
+      banner.classList.remove('visible');
+    });
+
+    // Called by the main screen() function after data arrives
+    window.handleStaleness = function(cacheAgeSeconds, isStale, refreshFn) {
+      if (!isStale && (cacheAgeSeconds == null || cacheAgeSeconds < 3600)) return;
+
+      var ageHrs = cacheAgeSeconds != null ? (cacheAgeSeconds / 3600).toFixed(1) : '?';
+      if (bannerTxt) bannerTxt.textContent =
+        'Showing data from ' + ageHrs + ' hour' + (ageHrs === '1.0' ? '' : 's') +
+        ' ago — refreshing in the background…';
+      banner.classList.add('visible');
+
+      // Fire a background force-refresh — don't block the UI
+      if (typeof refreshFn === 'function') {
+        refreshFn(true).then(function() {
+          if (bannerTxt) bannerTxt.textContent = 'Data updated ✓';
+          if (banner) {
+            banner.style.background = 'rgba(34,197,94,0.1)';
+            banner.style.borderColor = 'rgba(34,197,94,0.3)';
+            banner.style.color = '#22c55e';
+            var sp = banner.querySelector('.refresh-banner-spinner');
+            if (sp) sp.style.display = 'none';
+          }
+          setTimeout(function() { banner.classList.remove('visible'); }, 3000);
+        }).catch(function() {
+          banner.classList.remove('visible');
+        });
+      }
+    };
   })();
 
   </script>

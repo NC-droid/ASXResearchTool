@@ -1,12 +1,14 @@
-"""Fetch ETF data from Yahoo Finance with an in-memory TTL cache.
+"""Fetch ETF data from Yahoo Finance with in-memory + disk TTL cache.
 
-The web app calls ``get_etf_data()`` on every screen request. To keep the UI
-snappy and Yahoo happy, results are cached for ``CACHE_TTL_SECONDS`` and only
-re-fetched when stale or when ``force_refresh=True`` is passed.
+The web app calls ``get_etf_data()`` on every screen request. Results are
+cached in memory for ``CACHE_TTL_SECONDS`` and persisted to disk so a server
+restart serves data instantly while a background Yahoo refresh runs.
 """
 
 from __future__ import annotations
 
+import dataclasses
+import json
 import logging
 import math
 import threading
@@ -20,8 +22,11 @@ import pandas as pd
 
 log = logging.getLogger(__name__)
 
-CACHE_TTL_SECONDS = 60 * 60  # 1 hour
+CACHE_TTL_SECONDS = 60 * 60          # 1 hour — in-memory freshness window
+DISK_CACHE_STALE_HOURS = 24          # disk cache considered too old after 24 h
 DEFAULT_HISTORY_PERIOD = "5y"
+
+_DISK_CACHE_PATH = Path(__file__).parent / "cache" / "etf_cache.json"
 
 
 @dataclass
@@ -234,13 +239,90 @@ def fetch_one(row: pd.Series, period: str = DEFAULT_HISTORY_PERIOD) -> ETFData:
 
 
 # ---------------------------------------------------------------------------
-# Cached universe fetch
+# Disk cache — survives server restarts
+# ---------------------------------------------------------------------------
+
+def _nan_safe(v: Any) -> Any:
+    """Convert NaN/Inf floats to None so json.dumps doesn't choke."""
+    if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+        return None
+    return v
+
+
+def _etf_to_dict(etf: ETFData) -> dict:
+    d = dataclasses.asdict(etf)
+    return {k: _nan_safe(v) for k, v in d.items()}
+
+
+def _etf_from_dict(d: dict) -> ETFData:
+    # Replace JSON null → NaN for float fields
+    fields = {f.name: f for f in dataclasses.fields(ETFData)}
+    kwargs: dict = {}
+    for name, fld in fields.items():
+        val = d.get(name)
+        if val is None and fld.default is dataclasses.MISSING:
+            # required field — use empty string as fallback
+            val = ""
+        elif val is None:
+            # optional float field — restore NaN
+            origin = getattr(fld.type, "__origin__", None)
+            if fld.default == float("nan") or (isinstance(fld.default, float) and math.isnan(fld.default)):
+                val = float("nan")
+        kwargs[name] = val
+    return ETFData(**kwargs)
+
+
+def _save_disk_cache(data: dict[str, ETFData], timestamp: float) -> None:
+    """Write in-memory cache to disk. Silently ignores errors."""
+    try:
+        _DISK_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "timestamp": timestamp,
+            "version": 1,
+            "data": {k: _etf_to_dict(v) for k, v in data.items()},
+        }
+        tmp = _DISK_CACHE_PATH.with_suffix(".tmp")
+        tmp.write_text(json.dumps(payload, allow_nan=False))
+        tmp.replace(_DISK_CACHE_PATH)
+        log.info("ETF disk cache written: %d entries", len(data))
+    except Exception as exc:  # noqa: BLE001
+        log.warning("ETF disk cache write failed: %s", exc)
+
+
+def _load_disk_cache() -> tuple[dict[str, ETFData], float]:
+    """Load disk cache. Returns ({}, 0.0) if missing, corrupt, or too old."""
+    try:
+        if not _DISK_CACHE_PATH.exists():
+            return {}, 0.0
+        payload = json.loads(_DISK_CACHE_PATH.read_text())
+        timestamp = float(payload.get("timestamp", 0))
+        age_hours = (time.time() - timestamp) / 3600
+        if age_hours > DISK_CACHE_STALE_HOURS:
+            log.info("ETF disk cache too old (%.1f h) — ignoring", age_hours)
+            return {}, 0.0
+        data = {k: _etf_from_dict(v) for k, v in payload.get("data", {}).items()}
+        log.info("ETF disk cache loaded: %d entries, age %.1f h", len(data), age_hours)
+        return data, timestamp
+    except Exception as exc:  # noqa: BLE001
+        log.warning("ETF disk cache load failed: %s", exc)
+        return {}, 0.0
+
+
+# ---------------------------------------------------------------------------
+# In-memory cache — pre-seeded from disk on import
 # ---------------------------------------------------------------------------
 
 _cache_lock = threading.Lock()
 _cache: dict[str, ETFData] = {}
 _cache_timestamp: float = 0.0
-_cache_refreshing: bool = False  # FIX: prevents concurrent Yahoo refresh storms
+_cache_refreshing: bool = False  # prevents concurrent Yahoo refresh storms
+
+# Seed in-memory cache from disk at import time so the first request is fast
+_disk_data, _disk_ts = _load_disk_cache()
+if _disk_data:
+    _cache.update(_disk_data)
+    _cache_timestamp = _disk_ts
+    log.info("ETF in-memory cache pre-seeded from disk (%d entries)", len(_cache))
 
 
 def get_etf_data(force_refresh: bool = False, workers: int = 8) -> list[ETFData]:
@@ -256,7 +338,6 @@ def get_etf_data(force_refresh: bool = False, workers: int = 8) -> list[ETFData]
         is_stale = (time.time() - _cache_timestamp) > CACHE_TTL_SECONDS
         if _cache and not force_refresh and not is_stale:
             return list(_cache.values())
-        # FIX: if another thread is already refreshing, return stale data
         if _cache_refreshing:
             log.debug("Cache refresh already in progress, returning stale data")
             return list(_cache.values())
@@ -280,10 +361,12 @@ def get_etf_data(force_refresh: bool = False, workers: int = 8) -> list[ETFData]
                 else:
                     log.debug("Drop %s: %s", ticker, etf.error)
 
+        now = time.time()
         with _cache_lock:
             _cache.clear()
             _cache.update(results)
-            _cache_timestamp = time.time()
+            _cache_timestamp = now
+        _save_disk_cache(results, now)          # persist to disk after every successful refresh
         log.info("Cache refreshed: %d / %d ETFs usable", len(results), len(universe))
         return list(results.values())
     finally:
@@ -296,7 +379,8 @@ def cache_status() -> dict[str, Any]:
         age = time.time() - _cache_timestamp if _cache_timestamp else None
     return {
         "size": len(_cache),
-        "age_seconds": age,
+        "age_seconds": round(age, 1) if age is not None else None,
         "stale": age is None or age > CACHE_TTL_SECONDS,
         "ttl_seconds": CACHE_TTL_SECONDS,
+        "disk_cache_exists": _DISK_CACHE_PATH.exists(),
     }
